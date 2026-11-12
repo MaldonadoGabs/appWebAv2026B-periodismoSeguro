@@ -1,39 +1,41 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registro de periodistas</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 28rem; margin: 2rem auto; padding: 0 1rem; }
-    label { display: block; margin-top: 1rem; font-weight: 600; }
-    input { width: 100%; padding: .5rem; box-sizing: border-box; }
-    .error { color: #b00020; font-size: .875rem; }
-    button { margin-top: 1.5rem; padding: .6rem 1.2rem; }
-  </style>
-</head>
+<head th:replace="~{fragments/base :: head('Registro de periodistas')}"></head>
 <body>
-  <h1>Registro de periodistas</h1>
-  <p>Tu nombre real y tu correo nunca serán públicos. Publicarás con un seudónimo.</p>
-  <form th:action="@{/registro}" th:object="${form}" method="post" novalidate>
-    <label for="correo">Correo</label>
-    <input id="correo" type="email" th:field="*{correo}" autocomplete="email">
-    <div class="error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <h1><span>Registro</span> de periodistas</h1>
+    <p class="suave">Tu nombre real y tu correo nunca serán públicos. Publicarás con un seudónimo.</p>
 
-    <label for="nombreReal">Nombre real</label>
-    <input id="nombreReal" type="text" th:field="*{nombreReal}" autocomplete="name">
-    <div class="error" th:if="${#fields.hasErrors('nombreReal')}" th:errors="*{nombreReal}"></div>
+    <form th:action="@{/registro}" th:object="${form}" method="post" novalidate>
+      <div class="campo">
+        <label for="correo">Correo</label>
+        <input id="correo" type="email" th:field="*{correo}" autocomplete="email">
+        <div class="msg-error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
+      </div>
 
-    <label for="clave">Contraseña</label>
-    <input id="clave" type="password" th:field="*{clave}" autocomplete="new-password">
-    <div class="error" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></div>
+      <div class="campo">
+        <label for="nombreReal">Nombre real</label>
+        <input id="nombreReal" type="text" th:field="*{nombreReal}" autocomplete="name">
+        <div class="msg-error" th:if="${#fields.hasErrors('nombreReal')}" th:errors="*{nombreReal}"></div>
+      </div>
 
-    <label for="confirmacion">Confirmar contraseña</label>
-    <input id="confirmacion" type="password" th:field="*{confirmacion}" autocomplete="new-password">
-    <div class="error" th:if="${#fields.hasErrors('confirmacion')}" th:errors="*{confirmacion}"></div>
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" th:field="*{clave}" autocomplete="new-password">
+        <div class="msg-error" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></div>
+      </div>
 
-    <button type="submit">Registrarme</button>
-  </form>
-  <p><a th:href="@{/login}">Ya tengo cuenta</a></p>
+      <div class="campo">
+        <label for="confirmacion">Confirmar contraseña</label>
+        <input id="confirmacion" type="password" th:field="*{confirmacion}" autocomplete="new-password">
+        <div class="msg-error" th:if="${#fields.hasErrors('confirmacion')}" th:errors="*{confirmacion}"></div>
+      </div>
+
+      <button type="submit" class="boton principal">Registrarme</button>
+    </form>
+    <p style="margin-top:1.5rem"><a th:href="@{/login}">Ya tengo cuenta</a></p>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
 </body>
 </html>
