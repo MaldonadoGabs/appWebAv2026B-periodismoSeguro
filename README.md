@@ -77,6 +77,7 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 |---|---|
 | `CuentasServiceTest` | La contraseña se guarda con hash BCrypt, el seudónimo tiene formato y es único, el correo repetido se rechaza sin importar mayúsculas, los datos no se filtran en `toString` |
 | `RegistroWebTest` | Validaciones del formulario: correo inválido, contraseña débil, confirmación distinta, correo repetido y registro correcto |
+| `InicioWebTest` | El inicio muestra la misión, la visión y el objetivo, e invita a registrarse |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
 | `AppTests` | La aplicación completa arranca |
