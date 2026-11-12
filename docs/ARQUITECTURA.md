@@ -6,7 +6,7 @@ Un solo despliegue hoy. Cada modulo se puede extraer a un microservicio sin rees
 
 | Modulo | Historias | Datos propios | Usa | Al extraerlo |
 |---|---|---|---|---|
-| `cuentas` | HU-01, HU-02 | cuentas, seudonimos | nadie | Servicio de cuentas |
+| `cuentas` | HU-01, HU-02 | identidades_privadas (correo, nombre real, hash), perfiles_publicos (seudonimo) | nadie | Servicio de cuentas |
 | `autenticacion` | HU-03 a HU-06 | sesiones, tokens de recuperacion | cuentas | Servicio de auth (emite y valida sesiones) |
 | `seguridad` | HU-08, HU-25, HU-26 | ninguno | nadie | Libreria compartida o gateway |
 | `noticias` | HU-09 a HU-14, HU-16 | noticias, categorias | nadie | Servicio de noticias |
