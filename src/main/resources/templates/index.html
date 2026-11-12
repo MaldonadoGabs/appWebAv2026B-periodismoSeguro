@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Periodismo Seguro - Validacion de stack</title>
+</head>
+<body>
+  <h1>Periodismo Seguro: validacion del stack</h1>
+  <ul>
+    <li>Spring Boot + Thymeleaf: OK (esta pagina)</li>
+    <li>JPA: <span th:text="${total}">0</span> mensajes guardados en la base de datos</li>
+    <li>WebSocket: <span id="estado">desconectado</span></li>
+  </ul>
+  <form id="f"><input id="t" maxlength="500" placeholder="Mensaje de prueba" autocomplete="off"><button>Enviar</button></form>
+  <ul id="log"><li th:each="m : ${mensajes}" th:text="${m.texto}"></li></ul>
+  <script src="/js/chat.js"></script>
+</body>
+</html>

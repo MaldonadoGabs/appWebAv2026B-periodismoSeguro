@@ -1,0 +1,53 @@
+trigger:
+  branches:
+    include: [main]
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  sufijo: psa26
+  rg: rg-periodismo-$(sufijo)
+  acr: acrperiodismo$(sufijo)
+  app: ca-periodismo-$(sufijo)
+  azureConnection: sc-azure
+
+stages:
+- stage: Build
+  jobs:
+  - job: Test
+    steps:
+    - task: Maven@4
+      inputs:
+        mavenPomFile: pom.xml
+        goals: verify
+        javaHomeOption: JDKVersion
+        jdkVersionOption: '1.21'
+- stage: Deploy
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - job: DeployAca
+    steps:
+    - task: AzureCLI@2
+      displayName: Build imagen en ACR y desplegar en Container Apps
+      inputs:
+        azureSubscription: $(azureConnection)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -e
+          az extension add --name containerapp -y
+          TAG=$(Build.BuildId)
+          # Se construye en el agente con Docker (ACR Tasks no existe en todas las regiones, p. ej. belgiumcentral)
+          az acr update -n $(acr) --admin-enabled true -o none
+          ACR_USER=$(az acr credential show -n $(acr) --query username -o tsv)
+          ACR_PASS=$(az acr credential show -n $(acr) --query "passwords[0].value" -o tsv)
+          echo "$ACR_PASS" | docker login $(acr).azurecr.io -u "$ACR_USER" --password-stdin
+          docker build -t $(acr).azurecr.io/periodismo:$TAG .
+          docker push $(acr).azurecr.io/periodismo:$TAG
+          az containerapp update -n $(app) -g $(rg) --image $(acr).azurecr.io/periodismo:$TAG
+          FQDN=$(az containerapp show -n $(app) -g $(rg) --query properties.configuration.ingress.fqdn -o tsv)
+          echo "Desplegado: https://$FQDN"
+          sleep 30
+          curl -fsS https://$FQDN/actuator/health
