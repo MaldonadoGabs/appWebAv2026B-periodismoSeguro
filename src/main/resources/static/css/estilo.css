@@ -1,0 +1,162 @@
+/* Periodismo Seguro: estilo visual (tomado de la guia de estilo del proyecto: capa editorial).
+   Blanco con tinta casi negra, marcador amarillo, titulos en Anton, lectura en Source Serif 4, interfaz en Public Sans.
+   Sin recursos externos: las fuentes (licencia OFL) estan en /fonts. Nunca solo color para dar significado. */
+
+@font-face { font-family: "Anton"; src: url("../fonts/anton.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Source Serif 4"; src: url("../fonts/source-serif-4.woff2") format("woff2"); font-weight: 200 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Source Serif 4"; src: url("../fonts/source-serif-4-italic.woff2") format("woff2"); font-weight: 200 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "Public Sans"; src: url("../fonts/public-sans.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+:root {
+  color-scheme: light;
+  --papel: #ffffff;
+  --superficie: #ffffff;
+  --tinta: #12161c;
+  --suave: #394150;
+  --regla: #cdd5e0;
+  --linea: #1b2a41;
+  --cab: #ffffff;
+  --cab-tinta: #1b2a41;
+  --marcador: #ffd60a;
+  --ok: #1b6e1b;
+  --alerta: #8a5a00;
+  --peligro: #c1121f;
+  --info: #1a5fb4;
+  --titulos: "Anton", "Arial Narrow Bold", Impact, sans-serif;
+  --cuerpo: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --lectura: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: Consolas, "Courier New", monospace;
+}
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+  --cab: #0c1322;
+  --cab-tinta: #f1f4fa;
+  --papel: #101728;
+  --superficie: #19223a;
+  --tinta: #f1f4fa;
+  --suave: #b8c3d8;
+  --regla: #34425f;
+  --linea: #c9d4ea;
+  --ok: #6fd12a;
+  --alerta: #f0b429;
+  --peligro: #ff7b80;
+  --info: #6aa9ff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    color-scheme: dark;
+    --cab: #0c1322;
+    --cab-tinta: #f1f4fa;
+    --papel: #101728;
+    --superficie: #19223a;
+    --tinta: #f1f4fa;
+    --suave: #b8c3d8;
+    --regla: #34425f;
+    --linea: #c9d4ea;
+    --ok: #6fd12a;
+    --alerta: #f0b429;
+    --peligro: #ff7b80;
+    --info: #6aa9ff;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font: 1rem/1.55 var(--cuerpo);
+  background: var(--papel);
+  color: var(--tinta);
+}
+a { color: inherit; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+a:hover { background: linear-gradient(transparent 62%, var(--marcador) 62%); color: #12161c; }
+:focus-visible { outline: 3px solid var(--info); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* Cabecera: rotulo con marcador amarillo + navegacion */
+.cabecera {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .7rem;
+  padding: .45rem clamp(.75rem, 2.4vw, 1.5rem);
+  background: var(--cab); color: var(--cab-tinta); border-bottom: 2px solid var(--linea);
+}
+.marca {
+  font: 400 1.5rem/1 var(--titulos); letter-spacing: .02em; text-transform: uppercase; text-decoration: none;
+  background: linear-gradient(transparent 62%, var(--marcador) 62%); color: var(--cab-tinta); padding: 0 .15rem;
+}
+.marca:hover { color: var(--cab-tinta); }
+.nav { display: flex; align-items: center; flex-wrap: wrap; gap: 1.1rem; font: 600 .9rem var(--cuerpo); }
+.nav a { text-decoration: none; color: var(--cab-tinta); padding: .1rem .15rem; }
+.nav a:hover, .nav a[aria-current="page"] { background: linear-gradient(transparent 62%, var(--marcador) 62%); color: #12161c; }
+.tema {
+  font: 600 .8rem var(--cuerpo); cursor: pointer; padding: .3rem .6rem;
+  border: 2px solid var(--cab-tinta); border-radius: 4px; background: transparent; color: var(--cab-tinta);
+}
+
+/* Contenido */
+main, .pagina { width: 100%; max-width: 44rem; margin: 0 auto; padding: 1.5rem clamp(.75rem, 4vw, 1.5rem); flex: 1; }
+h1, h2, h3 { font-family: var(--titulos); font-weight: 400; line-height: 1.04; letter-spacing: .005em; margin: 0 0 .6rem; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 5vw, 3rem); }
+h1 span, h1 .marcado { background: linear-gradient(transparent 58%, var(--marcador) 58%); padding: 0 .1em; }
+h2 { font-size: clamp(1.4rem, 3vw, 1.9rem); }
+p { margin: 0 0 1em; }
+.suave { color: var(--suave); }
+.mono { font-family: var(--mono); }
+.lectura { font: 400 1.18rem/1.72 var(--lectura); max-width: 40rem; }
+
+/* Formularios: planos, borde de tinta */
+.campo { margin-bottom: 1.25rem; }
+label { display: block; font-weight: 700; font-size: .95rem; margin-bottom: .35rem; }
+input, textarea, select {
+  font: inherit; width: 100%; padding: .7rem .85rem;
+  border: 2px solid var(--linea); border-radius: 4px; background: var(--superficie); color: var(--tinta);
+}
+input:focus, textarea:focus, select:focus { outline: 3px solid var(--marcador); outline-offset: 1px; border-color: #12161c; }
+.msg-error { margin-top: .35rem; font-size: .875rem; font-weight: 600; color: var(--peligro); }
+.msg-error::before { content: "Error: "; }
+
+/* Botones: borde de tinta y sombra corta */
+.boton, button.boton {
+  display: inline-block; cursor: pointer; text-decoration: none;
+  font: 700 .95rem/1.1 var(--cuerpo); padding: .6rem 1rem;
+  border: 2px solid var(--linea); border-radius: 4px; background: var(--superficie); color: var(--tinta);
+  box-shadow: 3px 3px 0 var(--linea); transition: transform .08s, box-shadow .08s;
+}
+.boton:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--linea); background: var(--superficie); color: var(--tinta); }
+.boton:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--linea); }
+.boton.principal { background: var(--marcador); color: #12161c; border-color: #12161c; box-shadow: 3px 3px 0 #12161c; }
+.boton.principal:hover { background: #ffe14d; color: #12161c; }
+@media (prefers-reduced-motion: reduce) { .boton { transition: none; } }
+
+/* Avisos: barra de color a un lado + texto (nunca solo color) */
+.nota { background: var(--superficie); border: 2px solid var(--linea); border-left-width: 8px; padding: .75rem .9rem; margin: .8rem 0; }
+.nota.ok { border-left-color: var(--ok); }
+.nota.ok::before { content: "Listo: "; font-weight: 700; }
+.nota.error { border-left-color: var(--peligro); }
+.nota.error::before { content: "Error: "; font-weight: 700; }
+.nota.demo { border-left-color: var(--marcador); }
+
+/* Panel de comic: contorno grueso y sombra dura */
+.panel { background: var(--superficie); border: 4px solid var(--linea); box-shadow: 7px 7px 0 var(--linea); border-radius: 3px; padding: 1.25rem; }
+
+/* Inicio: portada, mision/vision/objetivo y pilares */
+.pagina.ancha { max-width: 64rem; }
+.hero { padding: 1rem 0 2rem; }
+.hero h1 { font-size: clamp(2.6rem, 8vw, 4.6rem); }
+.rejilla { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 1rem 0 2.5rem; }
+.rejilla .panel h2 { text-transform: uppercase; letter-spacing: .06em; font-size: 1.3rem; }
+.rejilla .panel p { margin: 0; }
+.pilares ol { padding-left: 1.25rem; }
+.pilares li { margin-bottom: .6rem; }
+details.plegable { border-top: 2px solid var(--linea); margin-top: 2rem; padding-top: .8rem; }
+details.plegable > summary { font: 400 1rem/1.2 var(--titulos); letter-spacing: .05em; text-transform: uppercase; cursor: pointer; }
+
+/* Pie */
+.pie { background: var(--cab); color: var(--cab-tinta); border-top: 6px solid var(--marcador); padding: 1.25rem clamp(1rem, 4vw, 3rem); font-size: .9rem; margin-top: 3rem; }
+.pie p { margin: 0; }
+
+/* Chat de prueba */
+#log { list-style: none; padding: 0; margin: 1rem 0 0; }
+#log li { border-bottom: 1px solid var(--regla); padding: .5rem 0; }

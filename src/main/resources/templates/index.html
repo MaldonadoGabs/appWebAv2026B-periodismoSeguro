@@ -1,18 +1,59 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>Periodismo Seguro - Validacion de stack</title>
-</head>
+<head th:replace="~{fragments/base :: head('Inicio')}"></head>
 <body>
-  <h1>Periodismo Seguro: validacion del stack</h1>
-  <ul>
-    <li>Spring Boot + Thymeleaf: OK (esta pagina)</li>
-    <li>JPA: <span th:text="${total}">0</span> mensajes guardados en la base de datos</li>
-    <li>WebSocket: <span id="estado">desconectado</span></li>
-  </ul>
-  <form id="f"><input id="t" maxlength="500" placeholder="Mensaje de prueba" autocomplete="off"><button>Enviar</button></form>
-  <ul id="log"><li th:each="m : ${mensajes}" th:text="${m.texto}"></li></ul>
-  <script src="/js/chat.js"></script>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina ancha">
+    <section class="hero">
+      <h1><span>Periodismo</span> Seguro</h1>
+      <p class="lectura">Una plataforma donde el periodista firma con un seudónimo, y nadie puede unirlo a su nombre.</p>
+      <p><a class="boton principal" th:href="@{/registro}">Registrarme como periodista</a></p>
+    </section>
+
+    <section class="rejilla" aria-label="Misión, visión y objetivo">
+      <article class="panel" id="mision">
+        <h2>Misión</h2>
+        <p>Garantizar la libertad de expresión y proteger la identidad de los comunicadores en entornos de alta censura, permitiéndoles publicar noticias con un seudónimo fijo, sin ningún vínculo con su identidad real.</p>
+      </article>
+      <article class="panel" id="vision">
+        <h2>Visión</h2>
+        <p>Ser la plataforma de periodismo independiente donde informar no ponga en riesgo a quien escribe: nadie puede unir una noticia con el nombre de su autor, y los lectores leen sin cuenta ni rastreo.</p>
+      </article>
+      <article class="panel" id="objetivo">
+        <h2>Objetivo</h2>
+        <p>Permitir publicar sin exponer la identidad, con credenciales verificadas y contenido auténtico.</p>
+      </article>
+    </section>
+
+    <section class="pilares">
+      <h2>Cinco pilares de seguridad</h2>
+      <ol>
+        <li><strong>Anonimato y privacidad del periodista.</strong> Seudónimos fijos, sin datos personales públicos.</li>
+        <li><strong>Control de los 3 segundos.</strong> La autoría se muestra poco tiempo y el autor recibe un aviso.</li>
+        <li><strong>Verificación volátil del título.</strong> Se comprueba la credencial sin guardar datos personales.</li>
+        <li><strong>Detección de contenido falso.</strong> Procedencia verificable de las fotos y los archivos.</li>
+        <li><strong>Pagos anónimos.</strong> Donaciones de un solo uso (en espera).</li>
+      </ol>
+    </section>
+
+    <details class="plegable">
+      <summary>Estado del stack (prueba técnica)</summary>
+      <ul>
+        <li>Spring Boot + Thymeleaf: OK (esta página)</li>
+        <li>JPA: <span th:text="${total}">0</span> mensajes guardados en la base de datos</li>
+        <li>WebSocket: <span id="estado">desconectado</span></li>
+      </ul>
+      <form id="f">
+        <div class="campo">
+          <label for="t">Mensaje de prueba</label>
+          <input id="t" maxlength="500" autocomplete="off">
+        </div>
+        <button class="boton">Enviar</button>
+      </form>
+      <ul id="log"><li th:each="m : ${mensajes}" th:text="${m.texto}"></li></ul>
+    </details>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+  <script th:src="@{/js/chat.js}"></script>
 </body>
 </html>

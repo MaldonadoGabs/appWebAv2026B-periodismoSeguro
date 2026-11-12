@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Registro de periodistas')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <h1><span>Registro</span> de periodistas</h1>
+    <p class="suave">Tu nombre real y tu correo nunca serán públicos. Publicarás con un seudónimo.</p>
+
+    <form th:action="@{/registro}" th:object="${form}" method="post" novalidate>
+      <div class="campo">
+        <label for="correo">Correo</label>
+        <input id="correo" type="email" th:field="*{correo}" autocomplete="email">
+        <div class="msg-error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
+      </div>
+
+      <div class="campo">
+        <label for="nombreReal">Nombre real</label>
+        <input id="nombreReal" type="text" th:field="*{nombreReal}" autocomplete="name">
+        <div class="msg-error" th:if="${#fields.hasErrors('nombreReal')}" th:errors="*{nombreReal}"></div>
+      </div>
+
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <input id="clave" type="password" th:field="*{clave}" autocomplete="new-password">
+        <div class="msg-error" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></div>
+      </div>
+
+      <div class="campo">
+        <label for="confirmacion">Confirmar contraseña</label>
+        <input id="confirmacion" type="password" th:field="*{confirmacion}" autocomplete="new-password">
+        <div class="msg-error" th:if="${#fields.hasErrors('confirmacion')}" th:errors="*{confirmacion}"></div>
+      </div>
+
+      <button type="submit" class="boton principal">Registrarme</button>
+    </form>
+    <p style="margin-top:1.5rem"><a th:href="@{/login}">Ya tengo cuenta</a></p>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>

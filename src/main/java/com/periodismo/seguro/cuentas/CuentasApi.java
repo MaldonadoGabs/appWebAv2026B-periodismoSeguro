@@ -4,8 +4,12 @@ import java.util.Optional;
 
 /** Epica Registro y autenticacion: HU-01 registro de periodistas, HU-02 identidad real separada del seudonimo. */
 public interface CuentasApi {
-    /** HU-01 y HU-02: crea la cuenta. La identidad real nunca se mezcla con el seudonimo. */
-    String registrar(String seudonimo, String clave);
+    /**
+     * HU-01: crea la cuenta con la clave en hash BCrypt y un seudonimo unico generado.
+     *
+     * @throws CorreoYaRegistradoException si el correo ya tiene cuenta
+     */
+    ResultadoRegistro registrar(SolicitudRegistro solicitud);
 
     Optional<String> seudonimoDe(String cuentaId);
 }

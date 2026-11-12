@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${titulo} + ' | Periodismo Seguro'">Periodismo Seguro</title>
+  <script th:src="@{/js/tema.js}"></script>
+  <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+  <header class="cabecera" th:fragment="cabecera">
+    <a class="marca" th:href="@{/}">Periodismo Seguro</a>
+    <nav class="nav" aria-label="Principal">
+      <a th:href="@{/}">Inicio</a>
+      <a th:href="@{/registro}">Registrarme</a>
+      <a th:href="@{/login}">Entrar</a>
+      <button type="button" class="tema" id="tema" aria-label="Cambiar entre tema claro y oscuro">Tema</button>
+    </nav>
+  </header>
+
+  <footer class="pie" th:fragment="pie">
+    <p>Periodismo Seguro. Tu nombre real y tu correo nunca son públicos: publicas con un seudónimo.</p>
+  </footer>
+</body>
+</html>

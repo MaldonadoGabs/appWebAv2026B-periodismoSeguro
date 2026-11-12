@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Iniciar sesión')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <h1><span>Iniciar</span> sesión</h1>
+    <div class="nota ok" th:if="${mensaje}" th:text="${mensaje}"></div>
+    <p class="suave">El formulario de inicio de sesión llega con HU-03.</p>
+    <p><a th:href="@{/registro}">Crear una cuenta</a></p>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>
