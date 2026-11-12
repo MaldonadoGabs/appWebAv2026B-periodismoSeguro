@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 public class RegistroForm {
     @NotBlank(message = "El correo es obligatorio")
     @Email(message = "El correo no tiene un formato válido")
-    @Pattern(regexp = ".+@.+\\..+", message = "El correo no tiene un formato válido")
+    @Pattern(regexp = "^$|.+@.+\\..+", message = "El correo no tiene un formato válido")
     private String correo;
 
     @NotBlank(message = "El nombre real es obligatorio")
@@ -17,7 +17,7 @@ public class RegistroForm {
     private String nombreReal;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
+    @Pattern(regexp = "^$|^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
         message = "Mínimo 8 caracteres, con mayúscula, minúscula y número")
     private String clave;
 
