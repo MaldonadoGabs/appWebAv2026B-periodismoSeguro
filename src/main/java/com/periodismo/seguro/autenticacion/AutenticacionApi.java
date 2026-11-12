@@ -7,8 +7,11 @@ import java.util.Optional;
  * Dueno de las sesiones: los demas modulos solo preguntan si una sesion es valida (HU-17, HU-08).
  */
 public interface AutenticacionApi {
-    /** HU-03. Devuelve el id de sesion o vacio si falla (error generico). */
-    Optional<String> iniciarSesion(String seudonimo, String clave);
+    /**
+     * HU-03. Verifica correo y clave (BCrypt) y devuelve el id de cuenta, o vacio si falla (sin distinguir la causa).
+     * La sesion HTTP (cookie) la crea el formulario de /login; {@link #validarSesion} la consulta despues.
+     */
+    Optional<String> verificarCredenciales(String correo, String clave);
 
     /** HU-04. */
     void cerrarSesion(String sesionId);
