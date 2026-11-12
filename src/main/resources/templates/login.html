@@ -6,8 +6,21 @@
   <main class="pagina">
     <h1><span>Iniciar</span> sesión</h1>
     <div class="nota ok" th:if="${mensaje}" th:text="${mensaje}"></div>
-    <p class="suave">El formulario de inicio de sesión llega con HU-03.</p>
-    <p><a th:href="@{/registro}">Crear una cuenta</a></p>
+    <div class="nota error" th:if="${param.error}" role="alert">Correo o contraseña incorrectos.</div>
+    <div class="nota error" th:if="${param.bloqueado}" role="alert">Demasiados intentos fallidos. Espera unos minutos antes de volver a intentarlo.</div>
+
+    <form th:action="@{/login}" method="post">
+      <div class="campo">
+        <label for="correo">Correo</label>
+        <input id="correo" name="correo" type="email" autocomplete="username" required>
+      </div>
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <input id="clave" name="clave" type="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="boton principal">Entrar</button>
+    </form>
+    <p style="margin-top:1.5rem"><a th:href="@{/registro}">Crear una cuenta</a></p>
   </main>
   <footer th:replace="~{fragments/base :: pie}"></footer>
 </body>

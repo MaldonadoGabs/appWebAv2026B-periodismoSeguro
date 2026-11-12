@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Mi panel')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <h1><span>Mi</span> panel</h1>
+    <section class="panel">
+      <p class="suave">Estás publicando como</p>
+      <p class="lectura"><strong th:text="${seudonimo}">Seudónimo</strong></p>
+      <p class="suave">Tu nombre real y tu correo nunca se muestran en el portal.</p>
+    </section>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>

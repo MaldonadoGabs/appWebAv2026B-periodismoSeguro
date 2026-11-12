@@ -3,6 +3,7 @@ package com.periodismo.seguro.entrada;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
@@ -24,7 +25,7 @@ class IdentidadWebTest {
     @Test
     void elMensajeTrasRegistrarMuestraElSeudonimoPeroNoLosDatosReales() throws Exception {
         String correo = "w" + UUID.randomUUID() + "@ejemplo.com";
-        var res = mvc.perform(post("/registro")
+        var res = mvc.perform(post("/registro").with(csrf())
                 .param("correo", correo).param("nombreReal", "Xylophon Quimera")
                 .param("clave", "Segura123").param("confirmacion", "Segura123"))
             .andExpect(status().is3xxRedirection())

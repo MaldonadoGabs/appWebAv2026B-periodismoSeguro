@@ -1,6 +1,7 @@
 package com.periodismo.seguro.entrada;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -24,7 +25,7 @@ class RegistroWebTest {
     private static String correoNuevo() { return "u" + UUID.randomUUID() + "@ejemplo.com"; }
 
     private ResultActions enviar(String correo, String clave, String confirmacion) throws Exception {
-        return mvc.perform(post("/registro")
+        return mvc.perform(post("/registro").with(csrf())
             .param("correo", correo)
             .param("nombreReal", "Ana Pérez")
             .param("clave", clave)
