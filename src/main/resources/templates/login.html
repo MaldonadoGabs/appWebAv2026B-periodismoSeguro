@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iniciar sesión</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 28rem; margin: 2rem auto; padding: 0 1rem; }
+    .ok { background: #e6f4ea; color: #1e4620; padding: .75rem 1rem; border-radius: .5rem; }
+  </style>
+</head>
+<body>
+  <h1>Iniciar sesión</h1>
+  <p class="ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+  <p>El formulario de inicio de sesión llega con HU-03.</p>
+  <p><a th:href="@{/registro}">Crear una cuenta</a></p>
+</body>
+</html>

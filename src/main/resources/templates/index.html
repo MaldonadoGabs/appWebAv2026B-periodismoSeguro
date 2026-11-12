@@ -13,6 +13,7 @@
   </ul>
   <form id="f"><input id="t" maxlength="500" placeholder="Mensaje de prueba" autocomplete="off"><button>Enviar</button></form>
   <ul id="log"><li th:each="m : ${mensajes}" th:text="${m.texto}"></li></ul>
+  <p><a th:href="@{/registro}">Registrarme como periodista</a></p>
   <script src="/js/chat.js"></script>
 </body>
 </html>
