@@ -5,39 +5,32 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.util.UUID;
 
-/** Datos propios del modulo cuentas. Nunca sale de este paquete: la API publica usa records. */
+/** HU-02: datos reales y privados (correo, nombre real, hash). No contiene el seudonimo ni sale de este paquete. */
 @Entity
-@Table(name = "cuentas", uniqueConstraints = {
-    @UniqueConstraint(columnNames = "correo"),
-    @UniqueConstraint(columnNames = "seudonimo")
-})
-public class Cuenta {
+@Table(name = "identidades_privadas", uniqueConstraints = @UniqueConstraint(columnNames = "correo"))
+public class IdentidadPrivada {
+    /** Mismo valor que PerfilPublico.cuentaId; es una referencia por id, sin clave foranea. */
     @Id
-    private String id;
+    private String cuentaId;
     @Column(nullable = false)
     private String correo;
     @Column(name = "nombre_real", nullable = false)
     private String nombreReal;
     @Column(name = "clave_hash", nullable = false)
     private String claveHash;
-    @Column(nullable = false)
-    private String seudonimo;
 
-    protected Cuenta() {}
+    protected IdentidadPrivada() {}
 
-    public Cuenta(String correo, String nombreReal, String claveHash, String seudonimo) {
-        this.id = UUID.randomUUID().toString();
+    public IdentidadPrivada(String cuentaId, String correo, String nombreReal, String claveHash) {
+        this.cuentaId = cuentaId;
         this.correo = correo;
         this.nombreReal = nombreReal;
         this.claveHash = claveHash;
-        this.seudonimo = seudonimo;
     }
 
-    public String getId() { return id; }
+    public String getCuentaId() { return cuentaId; }
     public String getCorreo() { return correo; }
     public String getNombreReal() { return nombreReal; }
     public String getClaveHash() { return claveHash; }
-    public String getSeudonimo() { return seudonimo; }
 }
