@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Recuperar contraseña')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <h1><span>Recuperar</span> contraseña</h1>
+
+    <th:block th:if="${param.enviado}">
+      <div class="nota ok" role="status">Si el correo corresponde a una cuenta, te enviamos un enlace para definir una nueva contraseña. El enlace sirve una sola vez y caduca en 30 minutos.</div>
+      <p class="suave">Revisa tu bandeja de entrada. Si no llega, puedes volver a pedirlo; solo valdrá el último enlace.</p>
+      <p><a class="boton" th:href="@{/login}">Volver a iniciar sesión</a></p>
+    </th:block>
+
+    <th:block th:unless="${param.enviado}">
+      <p class="suave">Escribe el correo con el que te registraste. Por tu seguridad, la respuesta es la misma tenga o no cuenta ese correo.</p>
+      <form th:action="@{/recuperar}" th:object="${form}" method="post" novalidate>
+        <div class="campo">
+          <label for="correo">Correo</label>
+          <input id="correo" type="email" th:field="*{correo}" autocomplete="email">
+          <div class="msg-error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
+        </div>
+        <button type="submit" class="boton principal">Enviar enlace</button>
+      </form>
+      <p style="margin-top:1.5rem"><a th:href="@{/login}">Volver a iniciar sesión</a></p>
+    </th:block>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>

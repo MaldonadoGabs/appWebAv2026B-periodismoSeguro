@@ -17,7 +17,7 @@ class EstiloWebTest {
 
     @Test
     void lasPaginasCargaranElEstiloYLaCabeceraComun() throws Exception {
-        for (String ruta : new String[] {"/", "/registro", "/login"}) {
+        for (String ruta : new String[] {"/", "/registro", "/login", "/recuperar"}) {
             mvc.perform(get(ruta))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/estilo.css")))
@@ -37,7 +37,7 @@ class EstiloWebTest {
 
     @Test
     void ningunaPaginaCargaRecursosDeOtrosDominios() throws Exception {
-        for (String ruta : new String[] {"/", "/registro", "/login"}) {
+        for (String ruta : new String[] {"/", "/registro", "/login", "/recuperar"}) {
             String html = mvc.perform(get(ruta)).andReturn().getResponse().getContentAsString();
             org.junit.jupiter.api.Assertions.assertFalse(
                 html.matches("(?s).*(src|href)=\"https?://.*"), "recurso externo en " + ruta);
