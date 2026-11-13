@@ -42,6 +42,7 @@ Páginas disponibles:
 | `/registro` | Registro de periodistas |
 | `/login` | Inicio de sesión |
 | `/recuperar` | Solicitud de recuperación de contraseña (el enlace se imprime en la consola) |
+| `/restablecer?token=...` | Definir una nueva contraseña con el enlace de recuperación (un solo uso, 30 minutos) |
 | `/inicio` | Pantalla principal del periodista (requiere sesión) |
 | `/actuator/health` | Estado de la aplicación (`{"status":"UP"}`) |
 
@@ -84,6 +85,9 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `InicioSesionWebTest` | HU-03: formulario de login, redirección a `/inicio`, mensaje genérico, aviso de bloqueo, páginas protegidas redirigen al login, rutas públicas abiertas, CSRF |
 | `RecuperacionClaveTest` | HU-05: token aleatorio de 256 bits guardado solo con hash, caduca en 30 minutos, una nueva solicitud anula la anterior, un correo inexistente no genera token, el enlace en consola no incluye correo, nombre real ni id de cuenta |
 | `RecuperacionWebTest` | HU-05: formulario público, misma respuesta exista o no la cuenta, confirmación genérica, error junto al campo para correo inválido, CSRF exigido, enlace desde el login |
+| `RestablecerClaveTest` | HU-06: con un token vigente la clave cambia y se guarda con BCrypt, la clave vieja deja de servir, el token no se reutiliza, tokens caducados o inexistentes se rechazan, una clave débil no gasta el token, se anulan los demás enlaces y se cierran las sesiones abiertas, nada sensible en consola |
+| `CambioClaveTest` | HU-06: `CuentasApi.cambiarClave` guarda BCrypt con sal nueva, rechaza claves que no cumplen las reglas del registro y cuentas inexistentes |
+| `RestablecerWebTest` | HU-06: formulario público con token vigente y `Referrer-Policy: no-referrer`, error claro para token inválido o ausente, errores junto al campo (clave débil, confirmación distinta), redirección al login con aviso, la nueva clave sirve para entrar, el enlace no sirve dos veces, CSRF exigido |
 | `CierreSesionWebTest` | HU-04: botón de cerrar sesión visible solo con sesión, la sesión se invalida, la cookie JSESSIONID se elimina, las páginas protegidas redirigen al login, CSRF exigido |
 | `RegistroWebTest` | Validaciones del formulario: correo inválido, contraseña débil, confirmación distinta, correo repetido y registro correcto |
 | `InicioWebTest` | El inicio muestra la misión, la visión y el objetivo, e invita a registrarse |
@@ -91,7 +95,7 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
 | `AppTests` | La aplicación completa arranca |
 
-Las pruebas de restablecer la clave con el token se agregan con la historia HU-06, y las de CRUD con las de noticias (HU-09 a HU-14).
+Las pruebas de CRUD se agregan con las historias de noticias (HU-09 a HU-14).
 
 ## Estructura
 

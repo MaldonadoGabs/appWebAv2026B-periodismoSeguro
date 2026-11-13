@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Nueva contraseña')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <h1><span>Nueva</span> contraseña</h1>
+
+    <th:block th:if="${invalido}">
+      <div class="nota error" role="alert">El enlace de recuperación no es válido: no existe, ya se usó o caducó (dura 30 minutos).</div>
+      <p class="suave">Por seguridad cada enlace sirve una sola vez. Pide uno nuevo para definir tu contraseña.</p>
+      <p><a class="boton principal" th:href="@{/recuperar}">Pedir un enlace nuevo</a></p>
+      <p style="margin-top:1.5rem"><a th:href="@{/login}">Volver a iniciar sesión</a></p>
+    </th:block>
+
+    <th:block th:unless="${invalido}">
+      <p class="suave">Elige una contraseña nueva: mínimo 8 caracteres, con mayúscula, minúscula y número. Al guardarla, este enlace deja de servir.</p>
+      <form th:action="@{/restablecer}" th:object="${form}" method="post" novalidate>
+        <input type="hidden" th:field="*{token}">
+        <div class="campo">
+          <label for="clave">Nueva contraseña</label>
+          <input id="clave" type="password" th:field="*{clave}" autocomplete="new-password">
+          <div class="msg-error" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></div>
+        </div>
+        <div class="campo">
+          <label for="confirmacion">Confirmar contraseña</label>
+          <input id="confirmacion" type="password" th:field="*{confirmacion}" autocomplete="new-password">
+          <div class="msg-error" th:if="${#fields.hasErrors('confirmacion')}" th:errors="*{confirmacion}"></div>
+        </div>
+        <button type="submit" class="boton principal">Guardar contraseña</button>
+      </form>
+    </th:block>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>

@@ -3,6 +3,7 @@ package com.periodismo.seguro.cuentas.internal;
 import com.periodismo.seguro.cuentas.CorreoYaRegistradoException;
 import com.periodismo.seguro.cuentas.CredencialesCuenta;
 import com.periodismo.seguro.cuentas.CuentasApi;
+import com.periodismo.seguro.cuentas.ReglasClave;
 import com.periodismo.seguro.cuentas.ResultadoRegistro;
 import com.periodismo.seguro.cuentas.SolicitudRegistro;
 import java.util.Locale;
@@ -11,6 +12,7 @@ import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 class CuentasService implements CuentasApi {
@@ -54,6 +56,24 @@ class CuentasService implements CuentasApi {
         }
         return identidades.findByCorreo(correo.trim().toLowerCase(Locale.ROOT))
             .map(i -> new CredencialesCuenta(i.getCuentaId(), i.getClaveHash()));
+    }
+
+    @Override
+    @Transactional
+    public boolean cambiarClave(String cuentaId, String nuevaClave) {
+        if (!ReglasClave.cumple(nuevaClave)) {
+            throw new IllegalArgumentException(ReglasClave.MENSAJE);
+        }
+        if (cuentaId == null) {
+            return false;
+        }
+        return identidades.findById(cuentaId)
+            .map(identidad -> {
+                identidad.cambiarClaveHash(encoder.encode(nuevaClave));
+                identidades.save(identidad);
+                return true;
+            })
+            .orElse(false);
     }
 
     private PerfilPublico guardarPerfil(String cuentaId) {

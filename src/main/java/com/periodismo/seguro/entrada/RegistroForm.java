@@ -1,5 +1,6 @@
 package com.periodismo.seguro.entrada;
 
+import com.periodismo.seguro.cuentas.ReglasClave;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -17,8 +18,7 @@ public class RegistroForm {
     private String nombreReal;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    @Pattern(regexp = "^$|^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
-        message = "Mínimo 8 caracteres, con mayúscula, minúscula y número")
+    @Pattern(regexp = ReglasClave.PATRON_FORMULARIO, message = ReglasClave.MENSAJE)
     private String clave;
 
     @NotBlank(message = "Confirma la contraseña")

@@ -2,6 +2,7 @@ package com.periodismo.seguro.autenticacion.internal;
 
 import com.periodismo.seguro.cuentas.CredencialesCuenta;
 import com.periodismo.seguro.cuentas.CuentasApi;
+import com.periodismo.seguro.cuentas.ReglasClave;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * HU-05: genera un token aleatorio de un solo uso que caduca en 30 minutos y lo guarda con hash.
  * Si el correo no tiene cuenta no se hace nada visible: la respuesta al usuario es siempre la misma.
+ * HU-06: valida el token (existe, no usado, no caducado), lo invalida al usarlo y pide a cuentas el cambio de clave.
  */
 @Service
 class RecuperacionClave {
@@ -53,6 +55,43 @@ class RecuperacionClave {
         tokens.findByCuentaIdAndUsadoFalse(cuentaId).forEach(TokenRecuperacion::marcarUsado);
         tokens.save(new TokenRecuperacion(hash(token), cuentaId, reloj.instant().plus(CADUCIDAD)));
         envio.enviar(urlPublica + "/restablecer?token=" + token);
+    }
+
+    /** HU-06: true si el token existe, no se ha usado y no ha caducado. No modifica nada. */
+    @Transactional(readOnly = true)
+    boolean vigente(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+        return tokens.findById(hash(token))
+            .filter(t -> !t.isUsado() && reloj.instant().isBefore(t.getCaducaEn()))
+            .isPresent();
+    }
+
+    /**
+     * HU-06: consume el token y cambia la clave. Devuelve el id de la cuenta, o vacio si el token no era valido.
+     * Si la clave no cumple las reglas lanza IllegalArgumentException sin gastar el token.
+     */
+    @Transactional
+    Optional<String> restablecer(String token, String nuevaClave) {
+        if (!ReglasClave.cumple(nuevaClave)) {
+            throw new IllegalArgumentException(ReglasClave.MENSAJE);
+        }
+        if (token == null || token.isBlank()) {
+            return Optional.empty();
+        }
+        String h = hash(token);
+        if (tokens.consumirSiVigente(h, reloj.instant()) != 1) {
+            return Optional.empty();
+        }
+        String cuentaId = tokens.findById(h).orElseThrow().getCuentaId();
+        // Cualquier otro enlace pendiente de la misma cuenta deja de servir.
+        tokens.findByCuentaIdAndUsadoFalse(cuentaId).forEach(TokenRecuperacion::marcarUsado);
+        if (!cuentas.cambiarClave(cuentaId, nuevaClave)) {
+            // La cuenta ya no existe: se revierte para no dejar el token gastado a medias.
+            throw new IllegalStateException("Cuenta inexistente para un token vigente");
+        }
+        return Optional.of(cuentaId);
     }
 
     private String nuevoToken() {
