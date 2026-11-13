@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.stereotype.Component;
 
-/** HU-03: reglas de acceso, formulario de inicio de sesion y bloqueo por intentos fallidos. */
+/** HU-03 y HU-04: reglas de acceso, formulario de inicio de sesion y bloqueo por intentos fallidos. */
 @Configuration
 class ConfiguracionSeguridad {
     @Bean
@@ -46,6 +46,11 @@ class ConfiguracionSeguridad {
                 .loginPage("/login").loginProcessingUrl("/login")
                 .usernameParameter("correo").passwordParameter("clave")
                 .successHandler(exito).failureHandler(fallo))
+            .logout(l -> l
+                .logoutUrl("/logout")
+                .invalidateHttpSession(true).clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessUrl("/login?salio"))
             .sessionManagement(s -> s.maximumSessions(-1).sessionRegistry(registro))
             .csrf(c -> c.ignoringRequestMatchers("/ws"))
             .httpBasic(AbstractHttpConfigurer::disable);
