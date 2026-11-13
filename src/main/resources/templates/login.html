@@ -7,6 +7,7 @@
     <h1><span>Iniciar</span> sesión</h1>
     <div class="nota ok" th:if="${mensaje}" th:text="${mensaje}"></div>
     <div class="nota ok" th:if="${param.salio}">Cerraste sesión correctamente.</div>
+    <div class="nota ok" th:if="${param.restablecida}" role="status">Tu contraseña se cambió. Ya puedes iniciar sesión con la nueva.</div>
     <div class="nota error" th:if="${param.error}" role="alert">Correo o contraseña incorrectos.</div>
     <div class="nota error" th:if="${param.bloqueado}" role="alert">Demasiados intentos fallidos. Espera unos minutos antes de volver a intentarlo.</div>
 
