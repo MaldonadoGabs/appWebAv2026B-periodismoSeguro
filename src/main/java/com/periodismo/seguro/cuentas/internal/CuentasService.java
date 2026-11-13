@@ -6,6 +6,7 @@ import com.periodismo.seguro.cuentas.ResultadoRegistro;
 import com.periodismo.seguro.cuentas.SolicitudRegistro;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,12 +15,15 @@ import org.springframework.stereotype.Service;
 class CuentasService implements CuentasApi {
     private static final int INTENTOS = 5;
 
-    private final CuentaRepository repo;
+    private final IdentidadPrivadaRepository identidades;
+    private final PerfilPublicoRepository perfiles;
     private final PasswordEncoder encoder;
     private final GeneradorSeudonimo generador;
 
-    CuentasService(CuentaRepository repo, PasswordEncoder encoder, GeneradorSeudonimo generador) {
-        this.repo = repo;
+    CuentasService(IdentidadPrivadaRepository identidades, PerfilPublicoRepository perfiles,
+                   PasswordEncoder encoder, GeneradorSeudonimo generador) {
+        this.identidades = identidades;
+        this.perfiles = perfiles;
         this.encoder = encoder;
         this.generador = generador;
     }
@@ -27,21 +31,27 @@ class CuentasService implements CuentasApi {
     @Override
     public ResultadoRegistro registrar(SolicitudRegistro solicitud) {
         String correo = solicitud.correo().trim().toLowerCase(Locale.ROOT);
-        if (repo.existsByCorreo(correo)) {
+        if (identidades.existsByCorreo(correo)) {
             throw new CorreoYaRegistradoException();
         }
         String hash = encoder.encode(solicitud.clave());
+        String cuentaId = UUID.randomUUID().toString();
+        PerfilPublico perfil = guardarPerfil(cuentaId);
+        try {
+            identidades.saveAndFlush(new IdentidadPrivada(cuentaId, correo, solicitud.nombreReal().trim(), hash));
+        } catch (DataIntegrityViolationException e) {
+            perfiles.deleteById(cuentaId);
+            throw new CorreoYaRegistradoException();
+        }
+        return new ResultadoRegistro(cuentaId, perfil.getSeudonimo());
+    }
+
+    private PerfilPublico guardarPerfil(String cuentaId) {
         for (int i = 0; i < INTENTOS; i++) {
-            String seudonimo = seudonimoLibre();
-            Cuenta cuenta = new Cuenta(correo, solicitud.nombreReal().trim(), hash, seudonimo);
             try {
-                repo.saveAndFlush(cuenta);
-                return new ResultadoRegistro(cuenta.getId(), seudonimo);
+                return perfiles.saveAndFlush(new PerfilPublico(cuentaId, seudonimoLibre()));
             } catch (DataIntegrityViolationException e) {
-                // Carrera por el mismo correo: es duplicado. Si no, fue el seudonimo y se reintenta.
-                if (repo.existsByCorreo(correo)) {
-                    throw new CorreoYaRegistradoException();
-                }
+                // Carrera por el mismo seudonimo: se reintenta con otro.
             }
         }
         throw new IllegalStateException("No se pudo generar un seudonimo unico");
@@ -49,14 +59,14 @@ class CuentasService implements CuentasApi {
 
     @Override
     public Optional<String> seudonimoDe(String cuentaId) {
-        return repo.findById(cuentaId).map(Cuenta::getSeudonimo);
+        return perfiles.findById(cuentaId).map(PerfilPublico::getSeudonimo);
     }
 
     private String seudonimoLibre() {
         String candidato;
         do {
             candidato = generador.nuevo();
-        } while (repo.existsBySeudonimo(candidato));
+        } while (perfiles.existsBySeudonimo(candidato));
         return candidato;
     }
 }

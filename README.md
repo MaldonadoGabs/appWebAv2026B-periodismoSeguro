@@ -76,6 +76,8 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | Prueba | Qué comprueba |
 |---|---|
 | `CuentasServiceTest` | La contraseña se guarda con hash BCrypt, el seudónimo tiene formato y es único, el correo repetido se rechaza sin importar mayúsculas, los datos no se filtran en `toString` |
+| `IdentidadSeparadaTest` | HU-02: el perfil público no tiene correo, nombre real ni hash; la identidad privada no tiene seudónimo; tablas distintas; los records de la API pública no exponen datos reales |
+| `IdentidadWebTest` | HU-02: el mensaje de registro y las páginas públicas muestran el seudónimo, nunca correo ni nombre real |
 | `RegistroWebTest` | Validaciones del formulario: correo inválido, contraseña débil, confirmación distinta, correo repetido y registro correcto |
 | `InicioWebTest` | El inicio muestra la misión, la visión y el objetivo, e invita a registrarse |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos y las fuentes propias, y no cargan recursos de otros dominios |

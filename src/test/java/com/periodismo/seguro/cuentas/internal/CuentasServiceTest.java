@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class CuentasServiceTest {
     @Autowired CuentasApi api;
-    @Autowired CuentaRepository repo;
+    @Autowired IdentidadPrivadaRepository repo;
 
     private static String correoNuevo() { return "u" + UUID.randomUUID() + "@ejemplo.com"; }
 
@@ -26,7 +26,7 @@ class CuentasServiceTest {
         String correo = correoNuevo();
         api.registrar(new SolicitudRegistro(correo, "Ana Pérez", "Segura123"));
 
-        Cuenta guardada = repo.findByCorreo(correo).orElseThrow();
+        IdentidadPrivada guardada = repo.findByCorreo(correo).orElseThrow();
         assertNotEquals("Segura123", guardada.getClaveHash());
         assertTrue(guardada.getClaveHash().startsWith("$2"), "debe ser un hash BCrypt");
     }
