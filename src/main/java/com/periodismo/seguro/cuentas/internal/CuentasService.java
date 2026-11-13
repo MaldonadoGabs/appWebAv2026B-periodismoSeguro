@@ -1,6 +1,7 @@
 package com.periodismo.seguro.cuentas.internal;
 
 import com.periodismo.seguro.cuentas.CorreoYaRegistradoException;
+import com.periodismo.seguro.cuentas.CredencialesCuenta;
 import com.periodismo.seguro.cuentas.CuentasApi;
 import com.periodismo.seguro.cuentas.ResultadoRegistro;
 import com.periodismo.seguro.cuentas.SolicitudRegistro;
@@ -44,6 +45,15 @@ class CuentasService implements CuentasApi {
             throw new CorreoYaRegistradoException();
         }
         return new ResultadoRegistro(cuentaId, perfil.getSeudonimo());
+    }
+
+    @Override
+    public Optional<CredencialesCuenta> credencialesPorCorreo(String correo) {
+        if (correo == null) {
+            return Optional.empty();
+        }
+        return identidades.findByCorreo(correo.trim().toLowerCase(Locale.ROOT))
+            .map(i -> new CredencialesCuenta(i.getCuentaId(), i.getClaveHash()));
     }
 
     private PerfilPublico guardarPerfil(String cuentaId) {

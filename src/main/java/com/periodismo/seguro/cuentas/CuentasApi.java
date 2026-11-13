@@ -12,4 +12,7 @@ public interface CuentasApi {
     ResultadoRegistro registrar(SolicitudRegistro solicitud);
 
     Optional<String> seudonimoDe(String cuentaId);
+
+    /** HU-03: credenciales (id de cuenta y hash de la clave) del correo dado, o vacio si no existe. */
+    Optional<CredencialesCuenta> credencialesPorCorreo(String correo);
 }

@@ -41,6 +41,7 @@ Páginas disponibles:
 | `/` | Página de validación del stack (Thymeleaf, JPA y WebSocket) |
 | `/registro` | Registro de periodistas |
 | `/login` | Inicio de sesión |
+| `/inicio` | Pantalla principal del periodista (requiere sesión) |
 | `/actuator/health` | Estado de la aplicación (`{"status":"UP"}`) |
 
 ### 2. Con PostgreSQL
@@ -78,13 +79,15 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `CuentasServiceTest` | La contraseña se guarda con hash BCrypt, el seudónimo tiene formato y es único, el correo repetido se rechaza sin importar mayúsculas, los datos no se filtran en `toString` |
 | `IdentidadSeparadaTest` | HU-02: el perfil público no tiene correo, nombre real ni hash; la identidad privada no tiene seudónimo; tablas distintas; los records de la API pública no exponen datos reales |
 | `IdentidadWebTest` | HU-02: el mensaje de registro y las páginas públicas muestran el seudónimo, nunca correo ni nombre real |
+| `AutenticacionServiceTest` | HU-03: credenciales con BCrypt, error igual para clave incorrecta y correo inexistente, bloqueo tras 5 fallos (también a correos inexistentes), reinicio con éxito, caducidad del bloqueo, correo no guardado en claro |
+| `InicioSesionWebTest` | HU-03: formulario de login, redirección a `/inicio`, mensaje genérico, aviso de bloqueo, páginas protegidas redirigen al login, rutas públicas abiertas, CSRF |
 | `RegistroWebTest` | Validaciones del formulario: correo inválido, contraseña débil, confirmación distinta, correo repetido y registro correcto |
 | `InicioWebTest` | El inicio muestra la misión, la visión y el objetivo, e invita a registrarse |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
 | `AppTests` | La aplicación completa arranca |
 
-Las pruebas de autenticación (inicio y cierre de sesión, recuperación de clave) se agregan con las historias HU-03 a HU-06, y las de CRUD con las de noticias (HU-09 a HU-14).
+Las pruebas de cierre de sesión y recuperación de clave se agregan con las historias HU-04 a HU-06, y las de CRUD con las de noticias (HU-09 a HU-14).
 
 ## Estructura
 
