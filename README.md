@@ -81,13 +81,14 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `IdentidadWebTest` | HU-02: el mensaje de registro y las páginas públicas muestran el seudónimo, nunca correo ni nombre real |
 | `AutenticacionServiceTest` | HU-03: credenciales con BCrypt, error igual para clave incorrecta y correo inexistente, bloqueo tras 5 fallos (también a correos inexistentes), reinicio con éxito, caducidad del bloqueo, correo no guardado en claro |
 | `InicioSesionWebTest` | HU-03: formulario de login, redirección a `/inicio`, mensaje genérico, aviso de bloqueo, páginas protegidas redirigen al login, rutas públicas abiertas, CSRF |
+| `CierreSesionWebTest` | HU-04: botón de cerrar sesión visible solo con sesión, la sesión se invalida, la cookie JSESSIONID se elimina, las páginas protegidas redirigen al login, CSRF exigido |
 | `RegistroWebTest` | Validaciones del formulario: correo inválido, contraseña débil, confirmación distinta, correo repetido y registro correcto |
 | `InicioWebTest` | El inicio muestra la misión, la visión y el objetivo, e invita a registrarse |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
 | `AppTests` | La aplicación completa arranca |
 
-Las pruebas de cierre de sesión y recuperación de clave se agregan con las historias HU-04 a HU-06, y las de CRUD con las de noticias (HU-09 a HU-14).
+Las pruebas de recuperación de clave se agregan con las historias HU-05 y HU-06, y las de CRUD con las de noticias (HU-09 a HU-14).
 
 ## Estructura
 

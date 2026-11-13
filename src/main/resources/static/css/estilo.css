@@ -160,3 +160,6 @@ details.plegable > summary { font: 400 1rem/1.2 var(--titulos); letter-spacing: 
 /* Chat de prueba */
 #log { list-style: none; padding: 0; margin: 1rem 0 0; }
 #log li { border-bottom: 1px solid var(--regla); padding: .5rem 0; }
+
+/* HU-04: formulario de cierre de sesion dentro de la barra */
+.nav .cierre { display: inline; margin: 0; }
