@@ -11,6 +11,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.HexFormat;
+import java.util.Locale;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -54,7 +55,7 @@ class RecuperacionClave {
         // Solo vale el ultimo enlace pedido: los anteriores quedan invalidados.
         tokens.findByCuentaIdAndUsadoFalse(cuentaId).forEach(TokenRecuperacion::marcarUsado);
         tokens.save(new TokenRecuperacion(hash(token), cuentaId, reloj.instant().plus(CADUCIDAD)));
-        envio.enviar(urlPublica + "/restablecer?token=" + token);
+        envio.enviar(correo.trim().toLowerCase(Locale.ROOT), urlPublica + "/restablecer?token=" + token);
     }
 
     /** HU-06: true si el token existe, no se ha usado y no ha caducado. No modifica nada. */

@@ -91,6 +91,7 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `CierreSesionWebTest` | HU-04: botón de cerrar sesión visible solo con sesión, la sesión se invalida, la cookie JSESSIONID se elimina, las páginas protegidas redirigen al login, CSRF exigido |
 | `RegistroWebTest` | Validaciones del formulario: correo inválido, contraseña débil, confirmación distinta, correo repetido y registro correcto |
 | `InicioWebTest` | El inicio muestra la misión, la visión y el objetivo, e invita a registrarse |
+| `EnvioRecuperacionResendTest` | El correo de recuperacion se envia por la API de Resend (simulada), sin registrar el correo ni el token en logs, y la consola es el proveedor por defecto |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
 | `AppTests` | La aplicación completa arranca |
@@ -132,3 +133,25 @@ Interfaz de "Periodismo Seguro": base blanca con tinta casi negra, marcador amar
 ## Privacidad
 
 No se guarda ni se registra en logs el correo, el nombre real ni la IP de nadie, y las vistas públicas solo muestran el seudónimo.
+
+## Correo de recuperacion de clave (Resend)
+
+Por defecto el enlace de recuperacion solo se imprime en consola (`APP_CORREO_PROVEEDOR=consola`), util para desarrollar. Para enviar correos reales se usa Resend.
+
+| Variable | Para que sirve |
+|---|---|
+| `APP_CORREO_PROVEEDOR` | `consola` (por defecto) o `resend` |
+| `RESEND_API_KEY` | API key de Resend. Es un secreto: nunca va en el repositorio |
+| `APP_CORREO_REMITENTE` | Remitente, por ejemplo `Periodismo Seguro <noreply@tudominio.com>` |
+| `APP_URL_PUBLICA` | URL publica de la aplicacion, que se usa en el enlace del correo |
+
+Notas de Resend: sin un dominio verificado solo permite enviar al correo del dueño de la cuenta (remitente `onboarding@resend.dev`). Para escribir a cualquier periodista hay que verificar un dominio.
+
+### Activarlo en Azure (una sola vez, lo hace quien tiene la suscripcion)
+
+```powershell
+az containerapp secret set -n ca-periodismo-psa26 -g rg-periodismo-psa26 --secrets resend-api-key=TU_API_KEY
+az containerapp update -n ca-periodismo-psa26 -g rg-periodismo-psa26 --set-env-vars APP_CORREO_PROVEEDOR=resend RESEND_API_KEY=secretref:resend-api-key "APP_CORREO_REMITENTE=Periodismo Seguro <noreply@tudominio.com>" APP_URL_PUBLICA=https://TU-URL.azurecontainerapps.io
+```
+
+El pipeline solo cambia la imagen: estas variables y el secreto se conservan en cada despliegue. Si falta `RESEND_API_KEY` con el proveedor `resend`, la aplicacion no arranca (el despliegue falla y la version anterior sigue activa).
