@@ -15,4 +15,12 @@ public interface CuentasApi {
 
     /** HU-03: credenciales (id de cuenta y hash de la clave) del correo dado, o vacio si no existe. */
     Optional<CredencialesCuenta> credencialesPorCorreo(String correo);
+
+    /**
+     * HU-06: reemplaza la clave de la cuenta por un nuevo hash BCrypt (con sal).
+     *
+     * @return false si la cuenta no existe
+     * @throws IllegalArgumentException si la clave no cumple {@link ReglasClave}
+     */
+    boolean cambiarClave(String cuentaId, String nuevaClave);
 }

@@ -33,4 +33,7 @@ public class IdentidadPrivada {
     public String getCorreo() { return correo; }
     public String getNombreReal() { return nombreReal; }
     public String getClaveHash() { return claveHash; }
+
+    /** HU-06: solo recibe un hash ya calculado, nunca la clave en claro. */
+    public void cambiarClaveHash(String claveHash) { this.claveHash = claveHash; }
 }
