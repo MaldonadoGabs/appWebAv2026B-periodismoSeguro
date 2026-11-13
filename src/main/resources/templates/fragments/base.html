@@ -12,11 +12,11 @@
     <a class="marca" th:href="@{/}">Periodismo Seguro</a>
     <nav class="nav" aria-label="Principal">
       <a th:href="@{/}">Inicio</a>
-      <th:block th:if="${#httpServletRequest.userPrincipal == null}">
+      <th:block th:if="${!conSesion}">
         <a th:href="@{/registro}">Registrarme</a>
         <a th:href="@{/login}">Entrar</a>
       </th:block>
-      <th:block th:if="${#httpServletRequest.userPrincipal != null}">
+      <th:block th:if="${conSesion}">
         <a th:href="@{/inicio}">Mi panel</a>
         <form class="cierre" th:action="@{/logout}" method="post">
           <button type="submit" class="tema" id="cerrar-sesion">Cerrar sesión</button>
