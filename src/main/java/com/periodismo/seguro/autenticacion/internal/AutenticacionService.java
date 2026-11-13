@@ -15,11 +15,14 @@ class AutenticacionService implements AutenticacionApi {
     private final AuthenticationConfiguration configuracion;
     private final SessionRegistry sesiones;
     private final ControlIntentos intentos;
+    private final RecuperacionClave recuperacion;
 
-    AutenticacionService(AuthenticationConfiguration configuracion, SessionRegistry sesiones, ControlIntentos intentos) {
+    AutenticacionService(AuthenticationConfiguration configuracion, SessionRegistry sesiones, ControlIntentos intentos,
+                         RecuperacionClave recuperacion) {
         this.configuracion = configuracion;
         this.sesiones = sesiones;
         this.intentos = intentos;
+        this.recuperacion = recuperacion;
     }
 
     /** HU-03: verifica correo y clave con BCrypt y el mismo control de intentos del formulario. */
@@ -53,8 +56,11 @@ class AutenticacionService implements AutenticacionApi {
         return Optional.of(usuario.getUsername());
     }
 
+    /** HU-05: delega en RecuperacionClave; no revela si el correo existe. */
     @Override
-    public void solicitarRecuperacion(String seudonimo) {}
+    public void solicitarRecuperacion(String correo) {
+        recuperacion.solicitar(correo);
+    }
 
     @Override
     public boolean restablecerClave(String token, String nuevaClave) { return false; }

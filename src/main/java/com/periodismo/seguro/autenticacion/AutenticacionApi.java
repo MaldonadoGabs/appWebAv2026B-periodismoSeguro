@@ -19,8 +19,11 @@ public interface AutenticacionApi {
     /** Devuelve el id de cuenta dueno de la sesion, o vacio si no es valida (fail-closed). */
     Optional<String> validarSesion(String sesionId);
 
-    /** HU-05. Respuesta siempre generica, exista o no la cuenta. */
-    void solicitarRecuperacion(String seudonimo);
+    /**
+     * HU-05. Si el correo tiene cuenta, genera un enlace de recuperacion de un solo uso (caduca en 30 minutos)
+     * y lo envia. No devuelve nada para que la respuesta sea siempre la misma, exista o no la cuenta.
+     */
+    void solicitarRecuperacion(String correo);
 
     /** HU-06. */
     boolean restablecerClave(String token, String nuevaClave);
