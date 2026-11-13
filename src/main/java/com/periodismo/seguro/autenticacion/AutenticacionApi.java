@@ -25,6 +25,14 @@ public interface AutenticacionApi {
      */
     void solicitarRecuperacion(String correo);
 
-    /** HU-06. */
+    /** HU-06: true si el token de recuperacion existe, no se ha usado y no ha caducado. */
+    boolean tokenRecuperacionVigente(String token);
+
+    /**
+     * HU-06: si el token es vigente lo invalida, guarda la nueva clave con BCrypt (via el modulo cuentas)
+     * y cierra las sesiones abiertas de esa cuenta. Devuelve false si el token no existe, ya se uso o caduco.
+     *
+     * @throws IllegalArgumentException si la clave no cumple las reglas del registro (el token no se gasta)
+     */
     boolean restablecerClave(String token, String nuevaClave);
 }

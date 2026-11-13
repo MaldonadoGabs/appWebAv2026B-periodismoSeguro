@@ -63,5 +63,23 @@ class AutenticacionService implements AutenticacionApi {
     }
 
     @Override
-    public boolean restablecerClave(String token, String nuevaClave) { return false; }
+    public boolean tokenRecuperacionVigente(String token) {
+        return recuperacion.vigente(token);
+    }
+
+    /** HU-06: tras cambiar la clave expira las sesiones abiertas de la cuenta (por si alguien mas la usaba). */
+    @Override
+    public boolean restablecerClave(String token, String nuevaClave) {
+        Optional<String> cuentaId = recuperacion.restablecer(token, nuevaClave);
+        cuentaId.ifPresent(this::expirarSesiones);
+        return cuentaId.isPresent();
+    }
+
+    private void expirarSesiones(String cuentaId) {
+        for (Object principal : sesiones.getAllPrincipals()) {
+            if (principal instanceof UserDetails usuario && usuario.getUsername().equals(cuentaId)) {
+                sesiones.getAllSessions(principal, false).forEach(SessionInformation::expireNow);
+            }
+        }
+    }
 }

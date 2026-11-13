@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.stereotype.Component;
 
-/** HU-03, HU-04 y HU-05 (/recuperar es publica): reglas de acceso, formulario de inicio de sesion y bloqueo por intentos fallidos. */
+/** HU-03, HU-04 y HU-05 y HU-06 (/recuperar y /restablecer son publicas): reglas de acceso, formulario de inicio de sesion y bloqueo por intentos fallidos. */
 @Configuration
 class ConfiguracionSeguridad {
     @Bean
@@ -39,7 +39,7 @@ class ConfiguracionSeguridad {
 
         http
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/", "/registro", "/login", "/recuperar", "/actuator/health", "/css/**", "/js/**", "/fonts/**", "/ws")
+                .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health", "/css/**", "/js/**", "/fonts/**", "/ws")
                 .permitAll()
                 .anyRequest().authenticated())
             .formLogin(f -> f
