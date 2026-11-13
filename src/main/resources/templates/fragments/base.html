@@ -12,8 +12,16 @@
     <a class="marca" th:href="@{/}">Periodismo Seguro</a>
     <nav class="nav" aria-label="Principal">
       <a th:href="@{/}">Inicio</a>
-      <a th:href="@{/registro}">Registrarme</a>
-      <a th:href="@{/login}">Entrar</a>
+      <th:block th:if="${#httpServletRequest.userPrincipal == null}">
+        <a th:href="@{/registro}">Registrarme</a>
+        <a th:href="@{/login}">Entrar</a>
+      </th:block>
+      <th:block th:if="${#httpServletRequest.userPrincipal != null}">
+        <a th:href="@{/inicio}">Mi panel</a>
+        <form class="cierre" th:action="@{/logout}" method="post">
+          <button type="submit" class="tema" id="cerrar-sesion">Cerrar sesión</button>
+        </form>
+      </th:block>
       <button type="button" class="tema" id="tema" aria-label="Cambiar entre tema claro y oscuro">Tema</button>
     </nav>
   </header>
