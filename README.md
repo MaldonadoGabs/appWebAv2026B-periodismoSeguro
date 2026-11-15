@@ -44,6 +44,9 @@ Páginas disponibles:
 | `/recuperar` | Solicitud de recuperación de contraseña (el enlace se imprime en la consola) |
 | `/restablecer?token=...` | Definir una nueva contraseña con el enlace de recuperación (un solo uso, 30 minutos) |
 | `/inicio` | Pantalla principal del periodista (requiere sesión) |
+| `/noticias/nueva` | Editor para redactar una noticia (requiere sesión) |
+| `/noticias/{id}` | Confirmación de la noticia guardada (requiere sesión) |
+| `/noticias/imagenes/{id}` | Imagen subida con la noticia (requiere sesión) |
 | `/actuator/health` | Estado de la aplicación (`{"status":"UP"}`) |
 
 ### 2. Con PostgreSQL
@@ -94,9 +97,27 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `EnvioRecuperacionResendTest` | El correo de recuperacion se envia por la API de Resend (simulada), sin registrar el correo ni el token en logs, y la consola es el proveedor por defecto |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
+| `CrearNoticiaTest` | HU-09: se guardan encabezado, subtítulo, texto, seudónimo y hora redondeada a 1 h; las imágenes acaban en disco con nombre UUID y sin metadatos; se rechazan archivos que no son imagen, formatos no permitidos y más de 5 imágenes; se publica `NoticiaCreada` |
+| `CrearNoticiaWebTest` | HU-09: ruta protegida, CSRF, varias imágenes en un envío, HTML peligroso eliminado, errores junto al campo, recursos solo propios, imagen servida con `no-store` y 404 para una noticia inexistente |
 | `AppTests` | La aplicación completa arranca |
 
-Las pruebas de CRUD se agregan con las historias de noticias (HU-09 a HU-14).
+HU-09 ya está implementada (crear noticias). Las pruebas del resto del CRUD se agregan con las historias HU-10 a HU-14.
+
+## Editor de noticias (HU-09)
+
+Desde `/noticias/nueva` el periodista redacta y modifica su nota antes de guardarla. La noticia tiene **encabezado, subtítulo, texto e imágenes**; el texto se escribe en un editor HTML propio (`contenteditable`) con barra de formato y vista previa en vivo, sin librerías ni CDN. Las imágenes seleccionadas se pueden quitar antes de guardar. Tras guardar se muestra `/noticias/{id}` con el seudónimo del autor.
+
+| Variable | Para qué sirve |
+|---|---|
+| `APP_IMAGENES_DIR` | Directorio donde se guardan las imágenes. Por defecto, `<tmp>/periodismo-seguro/imagenes` |
+| `PORT`, `DB_*` | Igual que en el resto de la aplicación |
+
+- Formatos: PNG y JPEG, hasta 5 MB por archivo y 5 imágenes por noticia.
+- El HTML del editor se reduce a una lista blanca (jsoup) antes de guardarse: sin `script`, sin atributos de eventos y sin imágenes incrustadas de otros dominios.
+- Cada imagen se **re-codifica** para eliminar EXIF/GPS y se guarda con un nombre UUID: nunca se conserva el nombre original del archivo. La referencia queda en `imagenes_noticias`, sin claves foráneas.
+- **Limitación:** el disco de Azure Container Apps es efímero, así que las imágenes se pierden al reiniciar o desplegar. El puerto `AlmacenImagenes` aísla el dominio del almacenamiento para migrar a BD o a un volumen montado en `APP_IMAGENES_DIR` sin reescribir la lógica. La re-codificación no aplica la orientación EXIF de la foto original.
+- Editar noticias ya guardadas corresponde a otra historia; aquí solo se redacta y se modifica mientras se crea.
+- Pendiente para HU-25: al activar la CSP habrá que permitir `blob:` en `img-src` para las miniaturas locales del editor, y decidir si `/noticias/imagenes/{id}` pasa a ser pública cuando el listado de noticias lo sea (hoy exige sesión).
 
 ## Estructura
 
@@ -132,7 +153,7 @@ Interfaz de "Periodismo Seguro": base blanca con tinta casi negra, marcador amar
 
 ## Privacidad
 
-No se guarda ni se registra en logs el correo, el nombre real ni la IP de nadie, y las vistas públicas solo muestran el seudónimo.
+No se guarda ni se registra en logs el correo, el nombre real ni la IP de nadie, y las vistas públicas solo muestran el seudónimo. Las imágenes se guardan sin metadatos y con nombre aleatorio, y la hora de creación de una noticia se redondea a 1 h.
 
 ## Correo de recuperacion de clave (Resend)
 

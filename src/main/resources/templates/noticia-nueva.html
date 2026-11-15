@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Nueva noticia')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina ancha">
+    <h1><span>Nueva</span> noticia</h1>
+    <p class="suave">Escribe y modifica tu nota antes de guardarla. Se publicara con tu seudonimo: tu nombre real y tu correo nunca aparecen.</p>
+
+    <form id="form-noticia" th:action="@{/noticias/nueva}" th:object="${form}" method="post" enctype="multipart/form-data" novalidate>
+      <div class="editor-columnas">
+        <div>
+          <div class="campo">
+            <label for="titulo">Encabezado</label>
+            <input id="titulo" type="text" th:field="*{titulo}" maxlength="180" autocomplete="off">
+            <div class="msg-error" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></div>
+          </div>
+
+          <div class="campo">
+            <label for="subtitulo">Subtitulo</label>
+            <input id="subtitulo" type="text" th:field="*{subtitulo}" maxlength="300" autocomplete="off">
+            <div class="msg-error" th:if="${#fields.hasErrors('subtitulo')}" th:errors="*{subtitulo}"></div>
+          </div>
+
+          <div class="campo">
+            <label for="editor">Texto de la noticia</label>
+            <div class="barra-editor" role="toolbar" aria-label="Formato del texto">
+              <button type="button" class="tema" data-comando="bold" title="Negrita" aria-label="Negrita"><strong>N</strong></button>
+              <button type="button" class="tema" data-comando="italic" title="Cursiva" aria-label="Cursiva"><em>C</em></button>
+              <button type="button" class="tema" data-comando="insertUnorderedList" title="Lista" aria-label="Lista">Lista</button>
+              <button type="button" class="tema" data-comando="formatBlock" data-valor="h2" title="Titulo de seccion" aria-label="Titulo de seccion">H2</button>
+              <button type="button" class="tema" data-comando="formatBlock" data-valor="blockquote" title="Cita" aria-label="Cita">Cita</button>
+              <button type="button" class="tema" data-comando="removeFormat" title="Quitar formato" aria-label="Quitar formato">Limpiar</button>
+            </div>
+            <div id="editor" class="editor" contenteditable="true" role="textbox" aria-multiline="true"
+                 aria-label="Texto de la noticia" th:utext="*{cuerpo}"></div>
+            <textarea id="cuerpo" class="sr-only" th:field="*{cuerpo}" aria-hidden="true"></textarea>
+            <div class="msg-error" th:if="${#fields.hasErrors('cuerpo')}" th:errors="*{cuerpo}"></div>
+          </div>
+
+          <div class="campo">
+            <label for="imagenes">Imagenes (PNG o JPEG, hasta 5)</label>
+            <input id="imagenes" type="file" name="imagenes" multiple accept="image/png,image/jpeg">
+            <th:block th:if="${#fields.hasGlobalErrors()}">
+              <div class="msg-error" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+            </th:block>
+            <ul id="miniaturas" class="miniaturas" aria-label="Imagenes seleccionadas"></ul>
+          </div>
+
+          <button type="submit" class="boton principal">Guardar noticia</button>
+        </div>
+
+        <section class="panel vista-previa" aria-label="Vista previa">
+          <h2>Vista previa</h2>
+          <p class="suave">Asi se vera mientras escribes.</p>
+          <h3 id="prev-titulo" class="lectura">Encabezado</h3>
+          <p id="prev-subtitulo" class="suave">Subtitulo</p>
+          <div id="prev-cuerpo" class="lectura"></div>
+        </section>
+      </div>
+    </form>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+  <script th:src="@{/js/editor-noticia.js}"></script>
+</body>
+</html>
