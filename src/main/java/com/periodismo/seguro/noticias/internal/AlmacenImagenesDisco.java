@@ -67,18 +67,31 @@ class AlmacenImagenesDisco implements AlmacenImagenes {
 
     @Override
     public Optional<byte[]> leer(String nombreGuardado) {
-        if (nombreGuardado == null || !NOMBRE_GENERADO.matcher(nombreGuardado).matches()) {
-            return Optional.empty();
-        }
-        Path archivo = directorio.resolve(nombreGuardado).normalize();
-        if (!archivo.startsWith(directorio) || !Files.isRegularFile(archivo)) {
+        if (!existe(nombreGuardado)) {
             return Optional.empty();
         }
         try {
-            return Optional.of(Files.readAllBytes(archivo));
+            return Optional.of(Files.readAllBytes(rutaSegura(nombreGuardado)));
         } catch (IOException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public boolean existe(String nombreGuardado) {
+        if (nombreGuardado == null || !NOMBRE_GENERADO.matcher(nombreGuardado).matches()) {
+            return false;
+        }
+        return Files.isRegularFile(rutaSegura(nombreGuardado));
+    }
+
+    /** Solo nombres generados por este almacen; evita cualquier intento de salir del directorio. */
+    private Path rutaSegura(String nombreGuardado) {
+        Path archivo = directorio.resolve(nombreGuardado).normalize();
+        if (!archivo.startsWith(directorio)) {
+            return directorio.resolve("no-existe");
+        }
+        return archivo;
     }
 
     /** Lee y vuelve a escribir el bitmap: el archivo resultante no conserva EXIF ni otros metadatos. */

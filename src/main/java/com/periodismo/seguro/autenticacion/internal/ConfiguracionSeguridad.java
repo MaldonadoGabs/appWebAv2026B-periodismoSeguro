@@ -39,7 +39,9 @@ class ConfiguracionSeguridad {
 
         http
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health", "/css/**", "/js/**", "/fonts/**", "/ws")
+                // HU-10: el feed es publico y sus imagenes tambien; crear noticias sigue exigiendo sesion.
+                .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health",
+                    "/css/**", "/js/**", "/fonts/**", "/ws", "/noticias/imagenes/**")
                 .permitAll()
                 .anyRequest().authenticated())
             .formLogin(f -> f

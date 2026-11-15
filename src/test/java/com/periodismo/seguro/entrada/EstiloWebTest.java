@@ -36,6 +36,13 @@ class EstiloWebTest {
     }
 
     @Test
+    void elInicioIncluyeElFeedDeNoticias() throws Exception {
+        mvc.perform(get("/"))
+            .andExpect(status().isOk())
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"feed\"")));
+    }
+
+    @Test
     void ningunaPaginaCargaRecursosDeOtrosDominios() throws Exception {
         for (String ruta : new String[] {"/", "/registro", "/login", "/recuperar"}) {
             String html = mvc.perform(get(ruta)).andReturn().getResponse().getContentAsString();

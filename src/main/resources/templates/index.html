@@ -10,6 +10,32 @@
       <p><a class="boton principal" th:href="@{/registro}">Registrarme como periodista</a></p>
     </section>
 
+    <section class="feed" id="feed" aria-label="Últimas noticias">
+      <h2>Últimas noticias</h2>
+      <p class="nota demo" th:if="${totalNoticias == 0}">
+        Todavía no hay noticias publicadas. Cuando un periodista publique, aparecerá aquí con su seudónimo.
+      </p>
+
+      <div class="tarjetas" th:if="${totalNoticias > 0}">
+        <article class="tarjeta" th:each="n : ${noticias}">
+          <img th:if="${n.primeraImagenId != null}"
+               th:src="@{/noticias/imagenes/{id}(id=${n.primeraImagenId})}"
+               alt="Imagen de la noticia">
+          <h3 th:text="${n.titulo}">Encabezado</h3>
+          <p class="suave" th:text="${n.subtitulo}">Subtítulo</p>
+          <p class="lectura" th:text="${n.extracto}">Extracto</p>
+          <p class="firma"><span th:text="${n.autorSeudonimo}">Seudónimo</span>
+            <span th:text="' · ' + ${n.publicadaEn}"> · fecha</span></p>
+        </article>
+      </div>
+
+      <nav class="paginacion" th:if="${totalPaginas > 1}" aria-label="Paginación del feed">
+        <a class="boton" th:if="${pagina > 1}" th:href="@{/(pagina=${pagina - 1},tamano=${tamano})}">Anterior</a>
+        <span class="suave" th:text="'Página ' + ${pagina} + ' de ' + ${totalPaginas}">Página 1 de 1</span>
+        <a class="boton" th:if="${pagina < totalPaginas}" th:href="@{/(pagina=${pagina + 1},tamano=${tamano})}">Siguiente</a>
+      </nav>
+    </section>
+
     <section class="rejilla" aria-label="Misión, visión y objetivo">
       <article class="panel" id="mision">
         <h2>Misión</h2>

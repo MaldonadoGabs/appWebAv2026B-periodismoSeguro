@@ -13,4 +13,7 @@ interface AlmacenImagenes {
 
     /** Lee los bytes de un nombre generado por este almacen. Vacio si no existe o no es valido. */
     Optional<byte[]> leer(String nombreGuardado);
+
+    /** HU-10: true si el archivo sigue ahi. El feed omite la imagen si el disco se perdio. */
+    boolean existe(String nombreGuardado);
 }
