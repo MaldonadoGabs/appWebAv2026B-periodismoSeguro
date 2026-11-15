@@ -23,8 +23,14 @@ public interface NoticiasApi {
     /** HU-12: consulta por identificador. La usa ya la confirmacion de HU-09. */
     Optional<NoticiaPublica> obtener(String id);
 
-    /** HU-10: listado paginado. */
-    List<String> listar(int pagina, int tamano);
+    /**
+     * HU-10: feed paginado, de mas reciente a mas antiguo. {@code pagina} empieza en 0 y
+     * {@code tamano} se limita internamente a 50. Devuelve resumenes, nunca entidades ni el cuerpo completo.
+     */
+    List<ResumenNoticia> listar(int pagina, int tamano);
+
+    /** HU-10: total de noticias, para calcular las paginas del feed. */
+    long contar();
 
     /** HU-11: busqueda y filtro. */
     List<String> buscar(String texto, String categoria);

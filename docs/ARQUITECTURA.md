@@ -35,3 +35,9 @@ Nunca registrar IP, identificadores del lector ni datos reales del periodista. L
 En HU-09 las fotos se re-codifican antes de escribirse en disco (adios EXIF y GPS) y se guardan con nombre UUID, nunca con el nombre original. Los bytes salen del dominio por el puerto `AlmacenImagenes`: hoy es disco local, manana BD o blob, sin cambiar `NoticiasService`. Ojo: el filesystem de Container Apps es efimero; en produccion hace falta un volumen persistente o esa migracion.
 
 El HTML del editor se sanea en `entrada` (lista blanca con jsoup), que es donde se reciben datos del navegador. El modulo `noticias` guarda el resultado ya limpio y lo muestra con `th:utext`.
+
+## Feed (HU-10)
+
+`NoticiasApi.listar(pagina, tamano)` devuelve `ResumenNoticia`: ids, texto y la fecha ya formateada, sin entidades JPA ni el cuerpo completo. El orden es `creadaEn DESC, id ASC`; el id es necesario porque la privacidad trunca la hora a 1 h y varias noticias pueden compartirla. `entrada` normaliza la paginacion y calcula el total con `contar()`.
+
+El feed es publico, por lo que `/noticias/imagenes/**` se abrio en la cadena de filtros; la creacion de noticias sigue autenticada. El puerto `AlmacenImagenes` tambien responde `existe(...)` para que una imagen perdida en el disco efimero se omita en lugar de romper la tarjeta. El extracto se calcula dentro de `noticias` solo con JDK y se pinta con `th:text`: ningun HTML del autor llega al feed.

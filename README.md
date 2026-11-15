@@ -38,7 +38,7 @@ Páginas disponibles:
 
 | Ruta | Qué es |
 |---|---|
-| `/` | Página de validación del stack (Thymeleaf, JPA y WebSocket) |
+| `/` | Página principal: feed público de noticias + misión, visión y objetivo (`?pagina=1&tamano=10`) |
 | `/registro` | Registro de periodistas |
 | `/login` | Inicio de sesión |
 | `/recuperar` | Solicitud de recuperación de contraseña (el enlace se imprime en la consola) |
@@ -46,7 +46,7 @@ Páginas disponibles:
 | `/inicio` | Pantalla principal del periodista (requiere sesión) |
 | `/noticias/nueva` | Editor para redactar una noticia (requiere sesión) |
 | `/noticias/{id}` | Confirmación de la noticia guardada (requiere sesión) |
-| `/noticias/imagenes/{id}` | Imagen subida con la noticia (requiere sesión) |
+| `/noticias/imagenes/{id}` | Imagen de una noticia (pública, para el feed) |
 | `/actuator/health` | Estado de la aplicación (`{"status":"UP"}`) |
 
 ### 2. Con PostgreSQL
@@ -94,14 +94,16 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `CierreSesionWebTest` | HU-04: botón de cerrar sesión visible solo con sesión, la sesión se invalida, la cookie JSESSIONID se elimina, las páginas protegidas redirigen al login, CSRF exigido |
 | `RegistroWebTest` | Validaciones del formulario: correo inválido, contraseña débil, confirmación distinta, correo repetido y registro correcto |
 | `InicioWebTest` | El inicio muestra la misión, la visión y el objetivo, e invita a registrarse |
+| `ListarNoticiasTest` | HU-10: orden por más reciente con desempate determinista por id, extracto en texto plano sin datos privados, fecha redondeada a 1 h, paginación con valores normalizados y tope de 50, miniatura omitida si el archivo desapareció |
+| `FeedNoticiasWebTest` | HU-10: feed público sin sesión, estado vacío, encabezado/subtítulo/extracto/seudónimo, imagen pública sin sesión, paginación y parámetros inválidos, imagen perdida tolerada, cero recursos externos |
 | `EnvioRecuperacionResendTest` | El correo de recuperacion se envia por la API de Resend (simulada), sin registrar el correo ni el token en logs, y la consola es el proveedor por defecto |
-| `EstiloWebTest` | Las páginas cargan la hoja de estilos y las fuentes propias, y no cargan recursos de otros dominios |
+| `EstiloWebTest` | Las páginas cargan la hoja de estilos, el feed y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
 | `CrearNoticiaTest` | HU-09: se guardan encabezado, subtítulo, texto, seudónimo y hora redondeada a 1 h; las imágenes acaban en disco con nombre UUID y sin metadatos; se rechazan archivos que no son imagen, formatos no permitidos y más de 5 imágenes; se publica `NoticiaCreada` |
 | `CrearNoticiaWebTest` | HU-09: ruta protegida, CSRF, varias imágenes en un envío, HTML peligroso eliminado, errores junto al campo, recursos solo propios, imagen servida con `no-store` y 404 para una noticia inexistente |
 | `AppTests` | La aplicación completa arranca |
 
-HU-09 ya está implementada (crear noticias). Las pruebas del resto del CRUD se agregan con las historias HU-10 a HU-14.
+HU-09 (crear noticias) y HU-10 (feed público) ya están implementadas. Las pruebas del resto del CRUD se agregan con las historias HU-11 a HU-14.
 
 ## Editor de noticias (HU-09)
 
@@ -117,7 +119,23 @@ Desde `/noticias/nueva` el periodista redacta y modifica su nota antes de guarda
 - Cada imagen se **re-codifica** para eliminar EXIF/GPS y se guarda con un nombre UUID: nunca se conserva el nombre original del archivo. La referencia queda en `imagenes_noticias`, sin claves foráneas.
 - **Limitación:** el disco de Azure Container Apps es efímero, así que las imágenes se pierden al reiniciar o desplegar. El puerto `AlmacenImagenes` aísla el dominio del almacenamiento para migrar a BD o a un volumen montado en `APP_IMAGENES_DIR` sin reescribir la lógica. La re-codificación no aplica la orientación EXIF de la foto original.
 - Editar noticias ya guardadas corresponde a otra historia; aquí solo se redacta y se modifica mientras se crea.
-- Pendiente para HU-25: al activar la CSP habrá que permitir `blob:` en `img-src` para las miniaturas locales del editor, y decidir si `/noticias/imagenes/{id}` pasa a ser pública cuando el listado de noticias lo sea (hoy exige sesión).
+- Pendiente para HU-25: al activar la CSP habrá que permitir `blob:` en `img-src` para las miniaturas locales del editor.
+- Desde HU-10, `/noticias/imagenes/{id}` es pública para que el feed pueda mostrar las fotos; crear noticias sigue exigiendo sesión.
+
+## Feed de noticias (HU-10)
+
+La página principal `/` muestra **Últimas noticias**: un feed público, sin cuenta y sin rastreo, con 10 noticias por página (`?pagina=1&tamano=10`, máximo 50). Cada tarjeta muestra encabezado, subtítulo, extracto en texto plano, seudónimo del autor y fecha redondeada a 1 h; solo incluye la primera imagen si el archivo sigue en disco.
+
+Decisiones tomadas en esta historia:
+
+- El feed convive en `/` con la misión, la visión, el objetivo y el bloque técnico «Estado del stack», que queda al final.
+- Orden por `creadaEn` descendente con **desempate determinista por id**, porque la hora está truncada a 1 h (HU-26) y puede haber empates.
+- `NoticiasApi.listar` devuelve `ResumenNoticia` (ids y texto), nunca entidades JPA ni el cuerpo completo; el extracto se calcula con JDK, sin meter jsoup dentro del módulo `noticias`.
+- El extracto se pinta con `th:text`, así que el HTML del autor nunca se ejecuta en el feed.
+- Los parámetros `pagina` y `tamano` inválidos se normalizan (nunca 400 ni 500) y una página fuera de rango se ajusta a la última.
+- Sin IP, cookies de analítica ni identificadores del lector en logs; cero recursos de otros dominios.
+
+**Fuera de alcance**: búsqueda (HU-11), detalle de la noticia (HU-12), filtro por categorías (HU-16) y enlace desde cada tarjeta al detalle, que se añadirá con HU-12.
 
 ## Estructura
 
