@@ -9,7 +9,7 @@ Un solo despliegue hoy. Cada modulo se puede extraer a un microservicio sin rees
 | `cuentas` | HU-01, HU-02 | identidades_privadas (correo, nombre real, hash), perfiles_publicos (seudonimo) | nadie | Servicio de cuentas |
 | `autenticacion` | HU-03 a HU-06 | sesiones, tokens de recuperacion | cuentas | Servicio de auth (emite y valida sesiones) |
 | `seguridad` | HU-08, HU-25, HU-26 | ninguno | nadie | Libreria compartida o gateway |
-| `noticias` | HU-09 a HU-14, HU-16 | noticias, categorias | nadie | Servicio de noticias |
+| `noticias` | HU-09 a HU-14, HU-16 | noticias, imagenes_noticias (referencias), categorias | nadie | Servicio de noticias |
 | `chat` | HU-17 a HU-20, HU-22 | mensajes, no leidos | autenticacion | Servicio de chat (WebSocket) |
 | `notificaciones` | HU-21 | ninguno | evento `NoticiaCreada` | Servicio de notificaciones |
 
@@ -31,3 +31,7 @@ Edita la tabla `PERMITIDAS` en `src/test/java/com/periodismo/seguro/ReglasArquit
 ## Privacidad (HU-26)
 
 Nunca registrar IP, identificadores del lector ni datos reales del periodista. La hora se redondea a 1 h.
+
+En HU-09 las fotos se re-codifican antes de escribirse en disco (adios EXIF y GPS) y se guardan con nombre UUID, nunca con el nombre original. Los bytes salen del dominio por el puerto `AlmacenImagenes`: hoy es disco local, manana BD o blob, sin cambiar `NoticiasService`. Ojo: el filesystem de Container Apps es efimero; en produccion hace falta un volumen persistente o esa migracion.
+
+El HTML del editor se sanea en `entrada` (lista blanca con jsoup), que es donde se reciben datos del navegador. El modulo `noticias` guarda el resultado ya limpio y lo muestra con `th:utext`.

@@ -163,3 +163,24 @@ details.plegable > summary { font: 400 1rem/1.2 var(--titulos); letter-spacing: 
 
 /* HU-04: formulario de cierre de sesion dentro de la barra */
 .nav .cierre { display: inline; margin: 0; }
+
+/* HU-09: editor de noticias y vista previa */
+.editor-columnas { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); align-items: start; }
+.barra-editor { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .5rem; }
+.barra-editor button { min-width: 2.6rem; background: var(--superficie); color: var(--tinta); border-color: var(--linea); }
+.barra-editor button:hover { background: var(--marcador); color: #12161c; }
+.editor {
+  min-height: 15rem; padding: .8rem .9rem; overflow-wrap: anywhere;
+  border: 2px solid var(--linea); border-radius: 4px;
+  background: var(--superficie); color: var(--tinta);
+  font: 400 1.18rem/1.72 var(--lectura);
+}
+.editor:focus { outline: 3px solid var(--marcador); outline-offset: 1px; }
+.editor h2, .editor h3 { font-size: 1.25rem; }
+.editor ul, .editor ol, .lectura ul, .lectura ol { padding-left: 1.4rem; }
+.editor blockquote, .lectura blockquote { border-left: 5px solid var(--marcador); margin-left: 0; padding-left: 1rem; color: var(--suave); }
+.vista-previa h3 { margin-top: .8rem; }
+.vista-previa .lectura { overflow-wrap: anywhere; }
+.miniaturas { list-style: none; display: flex; flex-wrap: wrap; gap: .85rem; padding: 0; margin: .85rem 0 0; }
+.miniaturas li { display: flex; flex-direction: column; align-items: flex-start; gap: .35rem; }
+.miniaturas img { width: 10rem; height: 8rem; object-fit: cover; border: 2px solid var(--linea); background: var(--superficie); }

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Noticia guardada')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <h1><span>Noticia</span> guardada</h1>
+    <p class="nota ok">Tu nota quedo guardada. Solo se muestra tu seudonimo.</p>
+
+    <article class="panel">
+      <p class="suave">Publicado por <strong th:text="${noticia.autorSeudonimo}">Seudonimo</strong></p>
+      <h2 th:text="${noticia.titulo}">Encabezado</h2>
+      <p class="lectura" th:text="${noticia.subtitulo}">Subtitulo</p>
+      <div class="lectura" th:utext="${noticia.cuerpo}"></div>
+      <ul class="miniaturas" th:if="${!#lists.isEmpty(noticia.imagenesIds)}" aria-label="Imagenes de la noticia">
+        <li th:each="imagenId : ${noticia.imagenesIds}">
+          <img th:src="@{/noticias/imagenes/{id}(id=${imagenId})}" alt="Imagen de la noticia">
+        </li>
+      </ul>
+    </article>
+
+    <p><a class="boton" th:href="@{/noticias/nueva}">Escribir otra noticia</a></p>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>

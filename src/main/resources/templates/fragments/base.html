@@ -18,6 +18,7 @@
       </th:block>
       <th:block th:if="${conSesion}">
         <a th:href="@{/inicio}">Mi panel</a>
+        <a th:href="@{/noticias/nueva}">Escribir noticia</a>
         <form class="cierre" th:action="@{/logout}" method="post">
           <button type="submit" class="tema" id="cerrar-sesion">Cerrar sesión</button>
         </form>
