@@ -89,7 +89,9 @@ class FeedNoticiasWebTest {
         crear("Primera nota del feed", List.of(new ImagenAdjunta("image/png", png())));
         crear("Segunda nota del feed", List.of());
 
-        String html = mvc.perform(get("/"))
+        // tamano=50: la hora esta truncada a 1 h y el desempate es por UUID, asi que pedir
+        // la pagina por defecto no garantiza que una noticia concreta aparezca en ella.
+        String html = mvc.perform(get("/").param("tamano", "50"))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Primera nota del feed")))
             .andExpect(content().string(containsString("Segunda nota del feed")))
@@ -140,9 +142,12 @@ class FeedNoticiasWebTest {
     void unaImagenPerdidaNoRompeElFeed() throws Exception {
         borrarImagenesDelDisco();
 
+        // No se comprueba un titulo concreto: con mas de 10 noticias en la misma hora truncada,
+        // el orden dentro de la hora es por id (UUID) y cual cae en la pagina 1 es aleatorio.
         String html = mvc.perform(get("/"))
             .andExpect(status().isOk())
-            .andExpect(content().string(containsString("Primera nota del feed")))
+            .andExpect(content().string(containsString("id=\"feed\"")))
+            .andExpect(content().string(containsString("class=\"tarjeta\"")))
             .andExpect(content().string(not(containsString("/noticias/imagenes/"))))
             .andReturn().getResponse().getContentAsString();
         sinRecursosExternos(html);

@@ -77,7 +77,7 @@ docker run -p 8080:8080 periodismo-seguro
 mvn verify
 ```
 
-Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipeline despliegue.
+Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipeline despliegue. El orden de clases es alfabetico y la codificacion UTF-8 esta fijada en el `pom.xml`, para que el resultado no dependa de si se ejecuta en Windows o en el agente Linux de Azure DevOps. El pipeline publica los informes JUnit en la pestana **Tests** aun cuando fallen.
 
 | Prueba | Qué comprueba |
 |---|---|
@@ -129,7 +129,7 @@ La página principal `/` muestra **Últimas noticias**: un feed público, sin cu
 Decisiones tomadas en esta historia:
 
 - El feed convive en `/` con la misión, la visión, el objetivo y el bloque técnico «Estado del stack», que queda al final.
-- Orden por `creadaEn` descendente con **desempate determinista por id**, porque la hora está truncada a 1 h (HU-26) y puede haber empates.
+- Orden por `creadaEn` descendente con **desempate determinista por id**, porque la hora está truncada a 1 h (HU-26) y puede haber empates. Dentro de una misma hora el orden es arbitrario a propósito: guardar el instante exacto permitiría reconstruir cuándo publicó cada periodista. Por eso las pruebas no deben asumir que una noticia concreta cae en la página 1 cuando hay más noticias que el tamaño de página.
 - `NoticiasApi.listar` devuelve `ResumenNoticia` (ids y texto), nunca entidades JPA ni el cuerpo completo; el extracto se calcula con JDK, sin meter jsoup dentro del módulo `noticias`.
 - El extracto se pinta con `th:text`, así que el HTML del autor nunca se ejecuta en el feed.
 - Los parámetros `pagina` y `tamano` inválidos se normalizan (nunca 400 ni 500) y una página fuera de rango se ajusta a la última.
