@@ -23,6 +23,14 @@ stages:
         goals: verify
         javaHomeOption: JDKVersion
         jdkVersionOption: '1.21'
+    # Aunque las pruebas fallen, se publica el detalle de cual fallo en la pestana Tests.
+    - task: PublishTestResults@2
+      displayName: Publicar resultados de las pruebas
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: JUnit
+        testResultsFiles: '**/target/surefire-reports/TEST-*.xml'
+        failTaskOnFailedTests: false
 - stage: Deploy
   dependsOn: Build
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
