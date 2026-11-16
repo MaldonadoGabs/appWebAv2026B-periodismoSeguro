@@ -26,8 +26,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * HU-09: interfaz para redactar noticias (encabezado, subtitulo, texto e imagenes).
+ * HU-01: incluye la categoria, que se valida contra el catalogo.
  * El periodista modifica todo en el editor antes de guardar; la edicion de noticias
- * ya publicadas corresponde a otra historia. La sesion la exige Spring Security.
+ * ya publicadas corresponde a otra historia. La sesion y el rol PERIODISTA los exige Spring Security.
  */
 @Controller
 class NoticiaController {
@@ -48,13 +49,15 @@ class NoticiaController {
     @GetMapping("/noticias/nueva")
     String formulario(Model model) {
         model.addAttribute("form", new NoticiaForm());
+        model.addAttribute("categorias", noticias.categorias());
         return "noticia-nueva";
     }
 
     @PostMapping("/noticias/nueva")
     String crear(@Valid @ModelAttribute("form") NoticiaForm form, BindingResult errores,
                  @RequestParam(value = "imagenes", required = false) List<MultipartFile> imagenes,
-                 Principal principal) {
+                 Principal principal, Model model) {
+        model.addAttribute("categorias", noticias.categorias());
         String cuerpo = sanitizador.limpiar(form.getCuerpo());
         // Se guarda ya limpio tambien en el formulario: si hay errores, la pagina no reinyecta HTML crudo.
         form.setCuerpo(cuerpo);
@@ -66,6 +69,9 @@ class NoticiaController {
         if (!errores.hasFieldErrors("cuerpo") && cuerpo.isBlank()) {
             errores.rejectValue("cuerpo", "vacio", "Escribe el texto de la noticia");
         }
+        if (!errores.hasFieldErrors("categoria") && !esCategoriaValida(form.getCategoria())) {
+            errores.rejectValue("categoria", "no.valida", "Elige una categoría de la lista");
+        }
         if (errores.hasErrors()) {
             return "noticia-nueva";
         }
@@ -75,7 +81,8 @@ class NoticiaController {
         String id;
         try {
             id = noticias.crear(cuentaId, seudonimo,
-                new SolicitudNoticia(form.getTitulo(), form.getSubtitulo(), cuerpo, aAdjuntas(adjuntas)));
+                new SolicitudNoticia(form.getTitulo(), form.getSubtitulo(), cuerpo, form.getCategoria(),
+                    aAdjuntas(adjuntas)));
         } catch (IllegalArgumentException e) {
             errores.reject("imagenes", e.getMessage());
             return "noticia-nueva";
@@ -83,9 +90,15 @@ class NoticiaController {
         return "redirect:/noticias/" + id;
     }
 
-    /** Pagina de confirmacion: muestra lo guardado tal como lo vera el lector, con el seudonimo. */
+    /**
+     * Pagina de confirmacion: muestra lo guardado tal como lo vera el lector, con el seudonimo.
+     * Solo el autor puede abrirla; para los demas la noticia no existe (404), sin revelar nada.
+     */
     @GetMapping("/noticias/{id}")
-    String creada(@PathVariable String id, Model model) {
+    String creada(@PathVariable String id, Principal principal, Model model) {
+        if (!noticias.esAutor(principal.getName(), id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
         NoticiaPublica noticia = noticias.obtener(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("noticia", noticia);
@@ -102,6 +115,10 @@ class NoticiaController {
         respuesta.setHeader("Cache-Control", "no-store");
         respuesta.setContentLength(archivo.contenido().length);
         respuesta.getOutputStream().write(archivo.contenido());
+    }
+
+    private boolean esCategoriaValida(String id) {
+        return id != null && noticias.categorias().stream().anyMatch(c -> c.id().equals(id));
     }
 
     private static void validarImagenes(List<MultipartFile> archivos, BindingResult errores) {

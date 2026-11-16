@@ -34,7 +34,7 @@ public class Noticia {
     @Column(nullable = false, length = 50000)
     private String cuerpo;
 
-    /** HU-16: la relacion con la categoria se anade con esa historia. */
+    /** HU-01: id (slug) de la categoria del catalogo. Nulo solo en noticias anteriores a HU-01. */
     @Column
     private String categoria;
 
@@ -45,12 +45,18 @@ public class Noticia {
 
     public Noticia(String id, String autorCuentaId, String autorSeudonimo, String titulo, String subtitulo,
                    String cuerpo, Instant creadaEn) {
+        this(id, autorCuentaId, autorSeudonimo, titulo, subtitulo, cuerpo, null, creadaEn);
+    }
+
+    public Noticia(String id, String autorCuentaId, String autorSeudonimo, String titulo, String subtitulo,
+                   String cuerpo, String categoria, Instant creadaEn) {
         this.id = id;
         this.autorCuentaId = autorCuentaId;
         this.autorSeudonimo = autorSeudonimo;
         this.titulo = titulo;
         this.subtitulo = subtitulo;
         this.cuerpo = cuerpo;
+        this.categoria = categoria;
         this.creadaEn = creadaEn;
     }
 

@@ -110,6 +110,7 @@ class CrearNoticiaWebTest {
                 .param("titulo", "Encabezado real")
                 .param("subtitulo", "Subtitulo real")
                 .param("cuerpo", "<p>Texto del cuerpo</p>")
+                .param("categoria", "otros")
                 .session(sesion).with(csrf()))
             .andExpect(status().is3xxRedirection())
             .andReturn();
@@ -138,6 +139,7 @@ class CrearNoticiaWebTest {
         MvcResult resultado = mvc.perform(multipart("/noticias/nueva")
                 .file(imagen("una.png", bytes)).file(imagen("otra.png", bytes))
                 .param("titulo", "Titulo").param("subtitulo", "Subtitulo").param("cuerpo", "<p>Texto</p>")
+                .param("categoria", "otros")
                 .session(entrar()).with(csrf()))
             .andExpect(status().is3xxRedirection())
             .andReturn();
@@ -155,6 +157,7 @@ class CrearNoticiaWebTest {
         MockHttpSession sesion = entrar();
         MvcResult resultado = mvc.perform(multipart("/noticias/nueva")
                 .param("titulo", "Titulo").param("subtitulo", "Subtitulo").param("cuerpo", peligroso)
+                .param("categoria", "otros")
                 .session(sesion).with(csrf()))
             .andExpect(status().is3xxRedirection())
             .andReturn();
@@ -188,6 +191,7 @@ class CrearNoticiaWebTest {
                 .file(new MockMultipartFile("imagenes", "falsa.png", "image/png",
                     "esto no es una imagen".getBytes(StandardCharsets.UTF_8)))
                 .param("titulo", "Titulo").param("subtitulo", "Subtitulo").param("cuerpo", "<p>Texto</p>")
+                .param("categoria", "otros")
                 .session(entrar()).with(csrf()))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("imagen valida")));

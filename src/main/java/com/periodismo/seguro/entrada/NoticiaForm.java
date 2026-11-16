@@ -17,6 +17,12 @@ class NoticiaForm {
     @Size(max = 50000, message = "El texto es demasiado largo")
     private String cuerpo;
 
+    /** HU-01: id del catalogo de categorias (NoticiasApi.categorias()). */
+    @NotBlank(message = "Elige una categoría")
+    private String categoria;
+
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
     public String getSubtitulo() { return subtitulo; }

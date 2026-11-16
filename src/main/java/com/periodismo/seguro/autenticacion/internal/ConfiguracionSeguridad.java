@@ -39,10 +39,13 @@ class ConfiguracionSeguridad {
 
         http
             .authorizeHttpRequests(a -> a
-                // HU-10: el feed es publico y sus imagenes tambien; crear noticias sigue exigiendo sesion.
+                // HU-10: el feed es publico y sus imagenes tambien.
                 .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health",
-                    "/css/**", "/js/**", "/fonts/**", "/ws", "/noticias/imagenes/**")
+                    "/css/**", "/js/**", "/fonts/**", "/noticias/imagenes/**")
                 .permitAll()
+                // HU-08: rutas exclusivas del periodista. Un LECTOR o ADMINISTRADOR autenticado recibe 403.
+                .requestMatchers("/inicio", "/mis-notas", "/mis-notas/**", "/noticias/**", "/chat", "/ws")
+                .hasRole("PERIODISTA")
                 .anyRequest().authenticated())
             .formLogin(f -> f
                 .loginPage("/login").loginProcessingUrl("/login")

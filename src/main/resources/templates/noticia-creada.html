@@ -8,7 +8,8 @@
     <p class="nota ok">Tu nota quedo guardada. Solo se muestra tu seudonimo.</p>
 
     <article class="panel">
-      <p class="suave">Publicado por <strong th:text="${noticia.autorSeudonimo}">Seudonimo</strong></p>
+      <p class="suave">Publicado por <strong th:text="${noticia.autorSeudonimo}">Seudonimo</strong>
+        <span th:if="${noticia.categoria != null}" th:text="' · Categoría: ' + ${noticia.categoria}"></span></p>
       <h2 th:text="${noticia.titulo}">Encabezado</h2>
       <p class="lectura" th:text="${noticia.subtitulo}">Subtitulo</p>
       <div class="lectura" th:utext="${noticia.cuerpo}"></div>
