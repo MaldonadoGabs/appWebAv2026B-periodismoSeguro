@@ -23,6 +23,15 @@
           </div>
 
           <div class="campo">
+            <label for="categoria">Categoría</label>
+            <select id="categoria" th:field="*{categoria}">
+              <option value="">Elige una categoría</option>
+              <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}">Política</option>
+            </select>
+            <div class="msg-error" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></div>
+          </div>
+
+          <div class="campo">
             <label for="editor">Texto de la noticia</label>
             <div class="barra-editor" role="toolbar" aria-label="Formato del texto">
               <button type="button" class="tema" data-comando="bold" title="Negrita" aria-label="Negrita"><strong>N</strong></button>

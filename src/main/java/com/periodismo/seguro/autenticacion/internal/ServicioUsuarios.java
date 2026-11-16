@@ -2,6 +2,7 @@ package com.periodismo.seguro.autenticacion.internal;
 
 import com.periodismo.seguro.cuentas.CredencialesCuenta;
 import com.periodismo.seguro.cuentas.CuentasApi;
+import com.periodismo.seguro.cuentas.Rol;
 import java.util.Optional;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,14 +31,16 @@ class ServicioUsuarios implements UserDetailsService {
         if (credenciales.isEmpty()) {
             if (bloqueado) {
                 // Un correo inexistente bloqueado se comporta igual que uno real: no se revela si existe.
-                return construir("desconocida", hashFalso, true);
+                return construir("desconocida", hashFalso, Rol.LECTOR, true);
             }
             throw new UsernameNotFoundException("Credenciales invalidas");
         }
-        return construir(credenciales.get().cuentaId(), credenciales.get().claveHash(), bloqueado);
+        CredencialesCuenta c = credenciales.get();
+        return construir(c.cuentaId(), c.claveHash(), c.rol(), bloqueado);
     }
 
-    private static UserDetails construir(String cuentaId, String hash, boolean bloqueado) {
-        return User.withUsername(cuentaId).password(hash).roles("PERIODISTA").accountLocked(bloqueado).build();
+    /** HU-08: el rol sale de la cuenta guardada, no de una constante. */
+    private static UserDetails construir(String cuentaId, String hash, Rol rol, boolean bloqueado) {
+        return User.withUsername(cuentaId).password(hash).roles(rol.name()).accountLocked(bloqueado).build();
     }
 }

@@ -10,6 +10,16 @@
       <p class="lectura"><strong th:text="${seudonimo}">Seudónimo</strong></p>
       <p class="suave">Tu nombre real y tu correo nunca se muestran en el portal.</p>
     </section>
+
+    <nav class="panel" aria-label="Accesos del periodista">
+      <h2>Accesos</h2>
+      <p><a class="boton principal" th:href="@{/noticias/nueva}">Escribir noticia</a>
+         <a class="boton" th:href="@{/mis-notas}">Mis notas</a>
+         <a class="boton" th:href="@{/chat}">Chat</a></p>
+      <form th:action="@{/logout}" method="post">
+        <button type="submit" class="boton" id="cerrar-sesion-panel">Cerrar sesión</button>
+      </form>
+    </nav>
   </main>
   <footer th:replace="~{fragments/base :: pie}"></footer>
 </body>

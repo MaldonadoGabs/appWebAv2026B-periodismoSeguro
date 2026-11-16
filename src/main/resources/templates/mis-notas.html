@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Mis notas')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina ancha">
+    <h1><span>Mis</span> notas</h1>
+    <p class="suave">Solo ves las noticias que publicaste con tu seudónimo.</p>
+
+    <p class="nota demo" th:if="${total == 0}">
+      Todavía no has publicado notas. <a th:href="@{/noticias/nueva}">Escribir noticia</a>
+    </p>
+
+    <div class="tarjetas" th:if="${total > 0}">
+      <article class="tarjeta" th:each="n : ${notas}">
+        <h3 th:text="${n.titulo}">Encabezado</h3>
+        <p class="suave" th:text="${n.subtitulo}">Subtítulo</p>
+        <p class="lectura" th:text="${n.extracto}">Extracto</p>
+        <p class="firma"><span th:text="${n.autorSeudonimo}">Seudónimo</span>
+          <span th:if="${n.categoria != null}" th:text="' · ' + ${n.categoria}"> · categoría</span>
+          <span th:text="' · ' + ${n.publicadaEn}"> · fecha</span></p>
+        <p><a class="boton" th:href="@{/noticias/{id}(id=${n.id})}">Ver nota</a></p>
+      </article>
+    </div>
+
+    <nav class="paginacion" th:if="${totalPaginas > 1}" aria-label="Paginación de mis notas">
+      <a class="boton" th:if="${pagina > 1}" th:href="@{/mis-notas(pagina=${pagina - 1})}">Anterior</a>
+      <span class="suave" th:text="'Página ' + ${pagina} + ' de ' + ${totalPaginas}">Página 1 de 1</span>
+      <a class="boton" th:if="${pagina < totalPaginas}" th:href="@{/mis-notas(pagina=${pagina + 1})}">Siguiente</a>
+    </nav>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>

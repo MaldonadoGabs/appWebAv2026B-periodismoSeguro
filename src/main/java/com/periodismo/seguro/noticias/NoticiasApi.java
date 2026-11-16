@@ -13,7 +13,7 @@ public interface NoticiasApi {
      * HU-09: guarda la noticia con encabezado, subtitulo, texto e imagenes, y devuelve su id.
      * Quien llama (la capa de entrada) ya valido la sesion, resolvio el seudonimo y limpio el HTML.
      *
-     * @throws IllegalArgumentException si faltan datos o una imagen no es valida
+     * @throws IllegalArgumentException si faltan datos, la categoria no existe o una imagen no es valida
      */
     String crear(String autorCuentaId, String autorSeudonimo, SolicitudNoticia solicitud);
 
@@ -22,6 +22,9 @@ public interface NoticiasApi {
 
     /** HU-12: consulta por identificador. La usa ya la confirmacion de HU-09. */
     Optional<NoticiaPublica> obtener(String id);
+
+    /** HU-08: true solo si la noticia existe y fue creada por esa cuenta. */
+    boolean esAutor(String autorCuentaId, String id);
 
     /**
      * HU-10: feed paginado, de mas reciente a mas antiguo. {@code pagina} empieza en 0 y
@@ -32,6 +35,15 @@ public interface NoticiasApi {
     /** HU-10: total de noticias, para calcular las paginas del feed. */
     long contar();
 
+    /**
+     * HU-01 / HU-08: "mis notas". Solo las noticias de ese autor, con el mismo orden y limites que el feed.
+     * Un id de cuenta nulo o desconocido devuelve una lista vacia.
+     */
+    List<ResumenNoticia> listarDeAutor(String autorCuentaId, int pagina, int tamano);
+
+    /** HU-01 / HU-08: total de noticias de ese autor, para paginar "mis notas". */
+    long contarDeAutor(String autorCuentaId);
+
     /** HU-11: busqueda y filtro. */
     List<String> buscar(String texto, String categoria);
 
@@ -41,6 +53,6 @@ public interface NoticiasApi {
     /** HU-14: requiere confirmacion. */
     boolean eliminar(String autorCuentaId, String id, boolean confirmado);
 
-    /** HU-16. */
-    List<String> categorias();
+    /** HU-16: catalogo de categorias, en el orden en que se muestran. */
+    List<CategoriaNoticia> categorias();
 }

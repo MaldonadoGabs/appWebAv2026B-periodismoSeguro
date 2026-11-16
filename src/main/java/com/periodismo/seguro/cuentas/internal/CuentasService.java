@@ -5,6 +5,7 @@ import com.periodismo.seguro.cuentas.CredencialesCuenta;
 import com.periodismo.seguro.cuentas.CuentasApi;
 import com.periodismo.seguro.cuentas.ReglasClave;
 import com.periodismo.seguro.cuentas.ResultadoRegistro;
+import com.periodismo.seguro.cuentas.Rol;
 import com.periodismo.seguro.cuentas.SolicitudRegistro;
 import java.util.Locale;
 import java.util.Optional;
@@ -41,7 +42,9 @@ class CuentasService implements CuentasApi {
         String cuentaId = UUID.randomUUID().toString();
         PerfilPublico perfil = guardarPerfil(cuentaId);
         try {
-            identidades.saveAndFlush(new IdentidadPrivada(cuentaId, correo, solicitud.nombreReal().trim(), hash));
+            // HU-08: el registro publico siempre crea periodistas; el rol no viene del formulario.
+            identidades.saveAndFlush(new IdentidadPrivada(cuentaId, correo, solicitud.nombreReal().trim(), hash,
+                Rol.PERIODISTA));
         } catch (DataIntegrityViolationException e) {
             perfiles.deleteById(cuentaId);
             throw new CorreoYaRegistradoException();
@@ -55,7 +58,7 @@ class CuentasService implements CuentasApi {
             return Optional.empty();
         }
         return identidades.findByCorreo(correo.trim().toLowerCase(Locale.ROOT))
-            .map(i -> new CredencialesCuenta(i.getCuentaId(), i.getClaveHash()));
+            .map(i -> new CredencialesCuenta(i.getCuentaId(), i.getClaveHash(), i.getRol()));
     }
 
     @Override

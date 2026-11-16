@@ -25,6 +25,7 @@
           <p class="suave" th:text="${n.subtitulo}">Subtítulo</p>
           <p class="lectura" th:text="${n.extracto}">Extracto</p>
           <p class="firma"><span th:text="${n.autorSeudonimo}">Seudónimo</span>
+            <span th:if="${n.categoria != null}" th:text="' · ' + ${n.categoria}"> · categoría</span>
             <span th:text="' · ' + ${n.publicadaEn}"> · fecha</span></p>
         </article>
       </div>

@@ -43,9 +43,11 @@ Páginas disponibles:
 | `/login` | Inicio de sesión |
 | `/recuperar` | Solicitud de recuperación de contraseña (el enlace se imprime en la consola) |
 | `/restablecer?token=...` | Definir una nueva contraseña con el enlace de recuperación (un solo uso, 30 minutos) |
-| `/inicio` | Pantalla principal del periodista (requiere sesión) |
-| `/noticias/nueva` | Editor para redactar una noticia (requiere sesión) |
-| `/noticias/{id}` | Confirmación de la noticia guardada (requiere sesión) |
+| `/inicio` | Panel del periodista (rol PERIODISTA; un LECTOR o ADMINISTRADOR recibe 403) |
+| `/mis-notas` | Lista paginada de las noticias del periodista autenticado (rol PERIODISTA) |
+| `/chat` | Chat en tiempo real entre periodistas, sobre el WebSocket `/ws` (rol PERIODISTA) |
+| `/noticias/nueva` | Editor para redactar una noticia, con categoría obligatoria (rol PERIODISTA) |
+| `/noticias/{id}` | Confirmación de la noticia guardada; solo la ve su autor, para los demás 404 (rol PERIODISTA) |
 | `/noticias/imagenes/{id}` | Imagen de una noticia (pública, para el feed) |
 | `/actuator/health` | Estado de la aplicación (`{"status":"UP"}`) |
 
@@ -101,6 +103,11 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
 | `CrearNoticiaTest` | HU-09: se guardan encabezado, subtítulo, texto, seudónimo y hora redondeada a 1 h; las imágenes acaban en disco con nombre UUID y sin metadatos; se rechazan archivos que no son imagen, formatos no permitidos y más de 5 imágenes; se publica `NoticiaCreada` |
 | `CrearNoticiaWebTest` | HU-09: ruta protegida, CSRF, varias imágenes en un envío, HTML peligroso eliminado, errores junto al campo, recursos solo propios, imagen servida con `no-store` y 404 para una noticia inexistente |
+| `RolesWebTest` | HU-08: el periodista abre panel, mis notas, escritura y chat; sin sesión redirige al login; LECTOR y ADMINISTRADOR reciben 403 en rutas de periodista; el registro no permite elegir rol; el lector ve el feed sin enlaces de periodista |
+| `MisNotasWebTest` | HU-01/HU-08: el periodista ve sus notas, nunca las de otro; la nota ajena da 404; estado vacío y paginación normalizada |
+| `CategoriaNoticiaWebTest` | HU-01: el formulario ofrece el catálogo; sin categoría o con una inventada no se guarda; con una válida se muestra en la confirmación y en el feed |
+| `NoticiasAutorTest` | HU-01/HU-08: catálogo de 9 categorías, categoría guardada y validada en el servicio, "mis notas" solo del autor, `esAutor` |
+| `ServicioUsuariosRolTest` | HU-08: el usuario de Spring Security recibe el rol guardado en la cuenta (PERIODISTA, LECTOR, ADMINISTRADOR) |
 | `AppTests` | La aplicación completa arranca |
 
 HU-09 (crear noticias) y HU-10 (feed público) ya están implementadas. Las pruebas del resto del CRUD se agregan con las historias HU-11 a HU-14.
