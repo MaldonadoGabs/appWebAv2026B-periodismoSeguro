@@ -41,12 +41,14 @@
 
       <div class="tarjetas" th:if="${totalNoticias > 0}">
         <article class="tarjeta" th:each="n : ${noticias}">
-          <img th:if="${n.primeraImagenId != null}"
-               th:src="@{/noticias/imagenes/{id}(id=${n.primeraImagenId})}"
-               alt="Imagen de la noticia">
-          <h3 th:text="${n.titulo}">Encabezado</h3>
-          <p class="suave" th:text="${n.subtitulo}">Subtítulo</p>
-          <p class="lectura" th:text="${n.extracto}">Extracto</p>
+          <a th:href="@{/noticias/{id}(id=${n.id})}" class="enlace-tarjeta">
+            <img th:if="${n.primeraImagenId != null}"
+                 th:src="@{/noticias/imagenes/{id}(id=${n.primeraImagenId})}"
+                 alt="Imagen de la noticia">
+            <h3 th:text="${n.titulo}">Encabezado</h3>
+            <p class="suave" th:text="${n.subtitulo}">Subtítulo</p>
+            <p class="lectura" th:text="${n.extracto}">Extracto</p>
+          </a>
           <p class="firma"><span th:text="${n.autorSeudonimo}">Seudónimo</span>
             <span th:if="${n.categoria != null}" th:text="' · ' + ${n.categoria}"> · categoría</span>
             <span th:text="' · ' + ${n.publicadaEn}"> · fecha</span></p>

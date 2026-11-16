@@ -89,7 +89,9 @@ class NoticiasService implements NoticiasApi {
         return noticias.findById(id).map(n -> new NoticiaPublica(
             n.getId(), n.getTitulo(), n.getSubtitulo(), n.getCuerpo(), n.getAutorSeudonimo(),
             imagenesNoticia.findByNoticiaIdOrderByOrdenAsc(id).stream().map(ImagenNoticia::getId).toList(),
-            CatalogoCategorias.nombreDe(n.getCategoria())));
+            CatalogoCategorias.nombreDe(n.getCategoria()),
+            FECHA.format(n.getCreadaEn()),
+            n.getModificadaEn() == null ? null : FECHA.format(n.getModificadaEn())));
     }
 
     @Override

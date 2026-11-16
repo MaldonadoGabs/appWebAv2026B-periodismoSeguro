@@ -39,13 +39,17 @@ class ConfiguracionSeguridad {
 
         http
             .authorizeHttpRequests(a -> a
-                // HU-10: el feed es publico y sus imagenes tambien.
-                .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health",
-                    "/css/**", "/js/**", "/fonts/**", "/noticias/imagenes/**")
-                .permitAll()
-                // HU-08: rutas exclusivas del periodista. Un LECTOR o ADMINISTRADOR autenticado recibe 403.
-                .requestMatchers("/inicio", "/mis-notas", "/mis-notas/**", "/noticias/**", "/chat", "/ws")
+                // HU-10: las imagenes son publicas. HU-08: rutas exclusivas del periodista.
+                // IMPORTANTE: las rutas especificas van ANTES de /noticias/{id}, porque este patron
+                // de un solo segmento tambien coincides con /noticias/nueva y lo abriria a cualquiera.
+                .requestMatchers("/noticias/imagenes/**").permitAll()
+                .requestMatchers("/inicio", "/mis-notas", "/mis-notas/**", "/noticias/nueva",
+                    "/noticias/*/editar", "/noticias/*/confirmacion", "/chat", "/ws")
                 .hasRole("PERIODISTA")
+                // HU-10 y HU-12: el feed, el detalle de una noticia y el resto de recursos son publicos.
+                .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health",
+                    "/css/**", "/js/**", "/fonts/**", "/noticias/*", "/error")
+                .permitAll()
                 .anyRequest().authenticated())
             .formLogin(f -> f
                 .loginPage("/login").loginProcessingUrl("/login")

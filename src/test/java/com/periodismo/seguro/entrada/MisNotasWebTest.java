@@ -63,21 +63,29 @@ class MisNotasWebTest {
     }
 
     @Test
-    void unPeriodistaNoVeNiAbreLasNotasDeOtro() throws Exception {
+    void unPeriodistaNoVeLasNotasDeOtroEnSuListado() throws Exception {
         Sesion ana = periodista();
         Sesion beto = periodista();
         String notaDeBeto = publicar(beto.cuentaId(), "Nota privada de Beto");
         publicar(ana.cuentaId(), "Nota de Ana");
 
+        // "Mis notas" sigue siendo privado: Ana nunca ve la nota de Beto en su lista.
         mvc.perform(get("/mis-notas").session(ana.sesion()))
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Nota de Ana")))
             .andExpect(content().string(not(containsString("Nota privada de Beto"))));
 
-        // La confirmacion de una nota ajena no existe para Ana.
-        mvc.perform(get("/noticias/" + notaDeBeto).session(ana.sesion())).andExpect(status().isNotFound());
-        // Beto si puede abrir la suya.
-        mvc.perform(get("/noticias/" + notaDeBeto).session(beto.sesion())).andExpect(status().isOk());
+        // HU-12: el detalle es publico, asi que Ana puede leer la nota de Beto como cualquier lector.
+        mvc.perform(get("/noticias/" + notaDeBeto).session(ana.sesion()))
+            .andExpect(status().isOk())
+            .andExpect(content().string(containsString("Nota privada de Beto")));
+
+        // Pero la confirmacion de la nota ajena si esta restringida al autor.
+        mvc.perform(get("/noticias/" + notaDeBeto + "/confirmacion").session(ana.sesion()))
+            .andExpect(status().isNotFound());
+        // Beto si puede abrir la confirmacion de la suya.
+        mvc.perform(get("/noticias/" + notaDeBeto + "/confirmacion").session(beto.sesion()))
+            .andExpect(status().isOk());
     }
 
     @Test

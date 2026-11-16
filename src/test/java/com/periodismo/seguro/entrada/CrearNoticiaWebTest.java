@@ -58,6 +58,12 @@ class CrearNoticiaWebTest {
         return new MockMultipartFile("imagenes", nombre, "image/png", contenido);
     }
 
+    /** HU-12: el redirect de creacion termina en /confirmacion; devuelve solo el id de la noticia. */
+    private static String idDeRedirect(String redirect) {
+        String id = redirect.replace("/noticias/", "");
+        return id.replace("/confirmacion", "");
+    }
+
     private MockHttpSession entrar() throws Exception {
         correo = "n" + UUID.randomUUID() + "@ejemplo.com";
         cuentas.registrar(new SolicitudRegistro(correo, "Ana Periodista", "Segura123"));
@@ -144,7 +150,7 @@ class CrearNoticiaWebTest {
             .andExpect(status().is3xxRedirection())
             .andReturn();
 
-        String id = resultado.getResponse().getRedirectedUrl().replace("/noticias/", "");
+        String id = idDeRedirect(resultado.getResponse().getRedirectedUrl());
         assertTrue(noticias.obtener(id).orElseThrow().imagenesIds().size() == 2);
     }
 
@@ -172,7 +178,7 @@ class CrearNoticiaWebTest {
         assertFalse(html.contains("otrodominio"));
         assertFalse(html.contains("javascript:"));
 
-        String id = destino.replace("/noticias/", "");
+        String id = idDeRedirect(destino);
         assertFalse(noticias.obtener(id).orElseThrow().cuerpo().contains("script"));
     }
 

@@ -87,14 +87,27 @@ class NoticiaController {
             errores.reject("imagenes", e.getMessage());
             return "noticia-nueva";
         }
-        return "redirect:/noticias/" + id;
+        return "redirect:/noticias/" + id + "/confirmacion";
     }
 
     /**
-     * Pagina de confirmacion: muestra lo guardado tal como lo vera el lector, con el seudonimo.
-     * Solo el autor puede abrirla; para los demas la noticia no existe (404), sin revelar nada.
+     * HU-12: detalle publico de una noticia. Lo ve cualquier lector, sin sesion.
+     * Muestra titulo, contenido, categoria, seudonimo y fechas de publicacion y edicion.
+     * Si la noticia no existe, responde 404 con una pagina amigable.
      */
     @GetMapping("/noticias/{id}")
+    String detalle(@PathVariable String id, Model model) {
+        NoticiaPublica noticia = noticias.obtener(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        model.addAttribute("noticia", noticia);
+        return "detalle-noticia";
+    }
+
+    /**
+     * HU-09: pagina de confirmacion tras guardar. Solo el autor la ve; para los demas 404.
+     * Se movio a /noticias/{id}/confirmacion para no chocar con el detalle publico de HU-12.
+     */
+    @GetMapping("/noticias/{id}/confirmacion")
     String creada(@PathVariable String id, Principal principal, Model model) {
         if (!noticias.esAutor(principal.getName(), id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -104,6 +117,7 @@ class NoticiaController {
         model.addAttribute("noticia", noticia);
         return "noticia-creada";
     }
+
 
     /** Sirve la imagen desde el almacenamiento del modulo, sin exponer rutas del disco. */
     @GetMapping("/noticias/imagenes/{imagenId}")
