@@ -12,8 +12,31 @@
 
     <section class="feed" id="feed" aria-label="Últimas noticias">
       <h2>Últimas noticias</h2>
-      <p class="nota demo" th:if="${totalNoticias == 0}">
+
+      <form class="busqueda" method="get" th:action="@{/}" role="search" aria-label="Buscar noticias">
+        <div class="campo">
+          <label for="q">Buscar</label>
+          <input id="q" name="q" type="search" placeholder="Título o palabra clave"
+                 th:value="${q}" maxlength="180">
+        </div>
+        <div class="campo">
+          <label for="categoria">Categoría</label>
+          <select id="categoria" name="categoria">
+            <option value="">Todas</option>
+            <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}"
+                    th:selected="${c.id == categoriaSeleccionada}">Categoría</option>
+          </select>
+        </div>
+        <button class="boton" type="submit">Buscar</button>
+        <a class="boton suave" th:if="${hayBusqueda}" th:href="@{/}">Limpiar</a>
+      </form>
+
+      <p class="nota demo" th:if="${totalNoticias == 0 and !hayBusqueda}">
         Todavía no hay noticias publicadas. Cuando un periodista publique, aparecerá aquí con su seudónimo.
+      </p>
+
+      <p class="nota demo" th:if="${hayBusqueda and totalNoticias == 0}">
+        No se encontraron noticias con esos criterios. Prueba con otras palabras o categoría.
       </p>
 
       <div class="tarjetas" th:if="${totalNoticias > 0}">
@@ -31,9 +54,11 @@
       </div>
 
       <nav class="paginacion" th:if="${totalPaginas > 1}" aria-label="Paginación del feed">
-        <a class="boton" th:if="${pagina > 1}" th:href="@{/(pagina=${pagina - 1},tamano=${tamano})}">Anterior</a>
+        <a class="boton" th:if="${pagina > 1}"
+           th:href="@{/(pagina=${pagina - 1},tamano=${tamano},q=${q},categoria=${categoriaSeleccionada})}">Anterior</a>
         <span class="suave" th:text="'Página ' + ${pagina} + ' de ' + ${totalPaginas}">Página 1 de 1</span>
-        <a class="boton" th:if="${pagina < totalPaginas}" th:href="@{/(pagina=${pagina + 1},tamano=${tamano})}">Siguiente</a>
+        <a class="boton" th:if="${pagina < totalPaginas}"
+           th:href="@{/(pagina=${pagina + 1},tamano=${tamano},q=${q},categoria=${categoriaSeleccionada})}">Siguiente</a>
       </nav>
     </section>
 

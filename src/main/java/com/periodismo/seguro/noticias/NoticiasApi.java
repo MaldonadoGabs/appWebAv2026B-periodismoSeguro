@@ -44,8 +44,16 @@ public interface NoticiasApi {
     /** HU-01 / HU-08: total de noticias de ese autor, para paginar "mis notas". */
     long contarDeAutor(String autorCuentaId);
 
-    /** HU-11: busqueda y filtro. */
-    List<String> buscar(String texto, String categoria);
+    /**
+     * HU-11: busqueda y filtro de noticias por texto (encabezado o palabras clave del cuerpo)
+     * y por categoria. Paginado como el feed, de mas reciente a mas antiguo.
+     * Si {@code texto} es nulo o vacio no filtra por texto; si {@code categoria} es nula o vacia
+     * no filtra por categoria. Si ambos son vacios, equivale a {@link #listar(int, int)}.
+     */
+    List<ResumenNoticia> buscar(String texto, String categoria, int pagina, int tamano);
+
+    /** HU-11: total de noticias que coinciden con la busqueda, para calcular las paginas. */
+    long contarBusqueda(String texto, String categoria);
 
     /** HU-13: solo el autor edita su noticia. */
     boolean editar(String autorCuentaId, String id, String cuerpo);

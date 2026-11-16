@@ -197,3 +197,9 @@ details.plegable > summary { font: 400 1rem/1.2 var(--titulos); letter-spacing: 
 .tarjeta .lectura { font-size: 1.02rem; margin-bottom: .6rem; }
 .tarjeta .firma { font: 600 .82rem var(--cuerpo); color: var(--suave); margin: 0; }
 .paginacion { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
+
+/* HU-11: formulario de busqueda y filtro del feed */
+.busqueda { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem; margin-bottom: 1.25rem; }
+.busqueda .campo { margin-bottom: 0; flex: 1 1 12rem; }
+.busqueda .boton { flex: 0 0 auto; }
+.boton.suave { background: var(--superficie); color: var(--suave); }

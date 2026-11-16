@@ -145,7 +145,25 @@ class NoticiasService implements NoticiasApi {
             CatalogoCategorias.nombreDe(n.getCategoria()));
     }
 
-    @Override public List<String> buscar(String texto, String categoria) { return List.of(); }
+    /** HU-11: busqueda por texto (encabezado o cuerpo) y filtro por categoria, paginada. */
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResumenNoticia> buscar(String texto, String categoria, int pagina, int tamano) {
+        String textoBusqueda = normalizarTexto(texto);
+        String categoriaBusqueda = normalizarCategoria(categoria);
+        return noticias.buscar(textoBusqueda, categoriaBusqueda, paginar(pagina, tamano))
+            .stream().map(this::resumen).toList();
+    }
+
+    /** HU-11: total de resultados de una busqueda. */
+    @Override
+    @Transactional(readOnly = true)
+    public long contarBusqueda(String texto, String categoria) {
+        String textoBusqueda = normalizarTexto(texto);
+        String categoriaBusqueda = normalizarCategoria(categoria);
+        return noticias.contarBusqueda(textoBusqueda, categoriaBusqueda);
+    }
+
     @Override public boolean editar(String autorCuentaId, String id, String cuerpo) { return false; }
     @Override public boolean eliminar(String autorCuentaId, String id, boolean confirmado) { return false; }
 
@@ -164,5 +182,19 @@ class NoticiasService implements NoticiasApi {
         if (solicitud.imagenes().size() > MAXIMO_IMAGENES) {
             throw new IllegalArgumentException("Se admiten hasta " + MAXIMO_IMAGENES + " imagenes");
         }
+    }
+
+    /** HU-11: texto vacio o en blanco significa "sin filtro de texto". */
+    private static String normalizarTexto(String texto) {
+        return texto == null || texto.isBlank() ? null : texto.trim();
+    }
+
+    /** HU-11: categoria vacia o que no existe en el catalogo significa "sin filtro de categoria". */
+    private static String normalizarCategoria(String categoria) {
+        if (categoria == null || categoria.isBlank()) {
+            return null;
+        }
+        String slug = categoria.trim();
+        return CatalogoCategorias.buscar(slug).isPresent() ? slug : null;
     }
 }
