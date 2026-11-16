@@ -2,6 +2,7 @@ package com.periodismo.seguro.entrada;
 
 import com.periodismo.seguro.cuentas.CuentasApi;
 import com.periodismo.seguro.noticias.ArchivoImagen;
+import com.periodismo.seguro.noticias.CategoriaNoticia;
 import com.periodismo.seguro.noticias.ImagenAdjunta;
 import com.periodismo.seguro.noticias.NoticiaPublica;
 import com.periodismo.seguro.noticias.NoticiasApi;
@@ -118,6 +119,73 @@ class NoticiaController {
         return "noticia-creada";
     }
 
+    /**
+     * HU-13: formulario de edicion. Carga los datos actuales de la noticia.
+     * Solo el autor puede editarla; si no es el autor o la noticia no existe, 404.
+     */
+    @GetMapping("/noticias/{id}/editar")
+    String editarForm(@PathVariable String id, Principal principal, Model model) {
+        if (!noticias.esAutor(principal.getName(), id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        NoticiaPublica noticia = noticias.obtener(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        NoticiaForm form = new NoticiaForm();
+        form.setTitulo(noticia.titulo());
+        form.setSubtitulo(noticia.subtitulo());
+        form.setCuerpo(noticia.cuerpo());
+        // La categoria llega como nombre visible; hay que buscar el id del catalogo.
+        String categoriaId = "";
+        if (noticia.categoria() != null) {
+            categoriaId = noticias.categorias().stream()
+                .filter(c -> c.nombre().equals(noticia.categoria()))
+                .map(CategoriaNoticia::id)
+                .findFirst().orElse("");
+        }
+        form.setCategoria(categoriaId);
+        model.addAttribute("form", form);
+        model.addAttribute("noticiaId", id);
+        model.addAttribute("categorias", noticias.categorias());
+        return "noticia-editar";
+    }
+
+    /**
+     * HU-13: guardar la edicion. Aplica las mismas validaciones que al crear.
+     * Solo el autor puede editarla; registra la fecha de modificacion.
+     */
+    @PostMapping("/noticias/{id}/editar")
+    String editarGuardar(@PathVariable String id,
+                         @Valid @ModelAttribute("form") NoticiaForm form, BindingResult errores,
+                         Principal principal, Model model) {
+        model.addAttribute("noticiaId", id);
+        model.addAttribute("categorias", noticias.categorias());
+        String cuerpo = sanitizador.limpiar(form.getCuerpo());
+        form.setCuerpo(cuerpo);
+
+        if (!errores.hasFieldErrors("cuerpo") && cuerpo.isBlank()) {
+            errores.rejectValue("cuerpo", "vacio", "Escribe el texto de la noticia");
+        }
+        if (!errores.hasFieldErrors("categoria") && !esCategoriaValida(form.getCategoria())) {
+            errores.rejectValue("categoria", "no.valida", "Elige una categoría de la lista");
+        }
+        if (errores.hasErrors()) {
+            return "noticia-editar";
+        }
+        boolean actualizado;
+        try {
+            actualizado = noticias.editar(principal.getName(), id,
+                new SolicitudNoticia(form.getTitulo(), form.getSubtitulo(), cuerpo, form.getCategoria(),
+                    List.of()));
+        } catch (IllegalArgumentException e) {
+            errores.reject("imagenes", e.getMessage());
+            return "noticia-editar";
+        }
+        // HU-13: si la noticia no existe o no es del autor, no se revela su existencia (404).
+        if (!actualizado) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return "redirect:/noticias/" + id + "/confirmacion";
+    }
 
     /** Sirve la imagen desde el almacenamiento del modulo, sin exponer rutas del disco. */
     @GetMapping("/noticias/imagenes/{imagenId}")

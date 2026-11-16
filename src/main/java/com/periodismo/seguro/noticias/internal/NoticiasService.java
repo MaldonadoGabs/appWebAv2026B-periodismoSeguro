@@ -166,7 +166,28 @@ class NoticiasService implements NoticiasApi {
         return noticias.contarBusqueda(textoBusqueda, categoriaBusqueda);
     }
 
-    @Override public boolean editar(String autorCuentaId, String id, String cuerpo) { return false; }
+    /** HU-13: el autor actualiza su noticia. Registra la fecha de modificacion. */
+    @Override
+    @Transactional
+    public boolean editar(String autorCuentaId, String id, SolicitudNoticia solicitud) {
+        if (autorCuentaId == null || id == null || solicitud == null) {
+            return false;
+        }
+        Noticia noticia = noticias.findById(id).orElse(null);
+        if (noticia == null || !autorCuentaId.equals(noticia.getAutorCuentaId())) {
+            return false;
+        }
+        validar(solicitud);
+        noticia.setTitulo(solicitud.titulo().trim());
+        noticia.setSubtitulo(solicitud.subtitulo().trim());
+        noticia.setCuerpo(solicitud.cuerpo());
+        noticia.setCategoria(solicitud.categoria());
+        // HU-26: hora redondeada a 1 h.
+        noticia.setModificadaEn(reloj.instant().truncatedTo(ChronoUnit.HOURS));
+        noticias.save(noticia);
+        return true;
+    }
+
     @Override public boolean eliminar(String autorCuentaId, String id, boolean confirmado) { return false; }
 
     @Override

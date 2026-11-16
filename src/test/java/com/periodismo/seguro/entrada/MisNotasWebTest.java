@@ -80,11 +80,13 @@ class MisNotasWebTest {
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("Nota privada de Beto")));
 
-        // Pero la confirmacion de la nota ajena si esta restringida al autor.
+        // Pero la confirmacion y la edicion de la nota ajena si estan restringidas al autor (HU-13).
         mvc.perform(get("/noticias/" + notaDeBeto + "/confirmacion").session(ana.sesion()))
             .andExpect(status().isNotFound());
-        // Beto si puede abrir la confirmacion de la suya.
-        mvc.perform(get("/noticias/" + notaDeBeto + "/confirmacion").session(beto.sesion()))
+        mvc.perform(get("/noticias/" + notaDeBeto + "/editar").session(ana.sesion()))
+            .andExpect(status().isNotFound());
+        // Beto si puede editar la suya.
+        mvc.perform(get("/noticias/" + notaDeBeto + "/editar").session(beto.sesion()))
             .andExpect(status().isOk());
     }
 

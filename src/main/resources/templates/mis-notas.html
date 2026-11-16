@@ -19,7 +19,8 @@
         <p class="firma"><span th:text="${n.autorSeudonimo}">Seudónimo</span>
           <span th:if="${n.categoria != null}" th:text="' · ' + ${n.categoria}"> · categoría</span>
           <span th:text="' · ' + ${n.publicadaEn}"> · fecha</span></p>
-        <p><a class="boton" th:href="@{/noticias/{id}(id=${n.id})}">Ver nota</a></p>
+        <p><a class="boton" th:href="@{/noticias/{id}(id=${n.id})}">Ver nota</a>
+           <a class="boton" th:href="@{/noticias/{id}/editar(id=${n.id})}">Editar</a></p>
       </article>
     </div>
 

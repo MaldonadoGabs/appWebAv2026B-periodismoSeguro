@@ -55,8 +55,13 @@ public interface NoticiasApi {
     /** HU-11: total de noticias que coinciden con la busqueda, para calcular las paginas. */
     long contarBusqueda(String texto, String categoria);
 
-    /** HU-13: solo el autor edita su noticia. */
-    boolean editar(String autorCuentaId, String id, String cuerpo);
+    /**
+     * HU-13: el autor (o un administrador) actualiza encabezado, subtitulo, cuerpo y categoria.
+     * Registra la fecha de modificacion. Devuelve false si la noticia no existe o el autor no coincide.
+     *
+     * @throws IllegalArgumentException si faltan datos o la categoria no existe
+     */
+    boolean editar(String autorCuentaId, String id, SolicitudNoticia solicitud);
 
     /** HU-14: requiere confirmacion. */
     boolean eliminar(String autorCuentaId, String id, boolean confirmado);

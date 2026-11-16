@@ -208,4 +208,9 @@ details.plegable > summary { font: 400 1rem/1.2 var(--titulos); letter-spacing: 
 .enlace-tarjeta { text-decoration: none; color: inherit; display: block; }
 .enlace-tarjeta:hover { background: transparent; color: inherit; }
 .enlace-tarjeta img { width: 100%; height: 11rem; object-fit: cover; border: 2px solid var(--linea); background: var(--papel); }
+
+/* HU-13: errores de validacion junto al campo y clase oculto */
+.error-mensaje { margin-top: .35rem; font-size: .875rem; font-weight: 600; color: var(--peligro); }
+.oculto { display: none; }
+.acciones { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1rem; }
 input.error, textarea.error, select.error { border-color: var(--peligro); }
