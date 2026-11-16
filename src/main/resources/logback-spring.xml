@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  HU-26: configuracion de logging que nunca incluye la IP del cliente ni datos sensibles.
+  El patron solo muestra fecha, nivel, hilo y mensaje: sin IP, sin contexto HTTP que pueda
+  arrastrar el correo o el nombre del periodista.
+  El convertidor %msgS enmascara correos electronicos y direcciones IP en cualquier mensaje.
+-->
+<configuration>
+    <conversionRule conversionWord="msgS"
+        converterClass="com.periodismo.seguro.LogSanitizador"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msgS%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
