@@ -1,9 +1,9 @@
 package com.periodismo.seguro.chat;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
-/** Sala de chat en tiempo real: entrada autorizada y difusion de mensajes a los participantes. */
+/** Sala de chat en tiempo real: entrada autorizada, mensajes y participantes conectados. */
 public interface ChatApi {
     /**
      * Valida la sesion HTTP. Devuelve el id de cuenta autorizado a entrar, o vacio si la sesion no es valida.
@@ -11,12 +11,15 @@ public interface ChatApi {
      */
     Optional<String> conectar(String sesionId);
 
-    /** Registra una conexion de la sala junto con su receptor de mensajes. */
-    void abrirConexion(String conexionId, Consumer<String> receptor);
+    /** Registra una conexion de la sala con su cuenta y sus callbacks. */
+    void abrirConexion(String conexionId, String cuentaId, SuscripcionChat suscripcion);
 
     /** Retira una conexion de la sala. */
     void cerrarConexion(String conexionId);
 
     /** Difunde el texto a todas las conexiones abiertas. */
     void enviar(String texto);
+
+    /** Seudonimos de quienes estan conectados ahora, sin duplicados y en orden estable. */
+    List<String> usuariosConectados();
 }

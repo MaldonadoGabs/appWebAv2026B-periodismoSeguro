@@ -2,40 +2,51 @@ package com.periodismo.seguro.entrada;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.periodismo.seguro.chat.ChatApi;
+import com.periodismo.seguro.chat.SuscripcionChat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-/** El adaptador registra conexiones en ChatApi y entrega los mensajes a la sesion WebSocket. */
+/** El adaptador registra conexiones en ChatApi y envia mensajes y conectados como JSON. */
 class ChatWebSocketHandlerTest {
     private final ChatApi chat = mock(ChatApi.class);
-    private final ChatWebSocketHandler handler = new ChatWebSocketHandler(chat);
+    private final ObjectMapper json = new ObjectMapper();
+    private final ChatWebSocketHandler handler = new ChatWebSocketHandler(chat, json);
 
     @Test
-    void unaConexionAutorizadaSeRegistraConSuReceptor() throws Exception {
+    void unaConexionAutorizadaRecibeMensajesYConectados() throws Exception {
         WebSocketSession sesion = sesion(true);
 
         handler.afterConnectionEstablished(sesion);
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Consumer<String>> receptor = ArgumentCaptor.forClass(Consumer.class);
-        verify(chat).abrirConexion(eq("ws-1"), receptor.capture());
-        receptor.getValue().accept("hola");
-        ArgumentCaptor<TextMessage> mensaje = ArgumentCaptor.forClass(TextMessage.class);
-        verify(sesion).sendMessage(mensaje.capture());
-        assertEquals("hola", mensaje.getValue().getPayload());
+        ArgumentCaptor<SuscripcionChat> suscripcion = ArgumentCaptor.forClass(SuscripcionChat.class);
+        verify(chat).abrirConexion(eq("ws-1"), eq("cuenta-1"), suscripcion.capture());
+        suscripcion.getValue().mensajes().accept("hola");
+        suscripcion.getValue().conectados().accept(List.of("Ana_Rojo"));
+
+        ArgumentCaptor<TextMessage> enviados = ArgumentCaptor.forClass(TextMessage.class);
+        verify(sesion, times(2)).sendMessage(enviados.capture());
+        Map<?, ?> mensaje = json.readValue(enviados.getAllValues().get(0).getPayload(), Map.class);
+        assertEquals("mensaje", mensaje.get("tipo"));
+        assertEquals("hola", mensaje.get("texto"));
+        Map<?, ?> conectados = json.readValue(enviados.getAllValues().get(1).getPayload(), Map.class);
+        assertEquals("conectados", conectados.get("tipo"));
+        assertEquals(List.of("Ana_Rojo"), conectados.get("usuarios"));
     }
 
     @Test
@@ -45,7 +56,7 @@ class ChatWebSocketHandlerTest {
         handler.afterConnectionEstablished(sesion);
 
         verify(sesion).close(any(CloseStatus.class));
-        verify(chat, never()).abrirConexion(any(), any());
+        verify(chat, never()).abrirConexion(anyString(), anyString(), any());
     }
 
     @Test

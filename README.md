@@ -45,7 +45,7 @@ Páginas disponibles:
 | `/restablecer?token=...` | Definir una nueva contraseña con el enlace de recuperación (un solo uso, 30 minutos) |
 | `/inicio` | Panel del periodista (rol PERIODISTA; un LECTOR o ADMINISTRADOR recibe 403) |
 | `/mis-notas` | Lista paginada de las noticias del periodista autenticado (rol PERIODISTA) |
-| `/chat` | Chat en tiempo real entre periodistas, sobre el WebSocket `/ws` (rol PERIODISTA) |
+| `/chat` | Chat en tiempo real entre periodistas sobre el WebSocket `/ws`, con lista de conectados por seudónimo (rol PERIODISTA) |
 | `/noticias/nueva` | Editor para redactar una noticia, con categoría obligatoria (rol PERIODISTA) |
 | `/noticias/{id}` | Confirmación de la noticia guardada; solo la ve su autor, para los demás 404 (rol PERIODISTA) |
 | `/noticias/imagenes/{id}` | Imagen de una noticia (pública, para el feed) |
@@ -108,6 +108,7 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `CategoriaNoticiaWebTest` | HU-01: el formulario ofrece el catálogo; sin categoría o con una inventada no se guarda; con una válida se muestra en la confirmación y en el feed |
 | `NoticiasAutorTest` | HU-01/HU-08: catálogo de 9 categorías, categoría guardada y validada en el servicio, "mis notas" solo del autor, `esAutor` |
 | `ServicioUsuariosRolTest` | HU-08: el usuario de Spring Security recibe el rol guardado en la cuenta (PERIODISTA, LECTOR, ADMINISTRADOR) |
+| `ChatConectadosWebTest` | HU-20: la sala muestra el panel de conectados con su contador |
 | `AppTests` | La aplicación completa arranca |
 
 HU-09 (crear noticias) y HU-10 (feed público) ya están implementadas. Las pruebas del resto del CRUD se agregan con las historias HU-11 a HU-14.

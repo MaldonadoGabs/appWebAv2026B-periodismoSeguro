@@ -25,7 +25,7 @@ public class ReglasArquitecturaTest {
         Map.entry("autenticacion", List.of("cuentas")),
         Map.entry("seguridad", List.of()),
         Map.entry("noticias", List.of()),
-        Map.entry("chat", List.of("autenticacion")),
+        Map.entry("chat", List.of("autenticacion", "cuentas")),
         Map.entry("notificaciones", List.of("noticias"))
     );
 

@@ -1,8 +1,11 @@
 package com.periodismo.seguro.entrada;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.periodismo.seguro.chat.ChatApi;
 import com.periodismo.seguro.chat.ChatWebSocketApi;
+import com.periodismo.seguro.chat.SuscripcionChat;
 import java.io.IOException;
+import java.util.Map;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -16,25 +19,35 @@ class ChatWebSocketHandler extends TextWebSocketHandler implements ChatWebSocket
     static final String CUENTA_ID = ChatWebSocketApi.CUENTA_ID;
 
     private final ChatApi chat;
+    private final ObjectMapper json;
 
-    ChatWebSocketHandler(ChatApi chat) {
+    ChatWebSocketHandler(ChatApi chat, ObjectMapper json) {
         this.chat = chat;
+        this.json = json;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession sesion) throws Exception {
-        if (sesion.getAttributes().get(CUENTA_ID) == null) {
+        if (!(sesion.getAttributes().get(CUENTA_ID) instanceof String cuentaId)) {
             sesion.close(CloseStatus.POLICY_VIOLATION.withReason("Sin autorizacion"));
             return;
         }
         String conexionId = sesion.getId();
-        chat.abrirConexion(conexionId, texto -> {
-            try {
-                sesion.sendMessage(new TextMessage(texto));
-            } catch (IOException e) {
-                chat.cerrarConexion(conexionId);
-            }
-        });
+        SuscripcionChat suscripcion = new SuscripcionChat(
+            texto -> enviarJson(sesion, conexionId, Map.of("tipo", "mensaje", "texto", texto)),
+            usuarios -> enviarJson(sesion, conexionId, Map.of("tipo", "conectados", "usuarios", usuarios)));
+        chat.abrirConexion(conexionId, cuentaId, suscripcion);
+    }
+
+    private void enviarJson(WebSocketSession sesion, String conexionId, Object evento) {
+        if (!sesion.isOpen()) {
+            return;
+        }
+        try {
+            sesion.sendMessage(new TextMessage(json.writeValueAsString(evento)));
+        } catch (IOException e) {
+            chat.cerrarConexion(conexionId);
+        }
     }
 
     @Override
