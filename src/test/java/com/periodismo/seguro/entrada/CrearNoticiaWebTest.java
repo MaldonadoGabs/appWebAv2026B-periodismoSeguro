@@ -200,7 +200,7 @@ class CrearNoticiaWebTest {
     @Test
     void laImagenSeSirveConSuTipoSinCacheYUnaNoticiaInexistenteDevuelve404() throws Exception {
         String id = noticias.crear("cuenta-web", "Condor Silente 482",
-            new SolicitudNoticia("Titulo", "Subtitulo", "<p>Texto</p>",
+            new SolicitudNoticia("Titulo", "Subtitulo", "<p>Texto</p>", "otros",
                 List.of(new ImagenAdjunta("image/png", png()))));
         String imagenId = noticias.obtener(id).orElseThrow().imagenesIds().get(0);
         MockHttpSession sesion = entrar();

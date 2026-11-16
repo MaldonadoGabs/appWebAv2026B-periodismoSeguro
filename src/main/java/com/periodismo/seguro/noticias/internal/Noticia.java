@@ -34,19 +34,14 @@ public class Noticia {
     @Column(nullable = false, length = 50000)
     private String cuerpo;
 
-    /** HU-01: id (slug) de la categoria del catalogo. Nulo solo en noticias anteriores a HU-01. */
-    @Column
+    /** HU-01: id (slug) de la categoria de la tabla de catalogo. Toda noticia tiene una. */
+    @Column(nullable = false)
     private String categoria;
 
     @Column(nullable = false)
     private Instant creadaEn;
 
     protected Noticia() {}
-
-    public Noticia(String id, String autorCuentaId, String autorSeudonimo, String titulo, String subtitulo,
-                   String cuerpo, Instant creadaEn) {
-        this(id, autorCuentaId, autorSeudonimo, titulo, subtitulo, cuerpo, null, creadaEn);
-    }
 
     public Noticia(String id, String autorCuentaId, String autorSeudonimo, String titulo, String subtitulo,
                    String cuerpo, String categoria, Instant creadaEn) {

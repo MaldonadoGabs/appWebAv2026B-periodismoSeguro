@@ -21,27 +21,28 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** HU-09: crear noticias e imagenes. HU-10: feed paginado. HU-01: categoria y "mis notas". El resto del CRUD sigue pendiente. */
+/** HU-09: crear noticias e imagenes. HU-10: feed paginado. HU-01: categoria obligatoria leida de la tabla. El resto del CRUD sigue pendiente. */
 @Service
 class NoticiasService implements NoticiasApi {
     static final int MAXIMO_IMAGENES = 5;
     static final int TAMANO_MAXIMO_PAGINA = 50;
-    /** Solo para noticias creadas sin categoria (llamadas anteriores a HU-01): el evento no inventa una clasificacion. */
-    private static final String SIN_CATEGORIA = "sin-categoria";
     /** La hora ya viene truncada a 1 h (HU-26); se muestra en UTC para no inventar la zona del lector. */
     private static final DateTimeFormatter FECHA =
         DateTimeFormatter.ofPattern("dd/MM/yyyy '·' HH:mm 'UTC'").withZone(ZoneOffset.UTC);
 
     private final NoticiaRepository noticias;
     private final ImagenNoticiaRepository imagenesNoticia;
+    private final CatalogoCategorias catalogo;
     private final AlmacenImagenes almacen;
     private final ApplicationEventPublisher eventos;
     private final Clock reloj;
 
-    NoticiasService(NoticiaRepository noticias, ImagenNoticiaRepository imagenesNoticia, AlmacenImagenes almacen,
+    NoticiasService(NoticiaRepository noticias, ImagenNoticiaRepository imagenesNoticia,
+                    CatalogoCategorias catalogo, AlmacenImagenes almacen,
                     ApplicationEventPublisher eventos, Clock reloj) {
         this.noticias = noticias;
         this.imagenesNoticia = imagenesNoticia;
+        this.catalogo = catalogo;
         this.almacen = almacen;
         this.eventos = eventos;
         this.reloj = reloj;
@@ -52,11 +53,12 @@ class NoticiasService implements NoticiasApi {
     public String crear(String autorCuentaId, String autorSeudonimo, SolicitudNoticia solicitud) {
         validar(solicitud);
         String id = UUID.randomUUID().toString();
+        String categoria = solicitud.categoria().trim();
         // HU-26: solo se conserva la hora, nunca la marca de tiempo exacta.
         Instant creadaEn = reloj.instant().truncatedTo(ChronoUnit.HOURS);
         noticias.save(new Noticia(id, autorCuentaId, autorSeudonimo,
             solicitud.titulo().trim(), solicitud.subtitulo().trim(), solicitud.cuerpo(),
-            solicitud.categoria(), creadaEn));
+            categoria, creadaEn));
 
         int orden = 0;
         for (ImagenAdjunta imagen : solicitud.imagenes()) {
@@ -64,7 +66,6 @@ class NoticiasService implements NoticiasApi {
             imagenesNoticia.save(new ImagenNoticia(UUID.randomUUID().toString(), id, nombreGuardado,
                 imagen.tipoContenido(), orden++));
         }
-        String categoria = solicitud.categoria() == null ? SIN_CATEGORIA : solicitud.categoria();
         eventos.publishEvent(new NoticiaCreada(id, categoria));
         return id;
     }
@@ -89,7 +90,7 @@ class NoticiasService implements NoticiasApi {
         return noticias.findById(id).map(n -> new NoticiaPublica(
             n.getId(), n.getTitulo(), n.getSubtitulo(), n.getCuerpo(), n.getAutorSeudonimo(),
             imagenesNoticia.findByNoticiaIdOrderByOrdenAsc(id).stream().map(ImagenNoticia::getId).toList(),
-            CatalogoCategorias.nombreDe(n.getCategoria())));
+            catalogo.nombreDe(n.getCategoria())));
     }
 
     @Override
@@ -142,7 +143,7 @@ class NoticiasService implements NoticiasApi {
             .orElse(null);
         return new ResumenNoticia(n.getId(), n.getTitulo(), n.getSubtitulo(), Extracto.de(n.getCuerpo()),
             n.getAutorSeudonimo(), FECHA.format(n.getCreadaEn()), imagenId,
-            CatalogoCategorias.nombreDe(n.getCategoria()));
+            catalogo.nombreDe(n.getCategoria()));
     }
 
     @Override public List<String> buscar(String texto, String categoria) { return List.of(); }
@@ -150,15 +151,16 @@ class NoticiasService implements NoticiasApi {
     @Override public boolean eliminar(String autorCuentaId, String id, boolean confirmado) { return false; }
 
     @Override
-    public List<CategoriaNoticia> categorias() { return CatalogoCategorias.TODAS; }
+    public List<CategoriaNoticia> categorias() { return catalogo.todas(); }
 
-    private static void validar(SolicitudNoticia solicitud) {
+    private void validar(SolicitudNoticia solicitud) {
         if (solicitud == null || solicitud.titulo() == null || solicitud.titulo().isBlank()
             || solicitud.subtitulo() == null || solicitud.subtitulo().isBlank()
             || solicitud.cuerpo() == null || solicitud.cuerpo().isBlank()) {
             throw new IllegalArgumentException("Faltan el encabezado, el subtitulo o el texto");
         }
-        if (solicitud.categoria() != null && CatalogoCategorias.buscar(solicitud.categoria()).isEmpty()) {
+        if (solicitud.categoria() == null || solicitud.categoria().isBlank()
+            || !catalogo.existe(solicitud.categoria().trim())) {
             throw new IllegalArgumentException("La categoria no existe");
         }
         if (solicitud.imagenes().size() > MAXIMO_IMAGENES) {

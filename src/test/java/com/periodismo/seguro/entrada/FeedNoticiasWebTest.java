@@ -56,7 +56,7 @@ class FeedNoticiasWebTest {
     private String crear(String titulo, List<ImagenAdjunta> imagenes) {
         return noticias.crear("cuenta-" + UUID.randomUUID(), "Condor Silente 482",
             new SolicitudNoticia(titulo, "Subtitulo de " + titulo,
-                "<p>Texto <strong>importante</strong> de " + titulo + "</p>", imagenes));
+                "<p>Texto <strong>importante</strong> de " + titulo + "</p>", "otros", imagenes));
     }
 
     private static void borrarImagenesDelDisco() throws IOException {
