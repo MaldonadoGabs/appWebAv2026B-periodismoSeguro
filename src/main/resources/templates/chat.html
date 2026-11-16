@@ -5,8 +5,13 @@
   <header th:replace="~{fragments/base :: cabecera}"></header>
   <main class="pagina">
     <h1><span>Chat</span> de periodistas</h1>
-    <p class="suave">Solo para periodistas con sesión iniciada. Los mensajes no muestran autor.</p>
+    <p class="suave">Solo para periodistas con sesión iniciada. Los mensajes no muestran autor; la lista de conectados usa seudónimos.</p>
     <p>WebSocket: <span id="estado">desconectado</span></p>
+
+    <section>
+      <h2>Conectados (<span id="total-conectados">0</span>)</h2>
+      <ul id="conectados"><li class="suave">Sin conexión</li></ul>
+    </section>
 
     <form id="f">
       <div class="campo">
