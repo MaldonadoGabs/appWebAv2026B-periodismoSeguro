@@ -3,34 +3,37 @@ package com.periodismo.seguro.noticias.internal;
 import com.periodismo.seguro.noticias.CategoriaNoticia;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
- * HU-16 / HU-01: catalogo cerrado de categorias. Es una lista fija en codigo (no una tabla) porque
- * cambia poco y asi no hace falta carga inicial ni migraciones. Los ids son slugs y son los que se guardan.
+ * HU-01: catalogo leido de la tabla categorias_noticias, cargada por data.sql.
+ * No hay lista fija en codigo: para dar de alta o cambiar categorias se usa el script.
  */
-final class CatalogoCategorias {
-    static final List<CategoriaNoticia> TODAS = List.of(
-        new CategoriaNoticia("politica", "Política"),
-        new CategoriaNoticia("economia", "Economía"),
-        new CategoriaNoticia("derechos-humanos", "Derechos Humanos"),
-        new CategoriaNoticia("sociedad", "Sociedad"),
-        new CategoriaNoticia("seguridad-justicia", "Seguridad y Justicia"),
-        new CategoriaNoticia("medio-ambiente", "Medio Ambiente"),
-        new CategoriaNoticia("cultura", "Cultura"),
-        new CategoriaNoticia("internacional", "Internacional"),
-        new CategoriaNoticia("otros", "Otros"));
+@Component
+class CatalogoCategorias {
+    private final CategoriaNoticiaRepository categorias;
 
-    private CatalogoCategorias() {}
+    CatalogoCategorias(CategoriaNoticiaRepository categorias) { this.categorias = categorias; }
 
-    static Optional<CategoriaNoticia> buscar(String id) {
+    List<CategoriaNoticia> todas() {
+        return categorias.findAllByOrderByOrdenAsc().stream()
+            .map(c -> new CategoriaNoticia(c.getId(), c.getNombre()))
+            .toList();
+    }
+
+    boolean existe(String id) {
+        return id != null && categorias.existsById(id);
+    }
+
+    Optional<CategoriaNoticia> buscar(String id) {
         if (id == null) {
             return Optional.empty();
         }
-        return TODAS.stream().filter(c -> c.id().equals(id)).findFirst();
+        return categorias.findById(id).map(c -> new CategoriaNoticia(c.getId(), c.getNombre()));
     }
 
-    /** Nombre visible de una categoria guardada, o nulo si la noticia no tiene categoria. */
-    static String nombreDe(String id) {
+    /** Nombre visible de una categoria guardada en la tabla. */
+    String nombreDe(String id) {
         return buscar(id).map(CategoriaNoticia::nombre).orElse(null);
     }
 }

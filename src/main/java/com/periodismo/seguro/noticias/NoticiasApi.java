@@ -12,6 +12,7 @@ public interface NoticiasApi {
     /**
      * HU-09: guarda la noticia con encabezado, subtitulo, texto e imagenes, y devuelve su id.
      * Quien llama (la capa de entrada) ya valido la sesion, resolvio el seudonimo y limpio el HTML.
+     * HU-01: toda noticia se guarda con una categoria existente en la tabla del catalogo.
      *
      * @throws IllegalArgumentException si faltan datos, la categoria no existe o una imagen no es valida
      */
@@ -53,6 +54,6 @@ public interface NoticiasApi {
     /** HU-14: requiere confirmacion. */
     boolean eliminar(String autorCuentaId, String id, boolean confirmado);
 
-    /** HU-16: catalogo de categorias, en el orden en que se muestran. */
+    /** HU-01: categorias de la tabla de catalogo, en el orden en que se muestran. */
     List<CategoriaNoticia> categorias();
 }

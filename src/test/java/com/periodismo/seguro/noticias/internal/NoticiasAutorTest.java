@@ -2,7 +2,6 @@ package com.periodismo.seguro.noticias.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,10 +55,16 @@ class NoticiasAutorTest {
     }
 
     @Test
-    void unaNoticiaSinCategoriaDeLasLlamadasAnterioresSigueSiendoValida() {
-        String id = api.crear("autor-" + UUID.randomUUID(), "Condor Silente 482",
-            new SolicitudNoticia("Sin categoria", "Subtitulo", "<p>Texto</p>", List.of()));
-        assertNull(api.obtener(id).orElseThrow().categoria());
+    void unaNoticiaSinCategoriaSeRechaza() {
+        SolicitudNoticia sinCategoria = new SolicitudNoticia(
+            "Sin categoria", "Subtitulo", "<p>Texto</p>", null, List.of());
+        SolicitudNoticia categoriaVacia = new SolicitudNoticia(
+            "Categoria vacia", "Subtitulo", "<p>Texto</p>", "   ", List.of());
+
+        assertThrows(IllegalArgumentException.class, () ->
+            api.crear("autor-" + UUID.randomUUID(), "Condor Silente 482", sinCategoria));
+        assertThrows(IllegalArgumentException.class, () ->
+            api.crear("autor-" + UUID.randomUUID(), "Condor Silente 482", categoriaVacia));
     }
 
     @Test

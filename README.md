@@ -46,7 +46,7 @@ Páginas disponibles:
 | `/inicio` | Panel del periodista (rol PERIODISTA; un LECTOR o ADMINISTRADOR recibe 403) |
 | `/mis-notas` | Lista paginada de las noticias del periodista autenticado (rol PERIODISTA) |
 | `/chat` | Chat en tiempo real entre periodistas, sobre el WebSocket `/ws` (rol PERIODISTA) |
-| `/noticias/nueva` | Editor para redactar una noticia, con categoría obligatoria (rol PERIODISTA) |
+| `/noticias/nueva` | Editor para redactar una noticia, con categoría obligatoria de la tabla del catálogo (rol PERIODISTA) |
 | `/noticias/{id}` | Confirmación de la noticia guardada; solo la ve su autor, para los demás 404 (rol PERIODISTA) |
 | `/noticias/imagenes/{id}` | Imagen de una noticia (pública, para el feed) |
 | `/actuator/health` | Estado de la aplicación (`{"status":"UP"}`) |
@@ -101,16 +101,17 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `EnvioRecuperacionResendTest` | El correo de recuperacion se envia por la API de Resend (simulada), sin registrar el correo ni el token en logs, y la consola es el proveedor por defecto |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos, el feed y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
-| `CrearNoticiaTest` | HU-09: se guardan encabezado, subtítulo, texto, seudónimo y hora redondeada a 1 h; las imágenes acaban en disco con nombre UUID y sin metadatos; se rechazan archivos que no son imagen, formatos no permitidos y más de 5 imágenes; se publica `NoticiaCreada` |
+| `CrearNoticiaTest` | HU-09: se guardan encabezado, subtítulo, texto, seudónimo, categoría y hora redondeada a 1 h; las imágenes acaban en disco con nombre UUID y sin metadatos; se rechazan archivos que no son imagen, formatos no permitidos y más de 5 imágenes; se publica `NoticiaCreada` |
 | `CrearNoticiaWebTest` | HU-09: ruta protegida, CSRF, varias imágenes en un envío, HTML peligroso eliminado, errores junto al campo, recursos solo propios, imagen servida con `no-store` y 404 para una noticia inexistente |
 | `RolesWebTest` | HU-08: el periodista abre panel, mis notas, escritura y chat; sin sesión redirige al login; LECTOR y ADMINISTRADOR reciben 403 en rutas de periodista; el registro no permite elegir rol; el lector ve el feed sin enlaces de periodista |
 | `MisNotasWebTest` | HU-01/HU-08: el periodista ve sus notas, nunca las de otro; la nota ajena da 404; estado vacío y paginación normalizada |
-| `CategoriaNoticiaWebTest` | HU-01: el formulario ofrece el catálogo; sin categoría o con una inventada no se guarda; con una válida se muestra en la confirmación y en el feed |
-| `NoticiasAutorTest` | HU-01/HU-08: catálogo de 9 categorías, categoría guardada y validada en el servicio, "mis notas" solo del autor, `esAutor` |
+| `CategoriaNoticiaWebTest` | HU-01: el formulario ofrece el catálogo de la tabla; sin categoría o con una inventada no se guarda; con una válida se muestra en la confirmación y en el feed |
+| `NoticiasAutorTest` | HU-01/HU-08: catálogo de 9 categorías desde la tabla, categoría guardada y validada en el servicio, nota sin categoría rechazada, "mis notas" solo del autor, `esAutor` |
+| `CategoriaTablaTest` | HU-01: tabla propia cargada por script sin duplicados, la API lee el catálogo de la tabla (no de una lista fija) y toda nota se guarda con una categoría válida |
 | `ServicioUsuariosRolTest` | HU-08: el usuario de Spring Security recibe el rol guardado en la cuenta (PERIODISTA, LECTOR, ADMINISTRADOR) |
 | `AppTests` | La aplicación completa arranca |
 
-HU-09 (crear noticias) y HU-10 (feed público) ya están implementadas. Las pruebas del resto del CRUD se agregan con las historias HU-11 a HU-14.
+La clasificación por categorías (HU-01), HU-09 (crear noticias) y HU-10 (feed público) ya están implementadas. Las pruebas del resto del CRUD se agregan con las historias HU-11 a HU-14.
 
 ## Editor de noticias (HU-09)
 
@@ -128,6 +129,12 @@ Desde `/noticias/nueva` el periodista redacta y modifica su nota antes de guarda
 - Editar noticias ya guardadas corresponde a otra historia; aquí solo se redacta y se modifica mientras se crea.
 - Pendiente para HU-25: al activar la CSP habrá que permitir `blob:` en `img-src` para las miniaturas locales del editor.
 - Desde HU-10, `/noticias/imagenes/{id}` es pública para que el feed pueda mostrar las fotos; crear noticias sigue exigiendo sesión.
+
+## Categorías de noticias (HU-01)
+
+El catálogo vive en su **tabla propia** `categorias_noticias` (`id` slug, `nombre` y `orden`), dentro del módulo `noticias`. Se carga al arrancar con `src/main/resources/data.sql`: 9 categorías (Política, Economía, Derechos Humanos, Sociedad, Seguridad y Justicia, Medio Ambiente, Cultura, Internacional y Otros) insertadas de forma **idempotente**, tanto en H2 como en PostgreSQL. El mismo script clasifica como `otros` las noticias antiguas que no tenían categoría, para que ninguna quede sin clasificar.
+
+Cada nota guarda el slug de su categoría en una columna obligatoria. El formulario exige una categoría de la tabla y el servicio la valida contra ella; no hay lista fija en el código. Para dar de alta o cambiar categorías se edita el script, no una constante Java. `spring.sql.init.mode=always` y `spring.jpa.defer-datasource-initialization=true` garantizan que el script se ejecute después de que Hibernate cree o actualice el esquema.
 
 ## Feed de noticias (HU-10)
 
@@ -151,7 +158,7 @@ src/main/java/com/periodismo/seguro/
   cuentas/          registro y seudónimos          (HU-01, HU-02)
   autenticacion/    sesión y recuperación de clave (HU-03 a HU-06)
   seguridad/        rutas, roles y cabeceras       (HU-08, HU-25, HU-26)
-  noticias/         CRUD de noticias               (HU-09 a HU-14, HU-16)
+  noticias/         CRUD y categorías de noticias  (HU-01, HU-09 a HU-14, HU-16)
   chat/             chat en tiempo real            (HU-17 a HU-20, HU-22)
   notificaciones/   avisos de noticias nuevas      (HU-21)
   entrada/          controladores web (gateway)

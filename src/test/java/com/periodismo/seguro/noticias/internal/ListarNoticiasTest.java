@@ -51,7 +51,7 @@ class ListarNoticiasTest {
 
     private String crear(String titulo, String cuerpo, List<ImagenAdjunta> imagenes) {
         return api.crear("cuenta-feed", "Condor Silente 482",
-            new SolicitudNoticia(titulo, "Subtitulo", cuerpo, imagenes));
+            new SolicitudNoticia(titulo, "Subtitulo", cuerpo, "otros", imagenes));
     }
 
     private ResumenNoticia resumenDe(String id) {
@@ -72,9 +72,9 @@ class ListarNoticiasTest {
     void elFeedOrdenaPorMasRecienteYDesempataPorIdDeFormaEstable() {
         Instant reciente = Instant.parse("2099-01-02T10:00:00Z");
         Instant antigua = Instant.parse("2099-01-01T10:00:00Z");
-        noticias.save(new Noticia("a-empate", "c", "Condor Silente 482", "Empate", "Sub", "<p>x</p>", reciente));
-        noticias.save(new Noticia("c-reciente", "c", "Condor Silente 482", "Reciente", "Sub", "<p>x</p>", reciente));
-        noticias.save(new Noticia("b-antigua", "c", "Condor Silente 482", "Antigua", "Sub", "<p>x</p>", antigua));
+        noticias.save(new Noticia("a-empate", "c", "Condor Silente 482", "Empate", "Sub", "<p>x</p>", "otros", reciente));
+        noticias.save(new Noticia("c-reciente", "c", "Condor Silente 482", "Reciente", "Sub", "<p>x</p>", "otros", reciente));
+        noticias.save(new Noticia("b-antigua", "c", "Condor Silente 482", "Antigua", "Sub", "<p>x</p>", "otros", antigua));
 
         List<String> primera = api.listar(0, 50).stream().map(ResumenNoticia::titulo).toList();
         assertEquals(List.of("Empate", "Reciente", "Antigua"), primera.subList(0, 3));

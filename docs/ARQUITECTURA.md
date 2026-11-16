@@ -9,7 +9,7 @@ Un solo despliegue hoy. Cada modulo se puede extraer a un microservicio sin rees
 | `cuentas` | HU-01, HU-02 | identidades_privadas (correo, nombre real, hash), perfiles_publicos (seudonimo) | nadie | Servicio de cuentas |
 | `autenticacion` | HU-03 a HU-06 | sesiones, tokens de recuperacion | cuentas | Servicio de auth (emite y valida sesiones) |
 | `seguridad` | HU-08, HU-25, HU-26 | ninguno | nadie | Libreria compartida o gateway |
-| `noticias` | HU-09 a HU-14, HU-16 | noticias, imagenes_noticias (referencias), categorias | nadie | Servicio de noticias |
+| `noticias` | HU-01, HU-09 a HU-14, HU-16 | noticias, imagenes_noticias (referencias), categorias_noticias | nadie | Servicio de noticias |
 | `chat` | HU-17 a HU-20, HU-22 | mensajes, no leidos | autenticacion | Servicio de chat (WebSocket) |
 | `notificaciones` | HU-21 | ninguno | evento `NoticiaCreada` | Servicio de notificaciones |
 
@@ -27,6 +27,12 @@ Un solo despliegue hoy. Cada modulo se puede extraer a un microservicio sin rees
 ## Como cambiar las reglas
 
 Edita la tabla `PERMITIDAS` en `src/test/java/com/periodismo/seguro/ReglasArquitecturaTest.java`. El pipeline falla si el codigo la incumple.
+
+## Categorias (HU-01)
+
+El catalogo esta en la tabla propia `categorias_noticias` (id slug, nombre y orden), dentro de `noticias`. `src/main/resources/data.sql` inserta las 9 categorias de forma idempotente (`INSERT ... SELECT ... WHERE NOT EXISTS`) y reclasifica como `otros` las noticias antiguas sin categoria. `spring.sql.init.mode=always` y `spring.jpa.defer-datasource-initialization=true` hacen que el script corra despues de que Hibernate cree o actualice el esquema, tambien en PostgreSQL.
+
+`Noticia.categoria` guarda el slug y es obligatoria. `CatalogoCategorias` lee la tabla y `NoticiasApi.categorias()` devuelve los pares id/nombre; no queda ninguna lista fija en codigo. `NoticiasService` rechaza una nota sin categoria o con un id ausente en la tabla. Anadir o cambiar categorias es un cambio de datos del script, no de codigo.
 
 ## Privacidad (HU-26)
 
