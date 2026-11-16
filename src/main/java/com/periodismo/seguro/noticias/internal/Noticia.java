@@ -34,23 +34,34 @@ public class Noticia {
     @Column(nullable = false, length = 50000)
     private String cuerpo;
 
-    /** HU-16: la relacion con la categoria se anade con esa historia. */
-    @Column
-    private String categoria;
+    /**
+     * HU-16: slug de la categoria (tabla propia categorias). Se refiere por id, sin clave foranea
+     * ni joins entre modulos. La columna se llama 'categoria' desde HU-09; el script la rellena
+     * con 'otros' en las noticias antiguas y desde aqui toda noticia nueva trae una categoria.
+     */
+    @Column(name = "categoria")
+    private String categoriaId;
 
     @Column(nullable = false)
     private Instant creadaEn;
 
     protected Noticia() {}
 
+    /** Compatibilidad con las pruebas y los datos anteriores a HU-16: sin categoria se usa 'Otros'. */
     public Noticia(String id, String autorCuentaId, String autorSeudonimo, String titulo, String subtitulo,
                    String cuerpo, Instant creadaEn) {
+        this(id, autorCuentaId, autorSeudonimo, titulo, subtitulo, cuerpo, "otros", creadaEn);
+    }
+
+    public Noticia(String id, String autorCuentaId, String autorSeudonimo, String titulo, String subtitulo,
+                   String cuerpo, String categoriaId, Instant creadaEn) {
         this.id = id;
         this.autorCuentaId = autorCuentaId;
         this.autorSeudonimo = autorSeudonimo;
         this.titulo = titulo;
         this.subtitulo = subtitulo;
         this.cuerpo = cuerpo;
+        this.categoriaId = categoriaId;
         this.creadaEn = creadaEn;
     }
 
@@ -60,6 +71,6 @@ public class Noticia {
     public String getTitulo() { return titulo; }
     public String getSubtitulo() { return subtitulo; }
     public String getCuerpo() { return cuerpo; }
-    public String getCategoria() { return categoria; }
+    public String getCategoriaId() { return categoriaId; }
     public Instant getCreadaEn() { return creadaEn; }
 }

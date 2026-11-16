@@ -2,6 +2,7 @@ package com.periodismo.seguro.entrada;
 
 import com.periodismo.seguro.cuentas.CuentasApi;
 import com.periodismo.seguro.noticias.ArchivoImagen;
+import com.periodismo.seguro.noticias.CategoriaNoticia;
 import com.periodismo.seguro.noticias.ImagenAdjunta;
 import com.periodismo.seguro.noticias.NoticiaPublica;
 import com.periodismo.seguro.noticias.NoticiasApi;
@@ -26,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * HU-09: interfaz para redactar noticias (encabezado, subtitulo, texto e imagenes).
+ * HU-16: el periodista elige una categoria del catalogo antes de guardar.
  * El periodista modifica todo en el editor antes de guardar; la edicion de noticias
  * ya publicadas corresponde a otra historia. La sesion la exige Spring Security.
  */
@@ -48,25 +50,29 @@ class NoticiaController {
     @GetMapping("/noticias/nueva")
     String formulario(Model model) {
         model.addAttribute("form", new NoticiaForm());
+        model.addAttribute("categorias", noticias.categorias());
         return "noticia-nueva";
     }
 
     @PostMapping("/noticias/nueva")
     String crear(@Valid @ModelAttribute("form") NoticiaForm form, BindingResult errores,
                  @RequestParam(value = "imagenes", required = false) List<MultipartFile> imagenes,
-                 Principal principal) {
+                 Principal principal, Model model) {
         String cuerpo = sanitizador.limpiar(form.getCuerpo());
         // Se guarda ya limpio tambien en el formulario: si hay errores, la pagina no reinyecta HTML crudo.
         form.setCuerpo(cuerpo);
         List<MultipartFile> adjuntas = imagenes == null
             ? List.of()
             : imagenes.stream().filter(archivo -> !archivo.isEmpty()).toList();
+        List<CategoriaNoticia> catalogo = noticias.categorias();
 
         validarImagenes(adjuntas, errores);
+        validarCategoria(form.getCategoriaSlug(), catalogo, errores);
         if (!errores.hasFieldErrors("cuerpo") && cuerpo.isBlank()) {
             errores.rejectValue("cuerpo", "vacio", "Escribe el texto de la noticia");
         }
         if (errores.hasErrors()) {
+            model.addAttribute("categorias", catalogo);
             return "noticia-nueva";
         }
 
@@ -75,9 +81,11 @@ class NoticiaController {
         String id;
         try {
             id = noticias.crear(cuentaId, seudonimo,
-                new SolicitudNoticia(form.getTitulo(), form.getSubtitulo(), cuerpo, aAdjuntas(adjuntas)));
+                new SolicitudNoticia(form.getTitulo(), form.getSubtitulo(), cuerpo,
+                    aAdjuntas(adjuntas), form.getCategoriaSlug()));
         } catch (IllegalArgumentException e) {
-            errores.reject("imagenes", e.getMessage());
+            model.addAttribute("categorias", catalogo);
+            errores.reject("noticia", e.getMessage());
             return "noticia-nueva";
         }
         return "redirect:/noticias/" + id;
@@ -102,6 +110,17 @@ class NoticiaController {
         respuesta.setHeader("Cache-Control", "no-store");
         respuesta.setContentLength(archivo.contenido().length);
         respuesta.getOutputStream().write(archivo.contenido());
+    }
+
+    /** HU-16: solo se acepta un slug del catalogo; cualquier otro valor se rechaza en el formulario. */
+    private static void validarCategoria(String slug, List<CategoriaNoticia> catalogo, BindingResult errores) {
+        if (errores.hasFieldErrors("categoriaSlug")) {
+            return;
+        }
+        boolean conocida = slug != null && catalogo.stream().anyMatch(c -> c.slug().equals(slug));
+        if (!conocida) {
+            errores.rejectValue("categoriaSlug", "invalida", "La categoria elegida no es valida");
+        }
     }
 
     private static void validarImagenes(List<MultipartFile> archivos, BindingResult errores) {

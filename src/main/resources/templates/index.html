@@ -21,6 +21,7 @@
           <img th:if="${n.primeraImagenId != null}"
                th:src="@{/noticias/imagenes/{id}(id=${n.primeraImagenId})}"
                alt="Imagen de la noticia">
+          <span class="etiqueta" th:text="${n.categoriaNombre}">Categoría</span>
           <h3 th:text="${n.titulo}">Encabezado</h3>
           <p class="suave" th:text="${n.subtitulo}">Subtítulo</p>
           <p class="lectura" th:text="${n.extracto}">Extracto</p>

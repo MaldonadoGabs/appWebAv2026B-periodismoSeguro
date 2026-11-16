@@ -12,4 +12,6 @@ public record ResumenNoticia(
     String extracto,
     String autorSeudonimo,
     String publicadaEn,
-    String primeraImagenId) {}
+    String primeraImagenId,
+    String categoriaSlug,
+    String categoriaNombre) {}

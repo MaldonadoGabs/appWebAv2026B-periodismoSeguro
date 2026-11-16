@@ -23,6 +23,16 @@
           </div>
 
           <div class="campo">
+            <label for="categoriaSlug">Categoria</label>
+            <select id="categoriaSlug" th:field="*{categoriaSlug}">
+              <option value="">Elige una categoria</option>
+              <option th:each="c : ${categorias}" th:value="${c.slug}" th:text="${c.nombre}">Categoria</option>
+            </select>
+            <div class="msg-error" th:if="${#fields.hasErrors('categoriaSlug')}" th:errors="*{categoriaSlug}"></div>
+            <p class="suave">Clasifica tu nota para que los lectores la encuentren por tema.</p>
+          </div>
+
+          <div class="campo">
             <label for="editor">Texto de la noticia</label>
             <div class="barra-editor" role="toolbar" aria-label="Formato del texto">
               <button type="button" class="tema" data-comando="bold" title="Negrita" aria-label="Negrita"><strong>N</strong></button>

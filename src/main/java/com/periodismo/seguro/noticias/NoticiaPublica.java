@@ -12,4 +12,5 @@ public record NoticiaPublica(
     String subtitulo,
     String cuerpo,
     String autorSeudonimo,
-    List<String> imagenesIds) {}
+    List<String> imagenesIds,
+    String categoriaNombre) {}

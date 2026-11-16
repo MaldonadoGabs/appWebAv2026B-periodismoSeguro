@@ -17,10 +17,16 @@ class NoticiaForm {
     @Size(max = 50000, message = "El texto es demasiado largo")
     private String cuerpo;
 
+    /** HU-16: slug de la categoria elegida en el selector. */
+    @NotBlank(message = "Selecciona una categoria de la lista")
+    private String categoriaSlug;
+
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
     public String getSubtitulo() { return subtitulo; }
     public void setSubtitulo(String subtitulo) { this.subtitulo = subtitulo; }
     public String getCuerpo() { return cuerpo; }
     public void setCuerpo(String cuerpo) { this.cuerpo = cuerpo; }
+    public String getCategoriaSlug() { return categoriaSlug; }
+    public void setCategoriaSlug(String categoriaSlug) { this.categoriaSlug = categoriaSlug; }
 }

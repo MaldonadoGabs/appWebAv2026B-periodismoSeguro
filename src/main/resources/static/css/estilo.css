@@ -197,3 +197,11 @@ details.plegable > summary { font: 400 1rem/1.2 var(--titulos); letter-spacing: 
 .tarjeta .lectura { font-size: 1.02rem; margin-bottom: .6rem; }
 .tarjeta .firma { font: 600 .82rem var(--cuerpo); color: var(--suave); margin: 0; }
 .paginacion { display: flex; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
+
+/* HU-16: etiqueta de categoria */
+.etiqueta {
+  display: inline-block; margin: 0 0 .6rem; padding: .12rem .5rem;
+  background: var(--marcador); color: #12161c; border: 2px solid var(--linea);
+  font: 700 .72rem var(--cuerpo); text-transform: uppercase; letter-spacing: .04em;
+}
+select { cursor: pointer; }

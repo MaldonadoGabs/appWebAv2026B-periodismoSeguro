@@ -3,7 +3,6 @@ package com.periodismo.seguro.noticias.internal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -67,7 +66,8 @@ class CrearNoticiaTest {
         assertEquals("<p>Texto de la nota</p>", guardada.getCuerpo());
         assertEquals("cuenta-1", guardada.getAutorCuentaId());
         assertEquals("Condor Silente 482", guardada.getAutorSeudonimo());
-        assertNull(guardada.getCategoria(), "la categoria llega con HU-16");
+        assertEquals(SolicitudNoticia.CATEGORIA_OTROS, guardada.getCategoriaId(),
+            "toda nota pertenece a una categoria; sin eleccion explicita queda en Otros");
         assertEquals(guardada.getCreadaEn(), guardada.getCreadaEn().truncatedTo(ChronoUnit.HOURS),
             "HU-26: la hora se redondea a 1 h");
         assertTrue(Arrays.stream(Noticia.class.getDeclaredFields())
