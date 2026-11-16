@@ -2,25 +2,47 @@ package com.periodismo.seguro.chat.internal;
 
 import com.periodismo.seguro.autenticacion.AutenticacionApi;
 import com.periodismo.seguro.chat.ChatApi;
-import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 import org.springframework.stereotype.Service;
 
 @Service
 class ChatService implements ChatApi {
+    private static final int MAXIMO_CARACTERES = 500;
+
     private final AutenticacionApi autenticacion;
+    private final SalaChat sala;
 
-    ChatService(AutenticacionApi autenticacion) { this.autenticacion = autenticacion; }
-
-    /** HU-17. Fail-closed: sin sesion valida no hay conexion. */
-    @Override
-    public boolean conectar(String sesionId) { return autenticacion.validarSesion(sesionId).isPresent(); }
-
-    @Override
-    public void enviar(String sesionId, String texto) {
-        throw new UnsupportedOperationException("HU-18 pendiente");
+    ChatService(AutenticacionApi autenticacion, SalaChat sala) {
+        this.autenticacion = autenticacion;
+        this.sala = sala;
     }
 
-    @Override public List<String> historial(int limite) { return List.of(); }
-    @Override public List<String> usuariosConectados() { return List.of(); }
-    @Override public int mensajesSinLeer(String cuentaId) { return 0; }
+    /** Fail-closed: sin sesion valida no hay entrada en la sala. */
+    @Override
+    public Optional<String> conectar(String sesionId) {
+        return autenticacion.validarSesion(sesionId);
+    }
+
+    @Override
+    public void abrirConexion(String conexionId, Consumer<String> receptor) {
+        sala.agregar(conexionId, receptor);
+    }
+
+    @Override
+    public void cerrarConexion(String conexionId) {
+        sala.quitar(conexionId);
+    }
+
+    @Override
+    public void enviar(String texto) {
+        if (texto == null) {
+            return;
+        }
+        String limpio = texto.trim();
+        if (limpio.isEmpty()) {
+            return;
+        }
+        sala.enviarATodos(limpio.substring(0, Math.min(limpio.length(), MAXIMO_CARACTERES)));
+    }
 }

@@ -16,7 +16,7 @@
       <button class="boton principal">Enviar</button>
     </form>
 
-    <ul id="log"><li th:each="m : ${mensajes}" th:text="${m.texto}"></li></ul>
+    <ul id="log"></ul>
     <p><a th:href="@{/inicio}">Volver al panel</a></p>
   </main>
   <footer th:replace="~{fragments/base :: pie}"></footer>
