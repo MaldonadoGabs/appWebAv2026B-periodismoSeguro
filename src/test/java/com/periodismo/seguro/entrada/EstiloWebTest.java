@@ -49,6 +49,15 @@ class EstiloWebTest {
     }
 
     @Test
+    void elScriptDeAvisosSeCargaConDeferParaEncontrarElContenedor() throws Exception {
+        String html = mvc.perform(get("/"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        org.junit.jupiter.api.Assertions.assertTrue(
+            html.contains("src=\"/js/avisos.js\" defer"), "el cliente de avisos debe cargarse con defer");
+    }
+
+    @Test
     void ningunaPaginaCargaRecursosDeOtrosDominios() throws Exception {
         for (String ruta : new String[] {"/", "/registro", "/login", "/recuperar"}) {
             String html = mvc.perform(get(ruta)).andReturn().getResponse().getContentAsString();
