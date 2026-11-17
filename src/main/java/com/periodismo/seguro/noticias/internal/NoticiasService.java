@@ -66,7 +66,7 @@ class NoticiasService implements NoticiasApi {
             imagenesNoticia.save(new ImagenNoticia(UUID.randomUUID().toString(), id, nombreGuardado,
                 imagen.tipoContenido(), orden++));
         }
-        eventos.publishEvent(new NoticiaCreada(id, categoria));
+        eventos.publishEvent(new NoticiaCreada(id, solicitud.titulo().trim(), autorSeudonimo, categoria));
         return id;
     }
 

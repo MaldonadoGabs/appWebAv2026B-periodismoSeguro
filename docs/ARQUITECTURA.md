@@ -38,6 +38,10 @@ El catalogo esta en la tabla propia `categorias_noticias` (id slug, nombre y ord
 
 `NoticiasApi.eliminar(cuentaId, id, confirmado, administrador)` exige confirmación explícita. El módulo `noticias` solo compara el id del autor con el de la cuenta y acepta el flag `administrador` que le pasa `entrada`, que es quien sabe el rol; así `noticias` sigue sin depender de `cuentas`. El borrado usa el puerto `AlmacenImagenes.eliminar(...)` para retirar los archivos y borra también las referencias de `imagenes_noticias`, sin claves foráneas.
 
+## Avisos de noticias nuevas (HU-21)
+
+`NoticiaCreada` lleva id, título, seudónimo y categoría. `NotificacionesService` escucha el evento con `@TransactionalEventListener(AFTER_COMMIT)` y entrega un `AvisoNoticia` a `SalaAvisos`, que solo guarda callbacks por id de conexión. El puerto `AvisosWebSocketApi` lo implementa el adaptador de `entrada`, que serializa JSON en `/avisos-ws`. El endpoint es público y distinto de `/ws` para no heredar la autorización del chat; `avisos.js` se incluye en la cabecera común, así que está en todas las pantallas. Al migrar a microservicios, el evento pasa a una cola y la sala se sustituye por un broker, sin cambiar el contrato.
+
 ## Privacidad (HU-26)
 
 Nunca registrar IP, identificadores del lector ni datos reales del periodista. La hora se redondea a 1 h.

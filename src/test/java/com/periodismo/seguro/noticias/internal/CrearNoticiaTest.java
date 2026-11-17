@@ -135,5 +135,9 @@ class CrearNoticiaTest {
 
         assertEquals(1, eventos.stream(NoticiaCreada.class)
             .filter(e -> e.noticiaId().equals(id)).count());
+        NoticiaCreada evento = eventos.stream(NoticiaCreada.class)
+            .filter(e -> e.noticiaId().equals(id)).findFirst().orElseThrow();
+        assertEquals("Encabezado de prueba", evento.titulo());
+        assertEquals("Condor Silente 482", evento.autorSeudonimo());
     }
 }
