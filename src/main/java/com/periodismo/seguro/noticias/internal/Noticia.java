@@ -41,6 +41,10 @@ public class Noticia {
     @Column(nullable = false)
     private Instant creadaEn;
 
+    /** HU-13: fecha de la ultima edicion. Nula si la noticia nunca se edito. Hora redondeada a 1 h (HU-26). */
+    @Column
+    private Instant modificadaEn;
+
     protected Noticia() {}
 
     public Noticia(String id, String autorCuentaId, String autorSeudonimo, String titulo, String subtitulo,
@@ -63,4 +67,10 @@ public class Noticia {
     public String getCuerpo() { return cuerpo; }
     public String getCategoria() { return categoria; }
     public Instant getCreadaEn() { return creadaEn; }
+    public Instant getModificadaEn() { return modificadaEn; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
+    public void setSubtitulo(String subtitulo) { this.subtitulo = subtitulo; }
+    public void setCuerpo(String cuerpo) { this.cuerpo = cuerpo; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
+    public void setModificadaEn(Instant modificadaEn) { this.modificadaEn = modificadaEn; }
 }

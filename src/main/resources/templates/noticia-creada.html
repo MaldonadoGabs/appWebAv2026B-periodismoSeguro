@@ -20,7 +20,11 @@
       </ul>
     </article>
 
-    <p><a class="boton" th:href="@{/noticias/nueva}">Escribir otra noticia</a></p>
+    <p>
+      <a class="boton" th:href="@{/noticias/{id}(id=${noticia.id})}">Ver noticia publicada</a>
+      <a class="boton" th:href="@{/noticias/{id}/editar(id=${noticia.id})}">Editar</a>
+      <a class="boton" th:href="@{/noticias/nueva}">Escribir otra noticia</a>
+    </p>
   </main>
   <footer th:replace="~{fragments/base :: pie}"></footer>
 </body>

@@ -1,6 +1,7 @@
 package com.periodismo.seguro.autenticacion.internal;
 
 import java.time.Clock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -13,12 +14,22 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.stereotype.Component;
 
-/** HU-03, HU-04 y HU-05 y HU-06 (/recuperar y /restablecer son publicas): reglas de acceso, formulario de inicio de sesion y bloqueo por intentos fallidos. */
+/**
+ * HU-03, HU-04, HU-05 y HU-06 (/recuperar y /restablecer son publicas): reglas de acceso, formulario de inicio de sesion y bloqueo por intentos fallidos.
+ * HU-25: cabeceras CSP, X-Frame-Options, cookies seguras (HttpOnly, SameSite, Secure en produccion) y caducidad por inactividad.
+ */
 @Configuration
 class ConfiguracionSeguridad {
+    /** HU-25: 30 minutos de inactividad caducan la sesion. */
+    static final int TIMEOUT_INACTIVIDAD_SEGUNDOS = 1800;
+
+    @Value("${app.produccion:false}")
+    private boolean produccion;
+
     @Bean
     Clock reloj() { return Clock.systemUTC(); }
 
@@ -39,13 +50,17 @@ class ConfiguracionSeguridad {
 
         http
             .authorizeHttpRequests(a -> a
-                // HU-10: el feed es publico y sus imagenes tambien.
-                .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health",
-                    "/css/**", "/js/**", "/fonts/**", "/noticias/imagenes/**")
-                .permitAll()
-                // HU-08: rutas exclusivas del periodista. Un LECTOR o ADMINISTRADOR autenticado recibe 403.
-                .requestMatchers("/inicio", "/mis-notas", "/mis-notas/**", "/noticias/**", "/chat", "/ws")
+                // HU-10: las imagenes son publicas. HU-08: rutas exclusivas del periodista.
+                // IMPORTANTE: las rutas especificas van ANTES de /noticias/{id}, porque este patron
+                // de un solo segmento tambien coincides con /noticias/nueva y lo abriria a cualquiera.
+                .requestMatchers("/noticias/imagenes/**").permitAll()
+                .requestMatchers("/inicio", "/mis-notas", "/mis-notas/**", "/noticias/nueva",
+                    "/noticias/*/editar", "/noticias/*/confirmacion", "/chat", "/ws")
                 .hasRole("PERIODISTA")
+                // HU-10 y HU-12: el feed, el detalle de una noticia y el resto de recursos son publicos.
+                .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health",
+                    "/css/**", "/js/**", "/fonts/**", "/noticias/*", "/error")
+                .permitAll()
                 .anyRequest().authenticated())
             .formLogin(f -> f
                 .loginPage("/login").loginProcessingUrl("/login")
@@ -57,6 +72,27 @@ class ConfiguracionSeguridad {
                 .deleteCookies("JSESSIONID")
                 .logoutSuccessUrl("/login?salio"))
             .sessionManagement(s -> s.maximumSessions(-1).sessionRegistry(registro))
+            // HU-25: proteccion contra fixation de sesion. La caducidad por inactividad
+            // la aplica el contenedor con server.servlet.session.timeout (30 min).
+            .sessionManagement(s -> s.sessionFixation(fix -> fix.newSession()))
+            // HU-25: cabeceras de seguridad en todas las respuestas.
+            .headers(h -> h
+                .contentTypeOptions(o -> {})
+                .frameOptions(fo -> fo.deny())
+                .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true).maxAgeInSeconds(31536000))
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives(
+                        "default-src 'self'; "
+                        + "img-src 'self' blob:; "
+                        + "script-src 'self'; "
+                        + "style-src 'self'; "
+                        + "font-src 'self'; "
+                        + "connect-src 'self'; "
+                        + "frame-ancestors 'none'; "
+                        + "base-uri 'self'; "
+                        + "form-action 'self'")))
             .csrf(c -> c.ignoringRequestMatchers("/ws"))
             .httpBasic(AbstractHttpConfigurer::disable);
         return http.build();

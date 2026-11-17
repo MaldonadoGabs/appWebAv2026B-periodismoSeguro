@@ -38,7 +38,7 @@ Páginas disponibles:
 
 | Ruta | Qué es |
 |---|---|
-| `/` | Página principal: feed público de noticias + misión, visión y objetivo (`?pagina=1&tamano=10`) |
+| `/` | Página principal: feed público de noticias + misión, visión y objetivo (`?pagina=1&tamano=10&q=&categoria=`) |
 | `/registro` | Registro de periodistas |
 | `/login` | Inicio de sesión |
 | `/recuperar` | Solicitud de recuperación de contraseña (el enlace se imprime en la consola) |
@@ -47,7 +47,9 @@ Páginas disponibles:
 | `/mis-notas` | Lista paginada de las noticias del periodista autenticado (rol PERIODISTA) |
 | `/chat` | Chat en tiempo real entre periodistas sobre el WebSocket `/ws`, con lista de conectados por seudónimo (rol PERIODISTA) |
 | `/noticias/nueva` | Editor para redactar una noticia, con categoría obligatoria de la tabla del catálogo (rol PERIODISTA) |
-| `/noticias/{id}` | Confirmación de la noticia guardada; solo la ve su autor, para los demás 404 (rol PERIODISTA) |
+| `/noticias/{id}` | Detalle público de una noticia: título, texto, categoría, seudónimo y fechas. 404 amigable si no existe |
+| `/noticias/{id}/editar` | Editor de una noticia propia: carga los datos actuales y registra la fecha de edición (rol PERIODISTA, solo el autor) |
+| `/noticias/{id}/confirmacion` | Confirmación tras guardar o editar; solo la ve su autor, para los demás 404 (rol PERIODISTA) |
 | `/noticias/imagenes/{id}` | Imagen de una noticia (pública, para el feed) |
 | `/actuator/health` | Estado de la aplicación (`{"status":"UP"}`) |
 
@@ -98,6 +100,13 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `InicioWebTest` | El inicio muestra la misión, la visión y el objetivo, e invita a registrarse |
 | `ListarNoticiasTest` | HU-10: orden por más reciente con desempate determinista por id, extracto en texto plano sin datos privados, fecha redondeada a 1 h, paginación con valores normalizados y tope de 50, miniatura omitida si el archivo desapareció |
 | `FeedNoticiasWebTest` | HU-10: feed público sin sesión, estado vacío, encabezado/subtítulo/extracto/seudónimo, imagen pública sin sesión, paginación y parámetros inválidos, imagen perdida tolerada, cero recursos externos |
+| `BuscarNoticiasTest` | HU-11: búsqueda por título y por palabra clave del cuerpo (ignorando mayúsculas), filtro por categoría, combinación de ambos, paginación con total independiente y resúmenes sin datos privados |
+| `BuscarNoticiasWebTest` | HU-11: formulario de búsqueda y filtro en el feed, resultados por texto y categoría, mensaje si no hay coincidencias, parámetros preservados en la paginación y cero recursos externos |
+| `DetalleNoticiaWebTest` | HU-12: detalle público sin sesión con título, texto, categoría, seudónimo y fechas, sin correo/nombre real/id de cuenta, 404 amigable y enlace desde cada tarjeta |
+| `EditarNoticiaTest` | HU-13: solo el autor edita, se actualizan todos los campos, se registra la fecha de modificación redondeada a 1 h, se conserva la publicación original y se aplican validaciones |
+| `EditarNoticiaWebTest` | HU-13: ruta protegida y CSRF, carga de datos actuales, otro periodista recibe 404, guardado con fecha, errores junto al campo y HTML peligroso eliminado |
+| `CabecerasSesionWebTest` | HU-25: CSP con `blob:` en `img-src`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, cookie HttpOnly/SameSite y recursos propios bajo la CSP |
+| `PrivacidadLogsTest` | HU-26: el sanitizador enmascara correos e IPs, publicar una noticia no escribe correo, nombre real ni IP en los logs, y los DTO públicos no exponen datos privados |
 | `EnvioRecuperacionResendTest` | El correo de recuperacion se envia por la API de Resend (simulada), sin registrar el correo ni el token en logs, y la consola es el proveedor por defecto |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos, el feed y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
@@ -112,11 +121,11 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `ChatConectadosWebTest` | HU-20: la sala muestra el panel de conectados con su contador |
 | `AppTests` | La aplicación completa arranca |
 
-La clasificación por categorías (HU-01), HU-09 (crear noticias) y HU-10 (feed público) ya están implementadas. Las pruebas del resto del CRUD se agregan con las historias HU-11 a HU-14.
+La clasificación por categorías (HU-01), HU-09 (crear noticias), HU-10 (feed público), HU-11 (búsqueda y filtro), HU-12 (detalle público), HU-13 (editar noticia propia), HU-18 y HU-20 (chat y conectados), HU-25 (cabeceras y sesiones seguras) y HU-26 (privacidad en logs) ya están implementadas. Falta HU-14 (eliminar); el filtro por categorías ampliado se cubre con HU-11.
 
 ## Editor de noticias (HU-09)
 
-Desde `/noticias/nueva` el periodista redacta y modifica su nota antes de guardarla. La noticia tiene **encabezado, subtítulo, texto e imágenes**; el texto se escribe en un editor HTML propio (`contenteditable`) con barra de formato y vista previa en vivo, sin librerías ni CDN. Las imágenes seleccionadas se pueden quitar antes de guardar. Tras guardar se muestra `/noticias/{id}` con el seudónimo del autor.
+Desde `/noticias/nueva` el periodista redacta y modifica su nota antes de guardarla. La noticia tiene **encabezado, subtítulo, texto e imágenes**; el texto se escribe en un editor HTML propio (`contenteditable`) con barra de formato y vista previa en vivo, sin librerías ni CDN. Las imágenes seleccionadas se pueden quitar antes de guardar. Tras guardar se muestra `/noticias/{id}/confirmacion` con el seudónimo del autor.
 
 | Variable | Para qué sirve |
 |---|---|
@@ -127,9 +136,9 @@ Desde `/noticias/nueva` el periodista redacta y modifica su nota antes de guarda
 - El HTML del editor se reduce a una lista blanca (jsoup) antes de guardarse: sin `script`, sin atributos de eventos y sin imágenes incrustadas de otros dominios.
 - Cada imagen se **re-codifica** para eliminar EXIF/GPS y se guarda con un nombre UUID: nunca se conserva el nombre original del archivo. La referencia queda en `imagenes_noticias`, sin claves foráneas.
 - **Limitación:** el disco de Azure Container Apps es efímero, así que las imágenes se pierden al reiniciar o desplegar. El puerto `AlmacenImagenes` aísla el dominio del almacenamiento para migrar a BD o a un volumen montado en `APP_IMAGENES_DIR` sin reescribir la lógica. La re-codificación no aplica la orientación EXIF de la foto original.
-- Editar noticias ya guardadas corresponde a otra historia; aquí solo se redacta y se modifica mientras se crea.
-- Pendiente para HU-25: al activar la CSP habrá que permitir `blob:` en `img-src` para las miniaturas locales del editor.
-- Desde HU-10, `/noticias/imagenes/{id}` es pública para que el feed pueda mostrar las fotos; crear noticias sigue exigiendo sesión.
+- Desde HU-13, una noticia ya guardada se edita en `/noticias/{id}/editar`: el editor carga los datos actuales y al guardar se registra la fecha de modificación (redondeada a 1 h, como la de creación).
+- Desde HU-25, la CSP está activa con `img-src 'self' blob:`, para que el editor pueda mostrar las miniaturas locales de las imágenes seleccionadas antes de guardarlas.
+- Desde HU-10, `/noticias/imagenes/{id}` es pública para que el feed pueda mostrar las fotos; crear y editar noticias sigue exigiendo sesión y rol PERIODISTA.
 
 ## Categorías de noticias (HU-01)
 
@@ -150,7 +159,22 @@ Decisiones tomadas en esta historia:
 - Los parámetros `pagina` y `tamano` inválidos se normalizan (nunca 400 ni 500) y una página fuera de rango se ajusta a la última.
 - Sin IP, cookies de analítica ni identificadores del lector en logs; cero recursos de otros dominios.
 
-**Fuera de alcance**: búsqueda (HU-11), detalle de la noticia (HU-12), filtro por categorías (HU-16) y enlace desde cada tarjeta al detalle, que se añadirá con HU-12.
+Desde HU-11 el feed acepta `?q=texto&categoria=slug` para buscar por título/palabra clave y filtrar por categoría, preservando ambos parámetros en la paginación y mostrando un mensaje claro cuando no hay coincidencias. Desde HU-12 cada tarjeta enlaza con su detalle público en `/noticias/{id}`.
+
+## Detalle de noticias (HU-12)
+
+`/noticias/{id}` es público: muestra encabezado, subtítulo, texto, categoría, seudónimo del autor y las fechas de publicación y edición (en UTC, hora redondeada a 1 h). No muestra correo, nombre real, id de cuenta ni IP. Si la noticia no existe responde 404 con una página amigable, sin stack traces. La confirmación privada de HU-09 se trasladó a `/noticias/{id}/confirmacion` para no mezclarla con este detalle público.
+
+## Búsqueda y edición (HU-11 y HU-13)
+
+- La búsqueda es insensible a mayúsculas y mira el encabezado y el cuerpo; la categoría se filtra por el slug del catálogo. Una categoría inventada se ignora en lugar de dejar el feed vacío.
+- `/noticias/{id}/editar` solo la abre el autor (el administrador no hereda ese permiso). Carga título, subtítulo, cuerpo y categoría actuales; aplica las mismas validaciones y sanitización HTML que la creación, y guarda la fecha de modificación. Un id ajeno o inexistente devuelve 404.
+
+## Cabeceras, sesiones y privacidad de logs (HU-25 y HU-26)
+
+Todas las respuestas llevan `Content-Security-Policy` (`default-src 'self'`, `img-src 'self' blob:` para el editor), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff` y `Referrer-Policy: no-referrer`. La cookie de sesión es `HttpOnly` y `SameSite=Lax`; con `APP_PRODUCCION=true` se añade `Secure` y HSTS. La sesión caduca por inactividad en 30 minutos (`server.servlet.session.timeout`).
+
+Los logs no incluyen correo, nombre real ni IP: el patrón de Logback no recoge el contexto HTTP y el convertidor `LogSanitizador` enmascara correos e IPv4 en cualquier mensaje antes de escribirlo. Las publicaciones y ediciones solo registran, como mucho, datos propios de la noticia, nunca la identidad del periodista.
 
 ## Estructura
 

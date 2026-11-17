@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Error')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <section class="hero">
+      <h1>Algo salió mal</h1>
+      <p class="lectura">No se pudo completar la acción. Intenta de nuevo en unos momentos.</p>
+      <p><a class="boton principal" th:href="@{/}">Volver al inicio</a></p>
+    </section>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>
