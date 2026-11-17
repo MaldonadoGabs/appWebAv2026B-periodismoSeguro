@@ -166,7 +166,7 @@ Desde HU-11 el feed acepta `?q=texto&categoria=slug` para buscar por título/pal
 
 ## Detalle de noticias (HU-12)
 
-`/noticias/{id}` es público: muestra encabezado, subtítulo, texto, categoría, seudónimo del autor y las fechas de publicación y edición (en UTC, hora redondeada a 1 h). No muestra correo, nombre real, id de cuenta ni IP. Si la noticia no existe responde 404 con una página amigable, sin stack traces. La confirmación privada de HU-09 se trasladó a `/noticias/{id}/confirmacion` para no mezclarla con este detalle público.
+`/noticias/{id}` es público: muestra encabezado, subtítulo, texto, categoría, seudónimo del autor y las fechas de publicación y edición (en UTC, hora redondeada a 1 h). No muestra correo, nombre real, id de cuenta ni IP. Si la noticia no existe responde 404 con una página amigable, sin stack traces. La confirmación privada de HU-09 se trasladó a `/noticias/{id}/confirmacion` para no mezclarla con este detalle público. Las imágenes se muestran completas, a lo ancho de la columna de lectura y sin recortar; las miniaturas del feed y del editor son independientes.
 
 ## Búsqueda y edición (HU-11 y HU-13)
 
