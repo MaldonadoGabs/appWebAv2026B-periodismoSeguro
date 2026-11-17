@@ -50,6 +50,7 @@ Páginas disponibles:
 | `/noticias/{id}` | Detalle público de una noticia: título, texto, categoría, seudónimo y fechas. 404 amigable si no existe |
 | `/noticias/{id}/editar` | Editor de una noticia propia: carga los datos actuales y registra la fecha de edición (rol PERIODISTA, solo el autor) |
 | `/noticias/{id}/confirmacion` | Confirmación tras guardar o editar; solo la ve su autor, para los demás 404 (rol PERIODISTA) |
+| `/noticias/{id}/eliminar` | Diálogo de confirmación y borrado de una nota; solo el autor o un administrador |
 | `/noticias/imagenes/{id}` | Imagen de una noticia (pública, para el feed) |
 | `/actuator/health` | Estado de la aplicación (`{"status":"UP"}`) |
 
@@ -105,6 +106,8 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `DetalleNoticiaWebTest` | HU-12: detalle público sin sesión con título, texto, categoría, seudónimo y fechas, sin correo/nombre real/id de cuenta, 404 amigable y enlace desde cada tarjeta |
 | `EditarNoticiaTest` | HU-13: solo el autor edita, se actualizan todos los campos, se registra la fecha de modificación redondeada a 1 h, se conserva la publicación original y se aplican validaciones |
 | `EditarNoticiaWebTest` | HU-13: ruta protegida y CSRF, carga de datos actuales, otro periodista recibe 404, guardado con fecha, errores junto al campo y HTML peligroso eliminado |
+| `EliminarNoticiaTest` | HU-14: sin confirmación no se borra, el autor o un administrador sí, otro periodista no, y se eliminan nota, referencias y archivos de imagen |
+| `EliminarNoticiaWebTest` | HU-14: diálogo de confirmación, GET no borra, CSRF, 404 para otro periodista, administrador permitido y mensaje tras la redirección |
 | `CabecerasSesionWebTest` | HU-25: CSP con `blob:` en `img-src`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, cookie HttpOnly/SameSite y recursos propios bajo la CSP |
 | `PrivacidadLogsTest` | HU-26: el sanitizador enmascara correos e IPs, publicar una noticia no escribe correo, nombre real ni IP en los logs, y los DTO públicos no exponen datos privados |
 | `EnvioRecuperacionResendTest` | El correo de recuperacion se envia por la API de Resend (simulada), sin registrar el correo ni el token en logs, y la consola es el proveedor por defecto |
@@ -121,7 +124,7 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `ChatConectadosWebTest` | HU-20: la sala muestra el panel de conectados con su contador |
 | `AppTests` | La aplicación completa arranca |
 
-La clasificación por categorías (HU-01), HU-09 (crear noticias), HU-10 (feed público), HU-11 (búsqueda y filtro), HU-12 (detalle público), HU-13 (editar noticia propia), HU-18 y HU-20 (chat y conectados), HU-25 (cabeceras y sesiones seguras) y HU-26 (privacidad en logs) ya están implementadas. Falta HU-14 (eliminar); el filtro por categorías ampliado se cubre con HU-11.
+La clasificación por categorías (HU-01), HU-09 (crear noticias), HU-10 (feed público), HU-11 (búsqueda y filtro), HU-12 (detalle público), HU-13 (editar noticia propia), HU-14 (eliminar nota propia), HU-18 y HU-20 (chat y conectados), HU-25 (cabeceras y sesiones seguras) y HU-26 (privacidad en logs) ya están implementadas.
 
 ## Editor de noticias (HU-09)
 
@@ -169,6 +172,10 @@ Desde HU-11 el feed acepta `?q=texto&categoria=slug` para buscar por título/pal
 
 - La búsqueda es insensible a mayúsculas y mira el encabezado y el cuerpo; la categoría se filtra por el slug del catálogo. Una categoría inventada se ignora en lugar de dejar el feed vacío.
 - `/noticias/{id}/editar` solo la abre el autor (el administrador no hereda ese permiso). Carga título, subtítulo, cuerpo y categoría actuales; aplica las mismas validaciones y sanitización HTML que la creación, y guarda la fecha de modificación. Un id ajeno o inexistente devuelve 404.
+
+## Eliminar noticias (HU-14)
+
+Desde «Mis notas» el autor abre `/noticias/{id}/eliminar`, una página de confirmación explícita: el `GET` solo muestra el aviso y el borrado exige un `POST` con CSRF. Solo el autor de la nota o un administrador puede hacerlo; otra cuenta recibe 404 para no revelar que la noticia existe. Al confirmar se eliminan la fila, sus referencias de imágenes y los archivos en disco, y se redirige a `/mis-notas` (o al feed para el administrador) con un mensaje de confirmación.
 
 ## Cabeceras, sesiones y privacidad de logs (HU-25 y HU-26)
 

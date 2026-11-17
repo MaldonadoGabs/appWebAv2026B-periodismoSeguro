@@ -6,6 +6,7 @@
   <main class="pagina ancha">
     <h1><span>Mis</span> notas</h1>
     <p class="suave">Solo ves las noticias que publicaste con tu seudónimo.</p>
+    <p class="nota ok" th:if="${mensaje}" th:text="${mensaje}"></p>
 
     <p class="nota demo" th:if="${total == 0}">
       Todavía no has publicado notas. <a th:href="@{/noticias/nueva}">Escribir noticia</a>
@@ -20,7 +21,8 @@
           <span th:if="${n.categoria != null}" th:text="' · ' + ${n.categoria}"> · categoría</span>
           <span th:text="' · ' + ${n.publicadaEn}"> · fecha</span></p>
         <p><a class="boton" th:href="@{/noticias/{id}(id=${n.id})}">Ver nota</a>
-           <a class="boton" th:href="@{/noticias/{id}/editar(id=${n.id})}">Editar</a></p>
+           <a class="boton" th:href="@{/noticias/{id}/editar(id=${n.id})}">Editar</a>
+           <a class="boton" th:href="@{/noticias/{id}/eliminar(id=${n.id})}">Eliminar</a></p>
       </article>
     </div>
 

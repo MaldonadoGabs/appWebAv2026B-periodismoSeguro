@@ -85,6 +85,18 @@ class AlmacenImagenesDisco implements AlmacenImagenes {
         return Files.isRegularFile(rutaSegura(nombreGuardado));
     }
 
+    @Override
+    public void eliminar(String nombreGuardado) {
+        if (nombreGuardado == null || !NOMBRE_GENERADO.matcher(nombreGuardado).matches()) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(rutaSegura(nombreGuardado));
+        } catch (IOException e) {
+            throw new IllegalStateException("No se pudo eliminar la imagen", e);
+        }
+    }
+
     /** Solo nombres generados por este almacen; evita cualquier intento de salir del directorio. */
     private Path rutaSegura(String nombreGuardado) {
         Path archivo = directorio.resolve(nombreGuardado).normalize();
