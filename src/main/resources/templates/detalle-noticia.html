@@ -8,7 +8,7 @@
       <h1 th:text="${noticia.titulo}">Encabezado</h1>
       <p class="lectura suave" th:text="${noticia.subtitulo}">Subtítulo</p>
       <div class="lectura" th:utext="${noticia.cuerpo}"></div>
-      <ul class="miniaturas" th:if="${!#lists.isEmpty(noticia.imagenesIds)}" aria-label="Imágenes de la noticia">
+      <ul class="imagenes-noticia" th:if="${!#lists.isEmpty(noticia.imagenesIds)}" aria-label="Imágenes de la noticia">
         <li th:each="imagenId : ${noticia.imagenesIds}">
           <img th:src="@{/noticias/imagenes/{id}(id=${imagenId})}" alt="Imagen de la noticia">
         </li>

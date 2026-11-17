@@ -13,7 +13,7 @@
       <h2 th:text="${noticia.titulo}">Encabezado</h2>
       <p class="lectura" th:text="${noticia.subtitulo}">Subtitulo</p>
       <div class="lectura" th:utext="${noticia.cuerpo}"></div>
-      <ul class="miniaturas" th:if="${!#lists.isEmpty(noticia.imagenesIds)}" aria-label="Imagenes de la noticia">
+      <ul class="imagenes-noticia" th:if="${!#lists.isEmpty(noticia.imagenesIds)}" aria-label="Imagenes de la noticia">
         <li th:each="imagenId : ${noticia.imagenesIds}">
           <img th:src="@{/noticias/imagenes/{id}(id=${imagenId})}" alt="Imagen de la noticia">
         </li>

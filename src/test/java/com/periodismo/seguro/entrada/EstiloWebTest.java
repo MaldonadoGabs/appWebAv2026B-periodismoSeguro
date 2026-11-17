@@ -30,7 +30,9 @@ class EstiloWebTest {
     void laHojaDeEstilosYLasFuentesSeSirvenSinRecursosExternos() throws Exception {
         mvc.perform(get("/css/estilo.css"))
             .andExpect(status().isOk())
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("--marcador")));
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("--marcador")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString(".imagenes-noticia img")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("height: auto")));
         mvc.perform(get("/fonts/anton.woff2")).andExpect(status().isOk());
         mvc.perform(get("/js/tema.js")).andExpect(status().isOk());
     }
