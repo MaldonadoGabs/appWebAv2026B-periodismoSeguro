@@ -10,8 +10,9 @@ Un solo despliegue hoy. Cada modulo se puede extraer a un microservicio sin rees
 | `autenticacion` | HU-03 a HU-06 | sesiones, tokens de recuperacion | cuentas | Servicio de auth (emite y valida sesiones) |
 | `seguridad` | HU-08, HU-25, HU-26 | ninguno | nadie | Libreria compartida o gateway |
 | `noticias` | HU-01, HU-09 a HU-14, HU-16 | noticias, imagenes_noticias (referencias), categorias_noticias | nadie | Servicio de noticias |
-| `chat` | HU-17 a HU-20, HU-22 | mensajes, no leidos | autenticacion | Servicio de chat (WebSocket) |
+| `chat` | HU-17 a HU-20, HU-22 | mensajes, no leidos | autenticacion, cuentas | Servicio de chat (WebSocket, solo lectores) |
 | `notificaciones` | HU-21 | ninguno | evento `NoticiaCreada` | Servicio de notificaciones |
+| `interacciones` | reacciones y comentarios | reacciones_noticias, comentarios_noticias | nadie | Servicio de interacciones |
 
 `entrada` (paginas, HU-07, y el chat de prueba) hace de gateway: valida la sesion, resuelve el seudonimo y llama a cada modulo.
 
@@ -40,7 +41,13 @@ El catalogo esta en la tabla propia `categorias_noticias` (id slug, nombre y ord
 
 ## Conversación del chat (HU-17 a HU-20)
 
-`ChatApi.enviar(cuentaId, texto)` y `ChatApi.avisarEscritura(cuentaId, activo)` resuelven el seudónimo desde `cuentas` dentro del módulo `chat`. `SalaChat` entrega `MensajeChat(autor, texto, Instant)` con la hora truncada al minuto, avisa del ingreso de cada conexión con `SuscripcionChat.ingresos` y difunde `EstadoEscritura` a todos menos a quien escribe. El adaptador de `entrada` serializa `mensaje`, `conectados`, `ingreso` y `escribiendo`; el cliente alinea las burbujas comparando con su propio seudónimo, inyectado como `data-yo` sin exponer la cuenta.
+El chat es exclusivo de lectores: Spring Security y `ChatHandshakeInterceptor` exigen `ROLE_LECTOR`, y los periodistas reciben 403. `ChatApi.enviar(cuentaId, texto)` y `ChatApi.avisarEscritura(cuentaId, activo)` resuelven el seudónimo desde `cuentas` dentro del módulo `chat`. `SalaChat` entrega `MensajeChat(autor, texto, Instant)` con la hora truncada al minuto, avisa del ingreso de cada conexión con `SuscripcionChat.ingresos` y difunde `EstadoEscritura` a todos menos a quien escribe. El adaptador de `entrada` serializa `mensaje`, `conectados`, `ingreso` y `escribiendo`; el cliente alinea las burbujas comparando con su propio seudónimo, inyectado como `data-yo` sin exponer la cuenta.
+
+## Lector, reacciones y comentarios
+
+`SolicitudRegistro` lleva el `Rol` elegido; `CuentasService` solo acepta LECTOR o PERIODISTA, nunca ADMINISTRADOR. El `AuthenticationSuccessHandler` envía al periodista a `/inicio` y al lector al feed. `/chat` y el handshake de `/ws` exigen `ROLE_LECTOR`: los periodistas quedan fuera por privacidad.
+
+El módulo `interacciones` es independiente: guarda `reacciones_noticias` y `comentarios_noticias` referenciadas por id de noticia, sin claves foráneas ni dependencia de `noticias`. `entrada` resuelve el seudónimo del lector con `CuentasApi` y lo copia al comentario, igual que se hace con el autor de una nota. Los comentarios se muestran con `th:text`, nunca como HTML.
 
 ## Avisos de noticias nuevas (HU-21)
 

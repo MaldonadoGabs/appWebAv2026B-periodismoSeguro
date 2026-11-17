@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-/** Puerta de /ws: exige sesion HTTP valida y rol PERIODISTA antes de abrir el socket. */
+/** Puerta de /ws: exige sesion HTTP valida y rol LECTOR antes de abrir el socket. */
 @Component
 class ChatHandshakeInterceptor implements HandshakeInterceptor {
-    private static final String ROL_PERIODISTA = "ROLE_PERIODISTA";
+    private static final String ROL_LECTOR = "ROLE_LECTOR";
 
     private final ChatApi chat;
 
@@ -30,7 +30,7 @@ class ChatHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
         Authentication autenticacion = SecurityContextHolder.getContext().getAuthentication();
         if (autenticacion == null || !autenticacion.isAuthenticated()
-            || autenticacion.getAuthorities().stream().noneMatch(a -> ROL_PERIODISTA.equals(a.getAuthority()))) {
+            || autenticacion.getAuthorities().stream().noneMatch(a -> ROL_LECTOR.equals(a.getAuthority()))) {
             return false;
         }
         if (!(request instanceof ServletServerHttpRequest servlet)) {

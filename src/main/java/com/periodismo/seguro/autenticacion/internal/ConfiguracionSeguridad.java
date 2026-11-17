@@ -43,7 +43,9 @@ class ConfiguracionSeguridad {
     SecurityFilterChain filtros(HttpSecurity http, SessionRegistry registro, ControlIntentos intentos) throws Exception {
         AuthenticationSuccessHandler exito = (req, res, auth) -> {
             intentos.registrarExito(req.getParameter("correo"));
-            res.sendRedirect(req.getContextPath() + "/inicio");
+            boolean periodista = auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_PERIODISTA".equals(a.getAuthority()));
+            res.sendRedirect(req.getContextPath() + (periodista ? "/inicio" : "/"));
         };
         AuthenticationFailureHandler fallo = (req, res, e) -> res.sendRedirect(
             req.getContextPath() + (e instanceof LockedException ? "/login?bloqueado" : "/login?error"));
@@ -56,8 +58,12 @@ class ConfiguracionSeguridad {
                 .requestMatchers("/noticias/imagenes/**").permitAll()
                 // HU-14: retirar noticias lo puede hacer su autor (PERIODISTA) o un ADMINISTRADOR.
                 .requestMatchers("/noticias/*/eliminar").hasAnyRole("PERIODISTA", "ADMINISTRADOR")
+                // El chat es exclusivo del lector: los periodistas no entran en ese WebSocket.
+                .requestMatchers("/chat", "/ws").hasRole("LECTOR")
+                .requestMatchers("/noticias/*/reaccionar", "/noticias/*/quitar-reaccion",
+                    "/noticias/*/comentar").hasRole("LECTOR")
                 .requestMatchers("/inicio", "/mis-notas", "/mis-notas/**", "/noticias/nueva",
-                    "/noticias/*/editar", "/noticias/*/confirmacion", "/chat", "/ws")
+                    "/noticias/*/editar", "/noticias/*/confirmacion")
                 .hasRole("PERIODISTA")
                 // HU-10 y HU-12: el feed, el detalle de una noticia y el resto de recursos son publicos.
                 .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health",

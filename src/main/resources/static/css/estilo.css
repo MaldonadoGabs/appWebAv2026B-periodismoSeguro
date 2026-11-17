@@ -271,3 +271,13 @@ input.error, textarea.error, select.error { border-color: var(--peligro); }
   .aviso-noticia { animation: aviso-entrada .2s ease-out; }
   @keyframes aviso-entrada { from { opacity: 0; transform: translateY(-.4rem); } to { opacity: 1; transform: translateY(0); } }
 }
+
+/* Reacciones y comentarios de lectores en el detalle publico */
+.interacciones { margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--linea); }
+.reacciones { display: flex; flex-wrap: wrap; gap: .75rem; font: 600 .85rem var(--cuerpo); }
+.reaccionar { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0; }
+.comentarios { list-style: none; padding: 0; margin: .75rem 0; }
+.comentarios li { padding: .6rem 0; border-bottom: 1px solid var(--regla); }
+.comentarios p { margin: .25rem 0 0; }
+.comentar { display: flex; flex-direction: column; gap: .5rem; }
+.comentar textarea { min-height: 5rem; resize: vertical; }

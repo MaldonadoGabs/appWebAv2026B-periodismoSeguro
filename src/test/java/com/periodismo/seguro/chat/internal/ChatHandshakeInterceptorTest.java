@@ -23,7 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-/** Solo entra al WebSocket quien tiene sesion valida y el rol PERIODISTA. */
+/** Solo entra al WebSocket quien tiene sesion valida y el rol LECTOR. */
 class ChatHandshakeInterceptorTest {
     private static final String CUENTA = "cuenta-1";
     private static final String SESION = "sesion-http-1";
@@ -54,14 +54,14 @@ class ChatHandshakeInterceptorTest {
 
     @Test
     void elPeriodistaConSesionValidaAbreElSocket() {
-        autenticar(CUENTA, "ROLE_PERIODISTA");
+        autenticar(CUENTA, "ROLE_LECTOR");
         assertTrue(interceptor.beforeHandshake(peticion, null, null, atributos));
         assertEquals(CUENTA, atributos.get(ChatWebSocketApi.CUENTA_ID));
     }
 
     @Test
-    void elLectorNoPuedeAbrirElSocket() {
-        autenticar(CUENTA, "ROLE_LECTOR");
+    void elPeriodistaNoPuedeAbrirElSocket() {
+        autenticar(CUENTA, "ROLE_PERIODISTA");
         assertFalse(interceptor.beforeHandshake(peticion, null, null, atributos));
         assertTrue(atributos.isEmpty());
     }
@@ -80,14 +80,14 @@ class ChatHandshakeInterceptorTest {
 
     @Test
     void unaSesionInvalidaNoAbreElSocket() {
-        autenticar(CUENTA, "ROLE_PERIODISTA");
+        autenticar(CUENTA, "ROLE_LECTOR");
         when(chat.conectar(SESION)).thenReturn(Optional.empty());
         assertFalse(interceptor.beforeHandshake(peticion, null, null, atributos));
     }
 
     @Test
     void noSePuedeUsarLaSesionDeOtraCuenta() {
-        autenticar("otra-cuenta", "ROLE_PERIODISTA");
+        autenticar("otra-cuenta", "ROLE_LECTOR");
         assertFalse(interceptor.beforeHandshake(peticion, null, null, atributos));
     }
 

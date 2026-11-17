@@ -20,6 +20,39 @@
         <span th:if="${noticia.modificadaEn != null}" th:text="' · Editada: ' + ${noticia.modificadaEn}"> · fecha de edición</span>
       </p>
     </article>
+
+    <section class="interacciones" aria-label="Reacciones y comentarios">
+      <h2>Reacciones</h2>
+      <div class="reacciones">
+        <span th:each="tipo : ${T(com.periodismo.seguro.interacciones.TipoReaccion).values()}"
+              th:text="${tipo.etiqueta()} + ': ' + ${conteo.get(tipo)}">Me gusta: 0</span>
+      </div>
+      <div class="reaccionar" th:if="${esLector}">
+        <form th:each="tipo : ${T(com.periodismo.seguro.interacciones.TipoReaccion).values()}"
+              method="post" th:action="@{/noticias/{id}/reaccionar(id=${noticia.id})}">
+          <input type="hidden" name="tipo" th:value="${tipo.name()}">
+          <button class="boton suave" type="submit"
+                  th:text="${miReaccion != null and miReaccion == tipo} ? 'Quitar ' + ${tipo.etiqueta()} : ${tipo.etiqueta()}">Reaccionar</button>
+        </form>
+      </div>
+      <p class="suave" th:if="${!esLector}">Inicia sesión como lector para reaccionar y comentar.</p>
+
+      <h2>Comentarios (<span th:text="${#lists.size(comentarios)}">0</span>)</h2>
+      <ul class="comentarios">
+        <li th:each="c : ${comentarios}">
+          <strong th:text="${c.autorSeudonimo}">Seudónimo</strong>
+          <span class="suave" th:text="' · ' + ${c.hora}"> · hora</span>
+          <p th:text="${c.texto}">Comentario</p>
+        </li>
+      </ul>
+      <form class="comentar" th:if="${esLector}" method="post"
+            th:action="@{/noticias/{id}/comentar(id=${noticia.id})}">
+        <label class="sr-only" for="comentario">Comentario</label>
+        <textarea id="comentario" name="texto" maxlength="500" required placeholder="Escribe un comentario…"></textarea>
+        <button class="boton principal" type="submit">Comentar</button>
+      </form>
+    </section>
+
     <p><a class="boton" th:href="@{/}">Volver al inicio</a></p>
   </main>
   <footer th:replace="~{fragments/base :: pie}"></footer>

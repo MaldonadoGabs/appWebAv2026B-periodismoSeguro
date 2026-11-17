@@ -1,6 +1,7 @@
 package com.periodismo.seguro.entrada;
 
 import com.periodismo.seguro.cuentas.CuentasApi;
+import com.periodismo.seguro.interacciones.InteraccionesApi;
 import com.periodismo.seguro.noticias.ArchivoImagen;
 import com.periodismo.seguro.noticias.CategoriaNoticia;
 import com.periodismo.seguro.noticias.ImagenAdjunta;
@@ -40,11 +41,14 @@ class NoticiaController {
     private final NoticiasApi noticias;
     private final CuentasApi cuentas;
     private final SanitizadorHtml sanitizador;
+    private final InteraccionesApi interacciones;
 
-    NoticiaController(NoticiasApi noticias, CuentasApi cuentas, SanitizadorHtml sanitizador) {
+    NoticiaController(NoticiasApi noticias, CuentasApi cuentas, SanitizadorHtml sanitizador,
+                      InteraccionesApi interacciones) {
         this.noticias = noticias;
         this.cuentas = cuentas;
         this.sanitizador = sanitizador;
+        this.interacciones = interacciones;
     }
 
     @GetMapping("/noticias/nueva")
@@ -97,10 +101,14 @@ class NoticiaController {
      * Si la noticia no existe, responde 404 con una pagina amigable.
      */
     @GetMapping("/noticias/{id}")
-    String detalle(@PathVariable String id, Model model) {
+    String detalle(@PathVariable String id, Principal principal, Model model) {
         NoticiaPublica noticia = noticias.obtener(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("noticia", noticia);
+        model.addAttribute("conteo", interacciones.conteo(id));
+        model.addAttribute("miReaccion",
+            interacciones.reaccionDe(principal == null ? null : principal.getName(), id).orElse(null));
+        model.addAttribute("comentarios", interacciones.comentarios(id));
         return "detalle-noticia";
     }
 

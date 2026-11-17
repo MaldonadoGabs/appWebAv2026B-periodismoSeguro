@@ -24,6 +24,12 @@ public class RegistroForm {
     @NotBlank(message = "Confirma la contraseña")
     private String confirmacion;
 
+    @NotBlank(message = "Elige qué tipo de cuenta quieres crear")
+    private String rol = "PERIODISTA";
+
+    public String getRol() { return rol; }
+    public void setRol(String rol) { this.rol = rol; }
+
     public String getCorreo() { return correo; }
     public void setCorreo(String correo) { this.correo = correo; }
     public String getNombreReal() { return nombreReal; }

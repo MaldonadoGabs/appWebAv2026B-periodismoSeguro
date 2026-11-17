@@ -39,13 +39,13 @@ Páginas disponibles:
 | Ruta | Qué es |
 |---|---|
 | `/` | Página principal: feed público de noticias + misión, visión y objetivo (`?pagina=1&tamano=10&q=&categoria=`) |
-| `/registro` | Registro de periodistas |
+| `/registro` | Registro de usuarios: eliges lector o periodista |
 | `/login` | Inicio de sesión |
 | `/recuperar` | Solicitud de recuperación de contraseña (el enlace se imprime en la consola) |
 | `/restablecer?token=...` | Definir una nueva contraseña con el enlace de recuperación (un solo uso, 30 minutos) |
 | `/inicio` | Panel del periodista (rol PERIODISTA; un LECTOR o ADMINISTRADOR recibe 403) |
 | `/mis-notas` | Lista paginada de las noticias del periodista autenticado (rol PERIODISTA) |
-| `/chat` | Chat en tiempo real entre periodistas sobre `/ws`: conversación tipo WhatsApp con autor seudónimo, hora, avisos de ingreso y estado de escritura (rol PERIODISTA) |
+| `/chat` | Chat de lectores sobre `/ws`: conversación tipo WhatsApp con autor seudónimo, hora, avisos de ingreso y estado de escritura (no accesible para periodistas) |
 | `/noticias/nueva` | Editor para redactar una noticia, con categoría obligatoria de la tabla del catálogo (rol PERIODISTA) |
 | `/noticias/{id}` | Detalle público de una noticia: título, texto, categoría, seudónimo y fechas. 404 amigable si no existe |
 | `/noticias/{id}/editar` | Editor de una noticia propia: carga los datos actuales y registra la fecha de edición (rol PERIODISTA, solo el autor) |
@@ -115,7 +115,9 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
 | `CrearNoticiaTest` | HU-09: se guardan encabezado, subtítulo, texto, seudónimo, categoría y hora redondeada a 1 h; las imágenes se guardan en BD con copia local en disco, nombre UUID y sin metadatos; se rechazan archivos que no son imagen, formatos no permitidos y más de 5 imágenes; se publica `NoticiaCreada` |
 | `CrearNoticiaWebTest` | HU-09: ruta protegida, CSRF, varias imágenes en un envío, HTML peligroso eliminado, errores junto al campo, recursos solo propios, imagen servida con `no-store` y 404 para una noticia inexistente |
-| `RolesWebTest` | HU-08: el periodista abre panel, mis notas, escritura y chat; sin sesión redirige al login; LECTOR y ADMINISTRADOR reciben 403 en rutas de periodista; el registro no permite elegir rol; el lector ve el feed sin enlaces de periodista |
+| `RolesWebTest` | El periodista publica pero no entra al chat; el lector entra al chat pero no publica; el registro elige lector/periodista y nunca administrador; redirección por rol tras el login |
+| `InteraccionesServiceTest` | Reacciones que se alternan/sustituyen y comentarios con seudónimo, sin exponer la cuenta del lector |
+| `ReaccionesComentariosWebTest` | Detalle público sin formularios, lector reacciona y comenta, periodista recibe 403 |
 | `MisNotasWebTest` | HU-01/HU-08: el periodista ve sus notas, nunca las de otro; la nota ajena da 404; estado vacío y paginación normalizada |
 | `CategoriaNoticiaWebTest` | HU-01: el formulario ofrece el catálogo de la tabla; sin categoría o con una inventada no se guarda; con una válida se muestra en la confirmación y en el feed |
 | `NoticiasAutorTest` | HU-01/HU-08: catálogo de 9 categorías desde la tabla, categoría guardada y validada en el servicio, nota sin categoría rechazada, "mis notas" solo del autor, `esAutor` |
@@ -129,7 +131,7 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `AvisosWebSocketHandlerTest` | HU-21: el adaptador envía JSON con `tipo`, título, seudónimo y enlace `/noticias/{id}` |
 | `AppTests` | La aplicación completa arranca |
 
-La clasificación por categorías (HU-01), HU-09 (crear noticias), HU-10 (feed público), HU-11 (búsqueda y filtro), HU-12 (detalle público), HU-13 (editar noticia propia), HU-14 (eliminar nota propia), HU-18 y HU-20 (chat y conectados), HU-21 (avisos de noticias nuevas), HU-25 (cabeceras y sesiones seguras) y HU-26 (privacidad en logs) ya están implementadas.
+La clasificación por categorías (HU-01), HU-09 (crear noticias), HU-10 (feed público), HU-11 (búsqueda y filtro), HU-12 (detalle público), HU-13 (editar noticia propia), HU-14 (eliminar nota propia), HU-18 y HU-20 (chat de lectores), HU-21 (avisos de noticias nuevas), HU-25 (cabeceras y sesiones seguras), HU-26 (privacidad en logs) y el sistema de reacciones y comentarios ya están implementados.
 
 ## Editor de noticias (HU-09)
 
@@ -190,7 +192,13 @@ El cliente `static/js/avisos.js` se carga desde la plantilla base, por lo que fu
 
 ## Conversación del chat (HU-17 a HU-20)
 
-`/chat` muestra una conversación tipo WhatsApp: burbujas propias y ajenas, seudónimo del autor, hora local con precisión de minuto, mensajes de sistema cuando alguien se une y un indicador de «está escribiendo…». El cliente solo conoce su propio seudónimo (para alinear sus burbujas); nunca recibe correo, nombre real ni id de cuenta. El aviso de escritura viaja como JSON por `/ws` y no se devuelve a quien lo envía.
+`/chat` es exclusivo de lectores y muestra una conversación tipo WhatsApp: burbujas propias y ajenas, seudónimo del autor, hora local con precisión de minuto, mensajes de sistema cuando alguien se une y un indicador de «está escribiendo…». El cliente solo conoce su propio seudónimo (para alinear sus burbujas); nunca recibe correo, nombre real ni id de cuenta. El aviso de escritura viaja como JSON por `/ws` y no se devuelve a quien lo envía. Los periodistas reciben 403 en `/chat` y en el handshake de `/ws`.
+
+## Lector, reacciones y comentarios
+
+El formulario de `/registro` permite elegir **lector** o **periodista**; no se puede pedir el rol de administrador. El periodista puede publicar y gestionar sus notas, pero **no tiene acceso al chat ni al WebSocket `/ws`**: ese canal es exclusivo del lector, por privacidad. Tras iniciar sesión, el periodista va a `/inicio` y el lector al feed `/`.
+
+En el detalle público de una nota, cualquier persona ve el contador de reacciones y los comentarios. Solo un lector con sesión puede reaccionar (Me gusta / Impacta / Importante; una reacción activa por nota y lector, que se alterna al repetirla) y dejar comentarios de hasta 500 caracteres. Los comentarios muestran el seudónimo y la hora al minuto, nunca la cuenta real.
 
 ## Cabeceras, sesiones y privacidad de logs (HU-25 y HU-26)
 
@@ -206,7 +214,8 @@ src/main/java/com/periodismo/seguro/
   autenticacion/    sesión y recuperación de clave (HU-03 a HU-06)
   seguridad/        rutas, roles y cabeceras       (HU-08, HU-25, HU-26)
   noticias/         CRUD y categorías de noticias  (HU-01, HU-09 a HU-14, HU-16)
-  chat/             chat en tiempo real            (HU-17 a HU-20, HU-22)
+  chat/             chat de lectores               (HU-17 a HU-20, HU-22)
+  interacciones/    reacciones y comentarios
   notificaciones/   avisos de noticias nuevas      (HU-21)
   entrada/          controladores web (gateway)
   validacion/       chat de prueba del stack

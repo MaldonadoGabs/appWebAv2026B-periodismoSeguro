@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface ChatApi {
     /**
      * Valida la sesion HTTP. Devuelve el id de cuenta autorizado a entrar, o vacio si la sesion no es valida.
-     * El rol PERIODISTA lo exige ademas Spring Security en el handshake de /ws.
+     * El rol LECTOR lo exige ademas Spring Security en el handshake de /ws.
      */
     Optional<String> conectar(String sesionId);
 

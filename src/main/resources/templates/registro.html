@@ -4,10 +4,16 @@
 <body>
   <header th:replace="~{fragments/base :: cabecera}"></header>
   <main class="pagina">
-    <h1><span>Registro</span> de periodistas</h1>
-    <p class="suave">Tu nombre real y tu correo nunca serán públicos. Publicarás con un seudónimo.</p>
+    <h1><span>Registro</span> de usuarios</h1>
+    <p class="suave">Tu nombre real y tu correo nunca serán públicos. Aparecerás con un seudónimo.</p>
 
     <form th:action="@{/registro}" th:object="${form}" method="post" novalidate>
+      <div class="campo">
+        <span class="etiqueta">Tipo de cuenta</span>
+        <label><input type="radio" th:field="*{rol}" value="PERIODISTA"> Periodista (puede publicar noticias)</label>
+        <label><input type="radio" th:field="*{rol}" value="LECTOR"> Lector (puede reaccionar, comentar y usar el chat)</label>
+        <div class="msg-error" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></div>
+      </div>
       <div class="campo">
         <label for="correo">Correo</label>
         <input id="correo" type="email" th:field="*{correo}" autocomplete="email">
