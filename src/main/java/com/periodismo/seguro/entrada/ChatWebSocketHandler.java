@@ -1,5 +1,7 @@
 package com.periodismo.seguro.entrada;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.periodismo.seguro.chat.ChatApi;
 import com.periodismo.seguro.chat.ChatWebSocketApi;
@@ -34,8 +36,15 @@ class ChatWebSocketHandler extends TextWebSocketHandler implements ChatWebSocket
         }
         String conexionId = sesion.getId();
         SuscripcionChat suscripcion = new SuscripcionChat(
-            texto -> enviarJson(sesion, conexionId, Map.of("tipo", "mensaje", "texto", texto)),
-            usuarios -> enviarJson(sesion, conexionId, Map.of("tipo", "conectados", "usuarios", usuarios)));
+            mensaje -> enviarJson(sesion, conexionId, Map.of(
+                "tipo", "mensaje",
+                "autor", mensaje.autorSeudonimo(),
+                "texto", mensaje.texto(),
+                "hora", mensaje.enviadoEn().toString())),
+            usuarios -> enviarJson(sesion, conexionId, Map.of("tipo", "conectados", "usuarios", usuarios)),
+            usuario -> enviarJson(sesion, conexionId, Map.of("tipo", "ingreso", "usuario", usuario)),
+            estado -> enviarJson(sesion, conexionId,
+                Map.of("tipo", "escribiendo", "usuario", estado.usuario(), "activo", estado.activo())));
         chat.abrirConexion(conexionId, cuentaId, suscripcion);
     }
 
@@ -52,7 +61,20 @@ class ChatWebSocketHandler extends TextWebSocketHandler implements ChatWebSocket
 
     @Override
     protected void handleTextMessage(@NonNull WebSocketSession sesion, @NonNull TextMessage mensaje) throws Exception {
-        chat.enviar(mensaje.getPayload());
+        if (!(sesion.getAttributes().get(CUENTA_ID) instanceof String cuentaId)) {
+            return;
+        }
+        String texto = mensaje.getPayload();
+        try {
+            JsonNode entrada = json.readTree(texto);
+            if (entrada.isObject() && "escribiendo".equals(entrada.path("tipo").asText())) {
+                chat.avisarEscritura(cuentaId, entrada.path("activo").asBoolean(false));
+                return;
+            }
+        } catch (JsonProcessingException e) {
+            // Texto plano de clientes antiguos: se trata como mensaje normal.
+        }
+        chat.enviar(cuentaId, texto);
     }
 
     @Override

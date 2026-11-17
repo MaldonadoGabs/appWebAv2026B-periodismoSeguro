@@ -6,20 +6,29 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.periodismo.seguro.autenticacion.AutenticacionApi;
+import com.periodismo.seguro.chat.EstadoEscritura;
+import com.periodismo.seguro.chat.MensajeChat;
 import com.periodismo.seguro.chat.SuscripcionChat;
 import com.periodismo.seguro.cuentas.CuentasApi;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** Mensajes y lista de conectados de la sala, siempre con seudonimos. */
+/** Conversacion de la sala: autor, hora, ingresos y escritura, siempre con seudonimos. */
 class ChatSalaTest {
+    private static final Instant INSTANTE = Instant.parse("2026-11-17T14:30:37Z");
+    private static final Instant HORA = Instant.parse("2026-11-17T14:30:00Z");
+
     private final SalaChat sala = new SalaChat();
     private final AutenticacionApi autenticacion = mock(AutenticacionApi.class);
     private final CuentasApi cuentas = mock(CuentasApi.class);
-    private final ChatService chat = new ChatService(autenticacion, cuentas, sala);
+    private final ChatService chat = new ChatService(
+        autenticacion, cuentas, sala, Clock.fixed(INSTANTE, ZoneOffset.UTC));
 
     @BeforeEach
     void preparar() {
@@ -28,16 +37,18 @@ class ChatSalaTest {
     }
 
     @Test
-    void elMensajeLlegaATodasLasConexiones() {
+    void elMensajeLlegaConAutorYHoraRedondeadaAlMinuto() {
         Registro uno = registro();
         Registro otro = registro();
         abrir("c1", "cuenta-1", uno);
         abrir("c2", "cuenta-2", otro);
 
-        chat.enviar("  texto compartido  ");
+        chat.enviar("cuenta-1", "  texto compartido  ");
 
-        assertEquals(List.of("texto compartido"), uno.mensajes);
-        assertEquals(List.of("texto compartido"), otro.mensajes);
+        MensajeChat esperado = new MensajeChat("Ana_Rojo", "texto compartido", HORA);
+        assertEquals(List.of(esperado), uno.mensajes);
+        assertEquals(List.of(esperado), otro.mensajes);
+        assertEquals(0, uno.mensajes.get(0).enviadoEn().getEpochSecond() % 60);
     }
 
     @Test
@@ -45,7 +56,7 @@ class ChatSalaTest {
         Registro registro = registro();
         abrir("c1", "cuenta-1", registro);
 
-        chat.enviar("   ");
+        chat.enviar("cuenta-1", "   ");
 
         assertTrue(registro.mensajes.isEmpty());
     }
@@ -58,9 +69,9 @@ class ChatSalaTest {
         abrir("c2", "cuenta-2", saliente);
         chat.cerrarConexion("c2");
 
-        chat.enviar("hola");
+        chat.enviar("cuenta-1", "hola");
 
-        assertEquals(List.of("hola"), emisor.mensajes);
+        assertEquals(1, emisor.mensajes.size());
         assertTrue(saliente.mensajes.isEmpty());
     }
 
@@ -68,12 +79,13 @@ class ChatSalaTest {
     void unReceptorRotoNoImpideQueLosDemasRecibanElMensaje() {
         Registro sano = registro();
         chat.abrirConexion("roto", "cuenta-1", new SuscripcionChat(
-            texto -> { throw new IllegalStateException("fallo"); }, usuarios -> { }));
+            mensaje -> { throw new IllegalStateException("fallo"); }, conectados -> { },
+            ingreso -> { }, estado -> { }));
         abrir("c2", "cuenta-2", sano);
 
-        chat.enviar("hola");
+        chat.enviar("cuenta-2", "hola");
 
-        assertEquals(List.of("hola"), sano.mensajes);
+        assertEquals(1, sano.mensajes.size());
     }
 
     @Test
@@ -102,6 +114,30 @@ class ChatSalaTest {
     }
 
     @Test
+    void alEntrarAlguienSeAvisaConSuSeudonimo() {
+        Registro primero = registro();
+        Registro segundo = registro();
+        abrir("c1", "cuenta-1", primero);
+        abrir("c2", "cuenta-2", segundo);
+
+        assertEquals(List.of("Ana_Rojo", "Zorro_25"), primero.ingresos);
+        assertEquals(List.of("Zorro_25"), segundo.ingresos);
+    }
+
+    @Test
+    void elAvisoDeEscrituraNoSeEnviaAQuienEscribe() {
+        Registro emisor = registro();
+        Registro otro = registro();
+        abrir("c1", "cuenta-1", emisor);
+        abrir("c2", "cuenta-2", otro);
+
+        chat.avisarEscritura("cuenta-1", true);
+
+        assertTrue(emisor.escribiendo.isEmpty());
+        assertEquals(List.of(new EstadoEscritura("Ana_Rojo", true)), otro.escribiendo);
+    }
+
+    @Test
     void sinConexionesLaListaEstaVacia() {
         assertTrue(chat.usuariosConectados().isEmpty());
     }
@@ -116,8 +152,8 @@ class ChatSalaTest {
     }
 
     private void abrir(String conexionId, String cuentaId, Registro registro) {
-        chat.abrirConexion(conexionId, cuentaId,
-            new SuscripcionChat(registro.mensajes::add, registro.conectados::add));
+        chat.abrirConexion(conexionId, cuentaId, new SuscripcionChat(
+            registro.mensajes::add, registro.conectados::add, registro.ingresos::add, registro.escribiendo::add));
     }
 
     private static Registro registro() {
@@ -125,7 +161,9 @@ class ChatSalaTest {
     }
 
     private static final class Registro {
-        private final List<String> mensajes = new ArrayList<>();
+        private final List<MensajeChat> mensajes = new ArrayList<>();
         private final List<List<String>> conectados = new ArrayList<>();
+        private final List<String> ingresos = new ArrayList<>();
+        private final List<EstadoEscritura> escribiendo = new ArrayList<>();
     }
 }

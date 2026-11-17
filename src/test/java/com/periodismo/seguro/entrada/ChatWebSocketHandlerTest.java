@@ -12,7 +12,10 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.periodismo.seguro.chat.ChatApi;
+import com.periodismo.seguro.chat.EstadoEscritura;
+import com.periodismo.seguro.chat.MensajeChat;
 import com.periodismo.seguro.chat.SuscripcionChat;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,31 +25,41 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-/** El adaptador registra conexiones en ChatApi y envia mensajes y conectados como JSON. */
+/** El adaptador traduce la conversacion del dominio a JSON y los avisos del cliente a ChatApi. */
 class ChatWebSocketHandlerTest {
     private final ChatApi chat = mock(ChatApi.class);
     private final ObjectMapper json = new ObjectMapper();
     private final ChatWebSocketHandler handler = new ChatWebSocketHandler(chat, json);
 
     @Test
-    void unaConexionAutorizadaRecibeMensajesYConectados() throws Exception {
+    void unaConexionAutorizadaRecibeTodosLosEventosComoJson() throws Exception {
         WebSocketSession sesion = sesion(true);
 
         handler.afterConnectionEstablished(sesion);
 
         ArgumentCaptor<SuscripcionChat> suscripcion = ArgumentCaptor.forClass(SuscripcionChat.class);
         verify(chat).abrirConexion(eq("ws-1"), eq("cuenta-1"), suscripcion.capture());
-        suscripcion.getValue().mensajes().accept("hola");
+        suscripcion.getValue().mensajes().accept(
+            new MensajeChat("Ana_Rojo", "hola", Instant.parse("2026-11-17T14:30:00Z")));
         suscripcion.getValue().conectados().accept(List.of("Ana_Rojo"));
+        suscripcion.getValue().ingresos().accept("Zorro_25");
+        suscripcion.getValue().escribiendo().accept(new EstadoEscritura("Zorro_25", true));
 
         ArgumentCaptor<TextMessage> enviados = ArgumentCaptor.forClass(TextMessage.class);
-        verify(sesion, times(2)).sendMessage(enviados.capture());
+        verify(sesion, times(4)).sendMessage(enviados.capture());
         Map<?, ?> mensaje = json.readValue(enviados.getAllValues().get(0).getPayload(), Map.class);
         assertEquals("mensaje", mensaje.get("tipo"));
+        assertEquals("Ana_Rojo", mensaje.get("autor"));
         assertEquals("hola", mensaje.get("texto"));
+        assertEquals("2026-11-17T14:30:00Z", mensaje.get("hora"));
         Map<?, ?> conectados = json.readValue(enviados.getAllValues().get(1).getPayload(), Map.class);
         assertEquals("conectados", conectados.get("tipo"));
-        assertEquals(List.of("Ana_Rojo"), conectados.get("usuarios"));
+        Map<?, ?> ingreso = json.readValue(enviados.getAllValues().get(2).getPayload(), Map.class);
+        assertEquals("ingreso", ingreso.get("tipo"));
+        assertEquals("Zorro_25", ingreso.get("usuario"));
+        Map<?, ?> escritura = json.readValue(enviados.getAllValues().get(3).getPayload(), Map.class);
+        assertEquals("escribiendo", escritura.get("tipo"));
+        assertEquals(true, escritura.get("activo"));
     }
 
     @Test
@@ -60,9 +73,18 @@ class ChatWebSocketHandlerTest {
     }
 
     @Test
-    void elTextoRecibidoSeEntregaALaSala() throws Exception {
+    void elTextoRecibidoSeEntregaALaSalaConSuAutor() throws Exception {
         handler.handleTextMessage(sesion(true), new TextMessage("mensaje"));
-        verify(chat).enviar("mensaje");
+        verify(chat).enviar("cuenta-1", "mensaje");
+    }
+
+    @Test
+    void unAvisoDeEscrituraDelClienteSeEntregaAlDominio() throws Exception {
+        handler.handleTextMessage(sesion(true),
+            new TextMessage("{\"tipo\":\"escribiendo\",\"activo\":true}"));
+
+        verify(chat).avisarEscritura("cuenta-1", true);
+        verify(chat, never()).enviar(anyString(), anyString());
     }
 
     @Test

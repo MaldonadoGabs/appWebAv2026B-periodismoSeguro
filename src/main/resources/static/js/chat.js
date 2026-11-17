@@ -1,59 +1,125 @@
-const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
-const estado = document.getElementById('estado');
-const log = document.getElementById('log');
-const conectados = document.getElementById('conectados');
-const total = document.getElementById('total-conectados');
+/*
+ * Chat de periodistas: conversacion tipo WhatsApp, sin librerias ni recursos externos.
+ * El servidor envia solo seudonimos y la hora con precision de minuto.
+ */
+(function () {
+  var raiz = document.querySelector('[data-yo]');
+  var yo = raiz ? raiz.getAttribute('data-yo') : '';
+  var socket = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
+  var estado = document.getElementById('estado');
+  var log = document.getElementById('log');
+  var conectados = document.getElementById('conectados');
+  var total = document.getElementById('total-conectados');
+  var escribiendo = document.getElementById('escribiendo');
+  var campo = document.getElementById('t');
+  var formulario = document.getElementById('f');
+  var temporizador = null;
+  var ultimoAviso = 0;
 
-function mostrarSinConexion() {
-  conectados.replaceChildren();
-  const li = document.createElement('li');
-  li.className = 'suave';
-  li.textContent = 'Sin conexión';
-  conectados.appendChild(li);
-  total.textContent = '0';
-}
+  function horaLocal(iso) {
+    var fecha = new Date(iso);
+    if (isNaN(fecha.getTime())) return '';
+    return fecha.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
 
-function pintarConectados(usuarios) {
-  conectados.replaceChildren();
-  total.textContent = String(usuarios.length);
-  if (usuarios.length === 0) {
-    const li = document.createElement('li');
-    li.className = 'suave';
-    li.textContent = 'Nadie conectado';
-    conectados.appendChild(li);
-    return;
-  }
-  for (const usuario of usuarios) {
-    const li = document.createElement('li');
-    li.textContent = usuario;
-    conectados.appendChild(li);
-  }
-}
+  function pintarMensaje(autor, texto, hora) {
+    var propio = autor === yo;
+    var li = document.createElement('li');
+    li.className = 'mensaje' + (propio ? ' propio' : '');
 
-ws.onopen = () => estado.textContent = 'conectado';
-ws.onerror = () => estado.textContent = 'error';
-ws.onclose = () => {
-  estado.textContent = 'desconectado';
-  mostrarSinConexion();
-};
-ws.onmessage = e => {
-  let evento = null;
-  try { evento = JSON.parse(e.data); } catch { /* compatibilidad con texto plano */ }
-  if (evento && evento.tipo === 'conectados') {
-    pintarConectados(Array.isArray(evento.usuarios) ? evento.usuarios : []);
-    return;
+    if (!propio) {
+      var nombre = document.createElement('span');
+      nombre.className = 'autor';
+      nombre.textContent = autor;
+      li.appendChild(nombre);
+    }
+    var burbuja = document.createElement('div');
+    burbuja.className = 'burbuja';
+    burbuja.textContent = texto;
+    li.appendChild(burbuja);
+
+    var marca = document.createElement('time');
+    marca.className = 'hora';
+    marca.textContent = horaLocal(hora);
+    li.appendChild(marca);
+
+    log.appendChild(li);
+    log.scrollTop = log.scrollHeight;
   }
-  const texto = evento && evento.tipo === 'mensaje' ? evento.texto : e.data;
-  const li = document.createElement('li');
-  li.textContent = texto;
-  log.prepend(li);
-};
-document.getElementById('f').onsubmit = ev => {
-  ev.preventDefault();
-  const t = document.getElementById('t');
-  const texto = t.value.trim();
-  if (texto && ws.readyState === WebSocket.OPEN) {
-    ws.send(texto);
-    t.value = '';
+
+  function pintarIngreso(usuario) {
+    var li = document.createElement('li');
+    li.className = 'mensaje sistema';
+    li.textContent = usuario + ' se unió a la sala';
+    log.appendChild(li);
+    log.scrollTop = log.scrollHeight;
   }
-};
+
+  function pintarConectados(usuarios) {
+    conectados.replaceChildren();
+    total.textContent = String(usuarios.length);
+    if (usuarios.length === 0) {
+      var li = document.createElement('li');
+      li.className = 'suave';
+      li.textContent = 'Nadie conectado';
+      conectados.appendChild(li);
+      return;
+    }
+    for (var i = 0; i < usuarios.length; i++) {
+      var item = document.createElement('li');
+      item.textContent = usuarios[i];
+      conectados.appendChild(item);
+    }
+  }
+
+  function avisarEscritura(activo) {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ tipo: 'escribiendo', activo: activo }));
+    }
+  }
+
+  socket.onopen = function () { estado.textContent = 'conectado'; };
+  socket.onerror = function () { estado.textContent = 'error'; };
+  socket.onclose = function () {
+    estado.textContent = 'desconectado';
+    conectados.replaceChildren();
+    total.textContent = '0';
+    escribiendo.textContent = '';
+  };
+
+  socket.onmessage = function (evento) {
+    var dato;
+    try { dato = JSON.parse(evento.data); } catch (error) { return; }
+    if (!dato) return;
+
+    if (dato.tipo === 'mensaje') {
+      pintarMensaje(dato.autor || 'Periodista', dato.texto || '', dato.hora || '');
+    } else if (dato.tipo === 'conectados') {
+      pintarConectados(Array.isArray(dato.usuarios) ? dato.usuarios : []);
+    } else if (dato.tipo === 'ingreso') {
+      pintarIngreso(dato.usuario || 'Un periodista');
+    } else if (dato.tipo === 'escribiendo') {
+      escribiendo.textContent = dato.activo ? (dato.usuario + ' está escribiendo…') : '';
+    }
+  };
+
+  campo.addEventListener('input', function () {
+    var ahora = Date.now();
+    if (ahora - ultimoAviso > 1000) {
+      avisarEscritura(true);
+      ultimoAviso = ahora;
+    }
+    clearTimeout(temporizador);
+    temporizador = setTimeout(function () { avisarEscritura(false); }, 1500);
+  });
+
+  formulario.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var texto = campo.value.trim();
+    if (!texto || socket.readyState !== WebSocket.OPEN) return;
+    socket.send(texto);
+    campo.value = '';
+    clearTimeout(temporizador);
+    avisarEscritura(false);
+  });
+})();
