@@ -45,7 +45,7 @@ Páginas disponibles:
 | `/restablecer?token=...` | Definir una nueva contraseña con el enlace de recuperación (un solo uso, 30 minutos) |
 | `/inicio` | Panel del periodista (rol PERIODISTA; un LECTOR o ADMINISTRADOR recibe 403) |
 | `/mis-notas` | Lista paginada de las noticias del periodista autenticado (rol PERIODISTA) |
-| `/chat` | Chat en tiempo real entre periodistas sobre el WebSocket `/ws`, con lista de conectados por seudónimo (rol PERIODISTA) |
+| `/chat` | Chat en tiempo real entre periodistas sobre `/ws`: conversación tipo WhatsApp con autor seudónimo, hora, avisos de ingreso y estado de escritura (rol PERIODISTA) |
 | `/noticias/nueva` | Editor para redactar una noticia, con categoría obligatoria de la tabla del catálogo (rol PERIODISTA) |
 | `/noticias/{id}` | Detalle público de una noticia: título, texto, categoría, seudónimo y fechas. 404 amigable si no existe |
 | `/noticias/{id}/editar` | Editor de una noticia propia: carga los datos actuales y registra la fecha de edición (rol PERIODISTA, solo el autor) |
@@ -121,7 +121,8 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `NoticiasAutorTest` | HU-01/HU-08: catálogo de 9 categorías desde la tabla, categoría guardada y validada en el servicio, nota sin categoría rechazada, "mis notas" solo del autor, `esAutor` |
 | `CategoriaTablaTest` | HU-01: tabla propia cargada por script sin duplicados, la API lee el catálogo de la tabla (no de una lista fija) y toda nota se guarda con una categoría válida |
 | `ServicioUsuariosRolTest` | HU-08: el usuario de Spring Security recibe el rol guardado en la cuenta (PERIODISTA, LECTOR, ADMINISTRADOR) |
-| `ChatConectadosWebTest` | HU-20: la sala muestra el panel de conectados con su contador |
+| `ChatConectadosWebTest` | HU-20: la sala muestra el panel de conectados con su contador y la estructura de la conversación |
+| `ChatSalaTest` / `ChatWebSocketHandlerTest` | Mensajes con seudónimo y hora al minuto, aviso de ingreso, escritura sin eco al emisor y serialización JSON de todos los eventos |
 | `NotificacionesServiceTest` | HU-21: el evento de publicación se convierte en aviso con título y seudónimo para todas las conexiones abiertas |
 | `AvisosWebSocketHandlerTest` | HU-21: el adaptador envía JSON con `tipo`, título, seudónimo y enlace `/noticias/{id}` |
 | `AppTests` | La aplicación completa arranca |
@@ -184,6 +185,10 @@ Desde «Mis notas» el autor abre `/noticias/{id}/eliminar`, una página de conf
 Al publicar una nota, `NoticiaCreada` viaja con el título y el seudónimo del autor. El módulo `notificaciones` lo convierte, **después del commit**, en un aviso que se emite por el WebSocket público `/avisos-ws`. Ese endpoint es distinto del `/ws` del chat: no exige sesión, así que cualquier persona con una pantalla abierta del portal recibe el aviso sin recargar.
 
 El cliente `static/js/avisos.js` se carga desde la plantilla base, por lo que funciona en **cualquier pantalla**, no solo en el chat. Muestra el título, el seudónimo y un enlace al detalle `/noticias/{id}`; el lector puede cerrarlo y desaparece solo. No se guarda correo, nombre real, IP ni identificador del lector.
+
+## Conversación del chat (HU-17 a HU-20)
+
+`/chat` muestra una conversación tipo WhatsApp: burbujas propias y ajenas, seudónimo del autor, hora local con precisión de minuto, mensajes de sistema cuando alguien se une y un indicador de «está escribiendo…». El cliente solo conoce su propio seudónimo (para alinear sus burbujas); nunca recibe correo, nombre real ni id de cuenta. El aviso de escritura viaja como JSON por `/ws` y no se devuelve a quien lo envía.
 
 ## Cabeceras, sesiones y privacidad de logs (HU-25 y HU-26)
 

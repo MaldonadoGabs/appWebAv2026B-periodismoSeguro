@@ -30,6 +30,9 @@ class ChatConectadosWebTest {
             .andExpect(content().string(containsString("Conectados")))
             .andExpect(content().string(containsString("id=\"conectados\"")))
             .andExpect(content().string(containsString("id=\"total-conectados\"")))
+            .andExpect(content().string(containsString("id=\"log\"")))
+            .andExpect(content().string(containsString("id=\"escribiendo\"")))
+            .andExpect(content().string(containsString("data-yo=")))
             .andExpect(content().string(containsString("/js/chat.js")));
     }
 }
