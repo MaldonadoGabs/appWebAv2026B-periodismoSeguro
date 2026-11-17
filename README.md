@@ -113,13 +113,15 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `EnvioRecuperacionResendTest` | El correo de recuperacion se envia por la API de Resend (simulada), sin registrar el correo ni el token en logs, y la consola es el proveedor por defecto |
 | `EstiloWebTest` | Las páginas cargan la hoja de estilos, el feed y las fuentes propias, y no cargan recursos de otros dominios |
 | `ReglasArquitecturaTest` | Los módulos solo usan la API pública de los demás, sin ciclos y sin exponer JPA |
-| `CrearNoticiaTest` | HU-09: se guardan encabezado, subtítulo, texto, seudónimo, categoría y hora redondeada a 1 h; las imágenes acaban en disco con nombre UUID y sin metadatos; se rechazan archivos que no son imagen, formatos no permitidos y más de 5 imágenes; se publica `NoticiaCreada` |
+| `CrearNoticiaTest` | HU-09: se guardan encabezado, subtítulo, texto, seudónimo, categoría y hora redondeada a 1 h; las imágenes se guardan en BD con copia local en disco, nombre UUID y sin metadatos; se rechazan archivos que no son imagen, formatos no permitidos y más de 5 imágenes; se publica `NoticiaCreada` |
 | `CrearNoticiaWebTest` | HU-09: ruta protegida, CSRF, varias imágenes en un envío, HTML peligroso eliminado, errores junto al campo, recursos solo propios, imagen servida con `no-store` y 404 para una noticia inexistente |
 | `RolesWebTest` | HU-08: el periodista abre panel, mis notas, escritura y chat; sin sesión redirige al login; LECTOR y ADMINISTRADOR reciben 403 en rutas de periodista; el registro no permite elegir rol; el lector ve el feed sin enlaces de periodista |
 | `MisNotasWebTest` | HU-01/HU-08: el periodista ve sus notas, nunca las de otro; la nota ajena da 404; estado vacío y paginación normalizada |
 | `CategoriaNoticiaWebTest` | HU-01: el formulario ofrece el catálogo de la tabla; sin categoría o con una inventada no se guarda; con una válida se muestra en la confirmación y en el feed |
 | `NoticiasAutorTest` | HU-01/HU-08: catálogo de 9 categorías desde la tabla, categoría guardada y validada en el servicio, nota sin categoría rechazada, "mis notas" solo del autor, `esAutor` |
 | `CategoriaTablaTest` | HU-01: tabla propia cargada por script sin duplicados, la API lee el catálogo de la tabla (no de una lista fija) y toda nota se guarda con una categoría válida |
+| `AlmacenImagenesPersistenteTest` | La imagen sigue disponible desde la BD aunque desaparezca el archivo local, y se borra de ambos sitios al eliminarla |
+| `ImagenesDespuesLogoutWebTest` | La imagen de una nota pública sigue sirviéndose sin sesión después del logout y el detalle no expone la cuenta del autor |
 | `ServicioUsuariosRolTest` | HU-08: el usuario de Spring Security recibe el rol guardado en la cuenta (PERIODISTA, LECTOR, ADMINISTRADOR) |
 | `ChatConectadosWebTest` | HU-20: la sala muestra el panel de conectados con su contador y la estructura de la conversación |
 | `ChatSalaTest` / `ChatWebSocketHandlerTest` | Mensajes con seudónimo y hora al minuto, aviso de ingreso, escritura sin eco al emisor y serialización JSON de todos los eventos |
@@ -141,7 +143,7 @@ Desde `/noticias/nueva` el periodista redacta y modifica su nota antes de guarda
 - Formatos: PNG y JPEG, hasta 5 MB por archivo y 5 imágenes por noticia.
 - El HTML del editor se reduce a una lista blanca (jsoup) antes de guardarse: sin `script`, sin atributos de eventos y sin imágenes incrustadas de otros dominios.
 - Cada imagen se **re-codifica** para eliminar EXIF/GPS y se guarda con un nombre UUID: nunca se conserva el nombre original del archivo. La referencia queda en `imagenes_noticias`, sin claves foráneas.
-- **Limitación:** el disco de Azure Container Apps es efímero, así que las imágenes se pierden al reiniciar o desplegar. El puerto `AlmacenImagenes` aísla el dominio del almacenamiento para migrar a BD o a un volumen montado en `APP_IMAGENES_DIR` sin reescribir la lógica. La re-codificación no aplica la orientación EXIF de la foto original.
+- **Persistencia:** los bytes se guardan en la tabla `imagenes_almacenadas` y además se escriben en `APP_IMAGENES_DIR` como copia local. Si el disco efímero se pierde al reiniciar o desplegar, la imagen se sirve desde la BD y el detalle público sigue viéndola. El puerto `AlmacenImagenes` aísla el dominio del almacenamiento. La re-codificación no aplica la orientación EXIF de la foto original.
 - Desde HU-13, una noticia ya guardada se edita en `/noticias/{id}/editar`: el editor carga los datos actuales y al guardar se registra la fecha de modificación (redondeada a 1 h, como la de creación).
 - Desde HU-25, la CSP está activa con `img-src 'self' blob:`, para que el editor pueda mostrar las miniaturas locales de las imágenes seleccionadas antes de guardarlas.
 - Desde HU-10, `/noticias/imagenes/{id}` es pública para que el feed pueda mostrar las fotos; crear y editar noticias sigue exigiendo sesión y rol PERIODISTA.
@@ -154,7 +156,7 @@ Cada nota guarda el slug de su categoría en una columna obligatoria. El formula
 
 ## Feed de noticias (HU-10)
 
-La página principal `/` muestra **Últimas noticias**: un feed público, sin cuenta y sin rastreo, con 10 noticias por página (`?pagina=1&tamano=10`, máximo 50). Cada tarjeta muestra encabezado, subtítulo, extracto en texto plano, seudónimo del autor y fecha redondeada a 1 h; solo incluye la primera imagen si el archivo sigue en disco.
+La página principal `/` muestra **Últimas noticias**: un feed público, sin cuenta y sin rastreo, con 10 noticias por página (`?pagina=1&tamano=10`, máximo 50). Cada tarjeta muestra encabezado, subtítulo, extracto en texto plano, seudónimo del autor y fecha redondeada a 1 h; solo incluye la primera imagen si sigue disponible en disco o en la copia persistente.
 
 Decisiones tomadas en esta historia:
 
@@ -178,7 +180,7 @@ Desde HU-11 el feed acepta `?q=texto&categoria=slug` para buscar por título/pal
 
 ## Eliminar noticias (HU-14)
 
-Desde «Mis notas» el autor abre `/noticias/{id}/eliminar`, una página de confirmación explícita: el `GET` solo muestra el aviso y el borrado exige un `POST` con CSRF. Solo el autor de la nota o un administrador puede hacerlo; otra cuenta recibe 404 para no revelar que la noticia existe. Al confirmar se eliminan la fila, sus referencias de imágenes y los archivos en disco, y se redirige a `/mis-notas` (o al feed para el administrador) con un mensaje de confirmación.
+Desde «Mis notas» el autor abre `/noticias/{id}/eliminar`, una página de confirmación explícita: el `GET` solo muestra el aviso y el borrado exige un `POST` con CSRF. Solo el autor de la nota o un administrador puede hacerlo; otra cuenta recibe 404 para no revelar que la noticia existe. Al confirmar se eliminan la fila, sus referencias de imágenes, los archivos en disco y su copia en BD, y se redirige a `/mis-notas` (o al feed para el administrador) con un mensaje de confirmación.
 
 ## Avisos de noticias nuevas (HU-21)
 

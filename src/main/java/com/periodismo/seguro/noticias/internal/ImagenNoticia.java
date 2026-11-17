@@ -6,8 +6,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * HU-09: referencia a una imagen de la noticia. El archivo vive en disco, aqui solo se guarda
- * el nombre generado (UUID), sin el nombre original ni metadatos que puedan identificar al periodista.
+ * HU-09: referencia a una imagen de la noticia. Los bytes viven en la copia persistente (y en
+ * disco local como cache); aqui solo se guarda el nombre generado (UUID), sin el nombre original
+ * ni metadatos que puedan identificar al periodista.
  * Se relaciona por id, sin claves foraneas, como pide la arquitectura modular.
  */
 @Entity
