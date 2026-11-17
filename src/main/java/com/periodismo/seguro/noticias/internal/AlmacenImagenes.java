@@ -16,4 +16,7 @@ interface AlmacenImagenes {
 
     /** HU-10: true si el archivo sigue ahi. El feed omite la imagen si el disco se perdio. */
     boolean existe(String nombreGuardado);
+
+    /** HU-14: borra el archivo al eliminar la nota. No hace nada si ya no esta. */
+    void eliminar(String nombreGuardado);
 }

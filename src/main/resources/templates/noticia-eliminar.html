@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/base :: head('Eliminar noticia')}"></head>
+<body>
+  <header th:replace="~{fragments/base :: cabecera}"></header>
+  <main class="pagina">
+    <h1><span>Confirmar</span> eliminación</h1>
+    <p class="nota demo">Esta acción retira la noticia de forma permanente y también borra sus imágenes. No se puede deshacer.</p>
+
+    <article class="panel">
+      <h2 th:text="${noticia.titulo}">Encabezado</h2>
+      <p class="suave" th:text="${noticia.subtitulo}">Subtítulo</p>
+      <p class="firma"><span th:text="${noticia.autorSeudonimo}">Seudónimo</span>
+        <span th:if="${noticia.categoria != null}" th:text="' · ' + ${noticia.categoria}"> · categoría</span></p>
+    </article>
+
+    <form method="post" th:action="@{/noticias/{id}/eliminar(id=${noticia.id})}">
+      <button class="boton" type="submit">Sí, eliminar la noticia</button>
+      <a class="boton" th:href="@{/mis-notas}">Cancelar</a>
+    </form>
+  </main>
+  <footer th:replace="~{fragments/base :: pie}"></footer>
+</body>
+</html>

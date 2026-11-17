@@ -64,8 +64,13 @@ public interface NoticiasApi {
      */
     boolean editar(String autorCuentaId, String id, SolicitudNoticia solicitud);
 
-    /** HU-14: requiere confirmacion. */
-    boolean eliminar(String autorCuentaId, String id, boolean confirmado);
+    /**
+     * HU-14: elimina la nota solo con confirmacion explícita y solo si la pide su autor
+     * o un administrador. Borra tambien sus imagenes y referencias. Devuelve false si no
+     * existe, falta la confirmacion o la cuenta no tiene permiso.
+     * El modulo no consulta roles: {@code administrador} lo resuelve la capa de entrada.
+     */
+    boolean eliminar(String cuentaId, String id, boolean confirmado, boolean administrador);
 
     /** HU-01: categorias de la tabla de catalogo, en el orden en que se muestran. */
     List<CategoriaNoticia> categorias();

@@ -34,6 +34,10 @@ El catalogo esta en la tabla propia `categorias_noticias` (id slug, nombre y ord
 
 `Noticia.categoria` guarda el slug y es obligatoria. `CatalogoCategorias` lee la tabla y `NoticiasApi.categorias()` devuelve los pares id/nombre; no queda ninguna lista fija en codigo. `NoticiasService` rechaza una nota sin categoria o con un id ausente en la tabla. Anadir o cambiar categorias es un cambio de datos del script, no de codigo.
 
+## Borrado de noticias (HU-14)
+
+`NoticiasApi.eliminar(cuentaId, id, confirmado, administrador)` exige confirmación explícita. El módulo `noticias` solo compara el id del autor con el de la cuenta y acepta el flag `administrador` que le pasa `entrada`, que es quien sabe el rol; así `noticias` sigue sin depender de `cuentas`. El borrado usa el puerto `AlmacenImagenes.eliminar(...)` para retirar los archivos y borra también las referencias de `imagenes_noticias`, sin claves foráneas.
+
 ## Privacidad (HU-26)
 
 Nunca registrar IP, identificadores del lector ni datos reales del periodista. La hora se redondea a 1 h.

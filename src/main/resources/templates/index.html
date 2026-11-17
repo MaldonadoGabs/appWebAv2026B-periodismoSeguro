@@ -4,6 +4,7 @@
 <body>
   <header th:replace="~{fragments/base :: cabecera}"></header>
   <main class="pagina ancha">
+    <p class="nota ok" th:if="${mensaje}" th:text="${mensaje}"></p>
     <section class="hero">
       <h1><span>Periodismo</span> Seguro</h1>
       <p class="lectura">Una plataforma donde el periodista firma con un seudónimo, y nadie puede unirlo a su nombre.</p>

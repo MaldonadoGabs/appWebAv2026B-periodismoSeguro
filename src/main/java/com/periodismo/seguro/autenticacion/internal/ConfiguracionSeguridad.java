@@ -54,6 +54,8 @@ class ConfiguracionSeguridad {
                 // IMPORTANTE: las rutas especificas van ANTES de /noticias/{id}, porque este patron
                 // de un solo segmento tambien coincides con /noticias/nueva y lo abriria a cualquiera.
                 .requestMatchers("/noticias/imagenes/**").permitAll()
+                // HU-14: retirar noticias lo puede hacer su autor (PERIODISTA) o un ADMINISTRADOR.
+                .requestMatchers("/noticias/*/eliminar").hasAnyRole("PERIODISTA", "ADMINISTRADOR")
                 .requestMatchers("/inicio", "/mis-notas", "/mis-notas/**", "/noticias/nueva",
                     "/noticias/*/editar", "/noticias/*/confirmacion", "/chat", "/ws")
                 .hasRole("PERIODISTA")

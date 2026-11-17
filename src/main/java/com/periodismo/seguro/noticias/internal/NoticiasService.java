@@ -189,7 +189,27 @@ class NoticiasService implements NoticiasApi {
         return true;
     }
 
-    @Override public boolean eliminar(String autorCuentaId, String id, boolean confirmado) { return false; }
+    /** HU-14: confirmacion obligatoria; el autor o un administrador pueden retirar la nota. */
+    @Override
+    @Transactional
+    public boolean eliminar(String cuentaId, String id, boolean confirmado, boolean administrador) {
+        if (!confirmado || cuentaId == null || id == null) {
+            return false;
+        }
+        Noticia noticia = noticias.findById(id).orElse(null);
+        if (noticia == null) {
+            return false;
+        }
+        boolean autor = cuentaId.equals(noticia.getAutorCuentaId());
+        if (!autor && !administrador) {
+            return false;
+        }
+        List<ImagenNoticia> imagenes = imagenesNoticia.findByNoticiaIdOrderByOrdenAsc(id);
+        imagenes.forEach(i -> almacen.eliminar(i.getNombreGuardado()));
+        imagenesNoticia.deleteAll(imagenes);
+        noticias.delete(noticia);
+        return true;
+    }
 
     @Override
     public List<CategoriaNoticia> categorias() { return catalogo.todas(); }
