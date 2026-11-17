@@ -139,7 +139,7 @@ class FeedNoticiasWebTest {
 
     @Test
     @Order(5)
-    void unaImagenPerdidaNoRompeElFeed() throws Exception {
+    void unaImagenPerdidaEnDiscoSigueEnElFeedDesdeLaBase() throws Exception {
         borrarImagenesDelDisco();
 
         // No se comprueba un titulo concreto: con mas de 10 noticias en la misma hora truncada,
@@ -148,7 +148,7 @@ class FeedNoticiasWebTest {
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("id=\"feed\"")))
             .andExpect(content().string(containsString("class=\"tarjeta\"")))
-            .andExpect(content().string(not(containsString("/noticias/imagenes/"))))
+            .andExpect(content().string(containsString("/noticias/imagenes/")))
             .andReturn().getResponse().getContentAsString();
         sinRecursosExternos(html);
     }

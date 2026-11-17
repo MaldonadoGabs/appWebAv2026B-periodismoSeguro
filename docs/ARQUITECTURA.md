@@ -36,7 +36,7 @@ El catalogo esta en la tabla propia `categorias_noticias` (id slug, nombre y ord
 
 ## Borrado de noticias (HU-14)
 
-`NoticiasApi.eliminar(cuentaId, id, confirmado, administrador)` exige confirmación explícita. El módulo `noticias` solo compara el id del autor con el de la cuenta y acepta el flag `administrador` que le pasa `entrada`, que es quien sabe el rol; así `noticias` sigue sin depender de `cuentas`. El borrado usa el puerto `AlmacenImagenes.eliminar(...)` para retirar los archivos y borra también las referencias de `imagenes_noticias`, sin claves foráneas.
+`NoticiasApi.eliminar(cuentaId, id, confirmado, administrador)` exige confirmación explícita. El módulo `noticias` solo compara el id del autor con el de la cuenta y acepta el flag `administrador` que le pasa `entrada`, que es quien sabe el rol; así `noticias` sigue sin depender de `cuentas`. El borrado usa el puerto `AlmacenImagenes.eliminar(...)` para retirar los archivos y su copia en BD, y borra también las referencias de `imagenes_noticias`, sin claves foráneas.
 
 ## Conversación del chat (HU-17 a HU-20)
 
@@ -50,7 +50,7 @@ El catalogo esta en la tabla propia `categorias_noticias` (id slug, nombre y ord
 
 Nunca registrar IP, identificadores del lector ni datos reales del periodista. La hora se redondea a 1 h.
 
-En HU-09 las fotos se re-codifican antes de escribirse en disco (adios EXIF y GPS) y se guardan con nombre UUID, nunca con el nombre original. Los bytes salen del dominio por el puerto `AlmacenImagenes`: hoy es disco local, manana BD o blob, sin cambiar `NoticiasService`. Ojo: el filesystem de Container Apps es efimero; en produccion hace falta un volumen persistente o esa migracion.
+En HU-09 las fotos se re-codifican antes de guardarse (adios EXIF y GPS) y se guardan con nombre UUID, nunca con el nombre original. Los bytes salen del dominio por el puerto `AlmacenImagenes`: hoy se escriben en la tabla `imagenes_almacenadas` y ademas en disco local como copia rapida, sin cambiar `NoticiasService`. Si el filesystem efimero de Container Apps desaparece, la copia en BD mantiene la imagen disponible en el detalle y en el feed.
 
 El HTML del editor se sanea en `entrada` (lista blanca con jsoup), que es donde se reciben datos del navegador. El modulo `noticias` guarda el resultado ya limpio y lo muestra con `th:utext`.
 
@@ -58,4 +58,4 @@ El HTML del editor se sanea en `entrada` (lista blanca con jsoup), que es donde 
 
 `NoticiasApi.listar(pagina, tamano)` devuelve `ResumenNoticia`: ids, texto y la fecha ya formateada, sin entidades JPA ni el cuerpo completo. El orden es `creadaEn DESC, id ASC`; el id es necesario porque la privacidad trunca la hora a 1 h y varias noticias pueden compartirla. `entrada` normaliza la paginacion y calcula el total con `contar()`.
 
-El feed es publico, por lo que `/noticias/imagenes/**` se abrio en la cadena de filtros; la creacion de noticias sigue autenticada. El puerto `AlmacenImagenes` tambien responde `existe(...)` para que una imagen perdida en el disco efimero se omita en lugar de romper la tarjeta. El extracto se calcula dentro de `noticias` solo con JDK y se pinta con `th:text`: ningun HTML del autor llega al feed.
+El feed es publico, por lo que `/noticias/imagenes/**` se abrio en la cadena de filtros; la creacion de noticias sigue autenticada. El puerto `AlmacenImagenes` tambien responde `existe(...)`, que mira disco y BD: si falta la copia local se sirve la persistida y la tarjeta no se rompe. El extracto se calcula dentro de `noticias` solo con JDK y se pinta con `th:text`: ningun HTML del autor llega al feed.

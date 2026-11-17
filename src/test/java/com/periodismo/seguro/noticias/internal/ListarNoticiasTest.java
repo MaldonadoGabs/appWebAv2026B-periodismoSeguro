@@ -2,7 +2,6 @@ package com.periodismo.seguro.noticias.internal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.periodismo.seguro.noticias.ImagenAdjunta;
@@ -111,7 +110,7 @@ class ListarNoticiasTest {
     }
 
     @Test
-    void siElArchivoDeImagenDesapareceSeOmiteLaMiniaturaSinRomperElFeed() throws IOException {
+    void siElArchivoDeImagenDesapareceLaMiniaturaSigueDesdeLaBase() throws IOException {
         String id = crear("Nota con foto", "<p>Texto</p>",
             List.of(new ImagenAdjunta("image/png", png())));
         ImagenNoticia imagen = imagenesNoticia.findFirstByNoticiaIdOrderByOrdenAsc(id).orElseThrow();
@@ -119,7 +118,7 @@ class ListarNoticiasTest {
 
         Files.deleteIfExists(DIRECTORIO.resolve(imagen.getNombreGuardado()));
 
-        assertNull(resumenDe(id).primeraImagenId());
+        assertEquals(imagen.getId(), resumenDe(id).primeraImagenId());
         assertEquals("Nota con foto", resumenDe(id).titulo());
     }
 }
