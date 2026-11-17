@@ -23,6 +23,8 @@
           <a th:href="@{/inicio}">Mi panel</a>
           <a th:href="@{/mis-notas}">Mis notas</a>
           <a th:href="@{/noticias/nueva}">Escribir noticia</a>
+        </th:block>
+        <th:block th:if="${esLector}">
           <a th:href="@{/chat}">Chat</a>
         </th:block>
         <form class="cierre" th:action="@{/logout}" method="post">

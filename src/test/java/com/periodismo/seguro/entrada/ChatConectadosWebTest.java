@@ -23,7 +23,7 @@ class ChatConectadosWebTest {
     @Autowired MockMvc mvc;
 
     @Test
-    @WithMockUser(username = "cuenta-1", roles = "PERIODISTA")
+    @WithMockUser(username = "cuenta-1", roles = "LECTOR")
     void laPaginaDelChatMuestraLaListaDeConectados() throws Exception {
         mvc.perform(get("/chat"))
             .andExpect(status().isOk())

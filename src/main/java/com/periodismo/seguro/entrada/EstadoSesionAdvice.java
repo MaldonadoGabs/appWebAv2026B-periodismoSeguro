@@ -19,4 +19,10 @@ class EstadoSesionAdvice {
         return autenticacion != null && autenticacion.getAuthorities().stream()
             .anyMatch(a -> "ROLE_PERIODISTA".equals(a.getAuthority()));
     }
+
+    @ModelAttribute("esLector")
+    boolean esLector(Authentication autenticacion) {
+        return autenticacion != null && autenticacion.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_LECTOR".equals(a.getAuthority()));
+    }
 }

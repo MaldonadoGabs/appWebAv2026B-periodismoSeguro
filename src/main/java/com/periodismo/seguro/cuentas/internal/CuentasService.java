@@ -42,9 +42,9 @@ class CuentasService implements CuentasApi {
         String cuentaId = UUID.randomUUID().toString();
         PerfilPublico perfil = guardarPerfil(cuentaId);
         try {
-            // HU-08: el registro publico siempre crea periodistas; el rol no viene del formulario.
-            identidades.saveAndFlush(new IdentidadPrivada(cuentaId, correo, solicitud.nombreReal().trim(), hash,
-                Rol.PERIODISTA));
+            // Solo se pueden crear lectores o periodistas; ADMINISTRADOR nunca viene del registro publico.
+            Rol rol = solicitud.rol() == Rol.LECTOR ? Rol.LECTOR : Rol.PERIODISTA;
+            identidades.saveAndFlush(new IdentidadPrivada(cuentaId, correo, solicitud.nombreReal().trim(), hash, rol));
         } catch (DataIntegrityViolationException e) {
             perfiles.deleteById(cuentaId);
             throw new CorreoYaRegistradoException();
