@@ -1,18 +1,37 @@
 package com.periodismo.seguro.notificaciones.internal;
 
 import com.periodismo.seguro.noticias.NoticiaCreada;
+import com.periodismo.seguro.notificaciones.AvisoNoticia;
 import com.periodismo.seguro.notificaciones.NotificacionesApi;
-import org.springframework.context.event.EventListener;
+import java.util.function.Consumer;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
-/** Reacciona al evento NoticiaCreada; no llama a Noticias. Pendiente HU-21: empujar el aviso por WebSocket. */
+/** HU-21: reacciona a NoticiaCreada despues del commit y empuja el aviso a los conectados. */
 @Service
 class NotificacionesService implements NotificacionesApi {
-    @EventListener
+    private final SalaAvisos sala;
+
+    NotificacionesService(SalaAvisos sala) { this.sala = sala; }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void alCrearseNoticia(NoticiaCreada evento) {
-        avisarNoticiaNueva(evento.noticiaId());
+        avisarNoticiaNueva(new AvisoNoticia(evento.noticiaId(), evento.titulo(), evento.autorSeudonimo()));
     }
 
     @Override
-    public void avisarNoticiaNueva(String noticiaId) {}
+    public void avisarNoticiaNueva(AvisoNoticia aviso) {
+        sala.enviarAviso(aviso);
+    }
+
+    @Override
+    public void abrirConexion(String conexionId, Consumer<AvisoNoticia> receptor) {
+        sala.agregar(conexionId, receptor);
+    }
+
+    @Override
+    public void cerrarConexion(String conexionId) {
+        sala.quitar(conexionId);
+    }
 }

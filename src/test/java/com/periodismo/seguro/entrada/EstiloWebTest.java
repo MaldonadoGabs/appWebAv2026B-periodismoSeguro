@@ -22,7 +22,9 @@ class EstiloWebTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/css/estilo.css")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"marca\"")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"pie\"")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("class=\"pie\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("id=\"avisos\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/js/avisos.js")));
         }
     }
 
@@ -32,9 +34,11 @@ class EstiloWebTest {
             .andExpect(status().isOk())
             .andExpect(content().string(org.hamcrest.Matchers.containsString("--marcador")))
             .andExpect(content().string(org.hamcrest.Matchers.containsString(".imagenes-noticia img")))
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("height: auto")));
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("height: auto")))
+            .andExpect(content().string(org.hamcrest.Matchers.containsString(".aviso-noticia")));
         mvc.perform(get("/fonts/anton.woff2")).andExpect(status().isOk());
         mvc.perform(get("/js/tema.js")).andExpect(status().isOk());
+        mvc.perform(get("/js/avisos.js")).andExpect(status().isOk());
     }
 
     @Test

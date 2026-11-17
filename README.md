@@ -122,9 +122,11 @@ Compila y corre todas las pruebas. Tienen que pasar en verde para que el pipelin
 | `CategoriaTablaTest` | HU-01: tabla propia cargada por script sin duplicados, la API lee el catálogo de la tabla (no de una lista fija) y toda nota se guarda con una categoría válida |
 | `ServicioUsuariosRolTest` | HU-08: el usuario de Spring Security recibe el rol guardado en la cuenta (PERIODISTA, LECTOR, ADMINISTRADOR) |
 | `ChatConectadosWebTest` | HU-20: la sala muestra el panel de conectados con su contador |
+| `NotificacionesServiceTest` | HU-21: el evento de publicación se convierte en aviso con título y seudónimo para todas las conexiones abiertas |
+| `AvisosWebSocketHandlerTest` | HU-21: el adaptador envía JSON con `tipo`, título, seudónimo y enlace `/noticias/{id}` |
 | `AppTests` | La aplicación completa arranca |
 
-La clasificación por categorías (HU-01), HU-09 (crear noticias), HU-10 (feed público), HU-11 (búsqueda y filtro), HU-12 (detalle público), HU-13 (editar noticia propia), HU-14 (eliminar nota propia), HU-18 y HU-20 (chat y conectados), HU-25 (cabeceras y sesiones seguras) y HU-26 (privacidad en logs) ya están implementadas.
+La clasificación por categorías (HU-01), HU-09 (crear noticias), HU-10 (feed público), HU-11 (búsqueda y filtro), HU-12 (detalle público), HU-13 (editar noticia propia), HU-14 (eliminar nota propia), HU-18 y HU-20 (chat y conectados), HU-21 (avisos de noticias nuevas), HU-25 (cabeceras y sesiones seguras) y HU-26 (privacidad en logs) ya están implementadas.
 
 ## Editor de noticias (HU-09)
 
@@ -176,6 +178,12 @@ Desde HU-11 el feed acepta `?q=texto&categoria=slug` para buscar por título/pal
 ## Eliminar noticias (HU-14)
 
 Desde «Mis notas» el autor abre `/noticias/{id}/eliminar`, una página de confirmación explícita: el `GET` solo muestra el aviso y el borrado exige un `POST` con CSRF. Solo el autor de la nota o un administrador puede hacerlo; otra cuenta recibe 404 para no revelar que la noticia existe. Al confirmar se eliminan la fila, sus referencias de imágenes y los archivos en disco, y se redirige a `/mis-notas` (o al feed para el administrador) con un mensaje de confirmación.
+
+## Avisos de noticias nuevas (HU-21)
+
+Al publicar una nota, `NoticiaCreada` viaja con el título y el seudónimo del autor. El módulo `notificaciones` lo convierte, **después del commit**, en un aviso que se emite por el WebSocket público `/avisos-ws`. Ese endpoint es distinto del `/ws` del chat: no exige sesión, así que cualquier persona con una pantalla abierta del portal recibe el aviso sin recargar.
+
+El cliente `static/js/avisos.js` se carga desde la plantilla base, por lo que funciona en **cualquier pantalla**, no solo en el chat. Muestra el título, el seudónimo y un enlace al detalle `/noticias/{id}`; el lector puede cerrarlo y desaparece solo. No se guarda correo, nombre real, IP ni identificador del lector.
 
 ## Cabeceras, sesiones y privacidad de logs (HU-25 y HU-26)
 

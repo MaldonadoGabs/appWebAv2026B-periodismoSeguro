@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title th:text="${titulo} + ' | Periodismo Seguro'">Periodismo Seguro</title>
   <script th:src="@{/js/tema.js}"></script>
+  <script th:src="@{/js/avisos.js}"></script>
   <link rel="stylesheet" th:href="@{/css/estilo.css}">
 </head>
 <body>
   <header class="cabecera" th:fragment="cabecera">
+    <ul id="avisos" class="avisos" aria-live="polite" aria-label="Avisos de noticias nuevas"></ul>
     <a class="marca" th:href="@{/}">Periodismo Seguro</a>
     <nav class="nav" aria-label="Principal">
       <a th:href="@{/}">Inicio</a>

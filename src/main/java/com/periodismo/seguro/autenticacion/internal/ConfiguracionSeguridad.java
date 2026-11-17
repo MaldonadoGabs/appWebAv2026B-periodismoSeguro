@@ -61,7 +61,7 @@ class ConfiguracionSeguridad {
                 .hasRole("PERIODISTA")
                 // HU-10 y HU-12: el feed, el detalle de una noticia y el resto de recursos son publicos.
                 .requestMatchers("/", "/registro", "/login", "/recuperar", "/restablecer", "/actuator/health",
-                    "/css/**", "/js/**", "/fonts/**", "/noticias/*", "/error")
+                    "/avisos-ws", "/css/**", "/js/**", "/fonts/**", "/noticias/*", "/error")
                 .permitAll()
                 .anyRequest().authenticated())
             .formLogin(f -> f
@@ -95,7 +95,7 @@ class ConfiguracionSeguridad {
                         + "frame-ancestors 'none'; "
                         + "base-uri 'self'; "
                         + "form-action 'self'")))
-            .csrf(c -> c.ignoringRequestMatchers("/ws"))
+            .csrf(c -> c.ignoringRequestMatchers("/ws", "/avisos-ws"))
             .httpBasic(AbstractHttpConfigurer::disable);
         return http.build();
     }
