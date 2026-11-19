@@ -3,6 +3,7 @@ package com.periodismo.seguro.autenticacion.internal;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
@@ -11,7 +12,7 @@ import java.time.Instant;
  * Se refiere a la cuenta por id (sin clave foranea hacia el modulo cuentas).
  */
 @Entity
-@Table(name = "tokens_recuperacion")
+@Table(name = "tokens_recuperacion", indexes = @Index(name = "idx_tokens_cuenta", columnList = "cuenta_id"))
 public class TokenRecuperacion {
     @Id
     @Column(name = "token_hash", length = 64)

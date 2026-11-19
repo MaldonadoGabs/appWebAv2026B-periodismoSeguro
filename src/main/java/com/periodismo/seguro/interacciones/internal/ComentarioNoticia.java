@@ -3,11 +3,12 @@ package com.periodismo.seguro.interacciones.internal;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
 @Entity
-@Table(name = "comentarios_noticias")
+@Table(name = "comentarios_noticias", indexes = @Index(name = "idx_comentarios_noticia", columnList = "noticia_id"))
 class ComentarioNoticia {
     @Id
     private String id;
