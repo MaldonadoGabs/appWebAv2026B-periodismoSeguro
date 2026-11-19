@@ -453,3 +453,88 @@ input:user-invalid, select:user-invalid, textarea:user-invalid { border-color: v
 @media (prefers-reduced-motion: reduce) {
   .uh-copia, .uh-pausa { display: none; }
 }
+
+/* ===== Animaciones en toda la aplicacion ================================================================
+   Entrada de pagina, formularios que aparecen en fila, avisos y errores con movimiento, botones con brillo,
+   menu con subrayado deslizante y chat vivo. Mismas reglas que los demas efectos: solo transform y opacity,
+   se apagan con "reducir movimiento" o con el interruptor del pie. Las animaciones de entrada usan
+   fill-mode backwards para no pisar los efectos al pasar el puntero. */
+@keyframes entrada-pagina { from { opacity: 0; transform: translateY(10px); } }
+@keyframes subir { from { opacity: 0; transform: translateY(14px); } }
+@keyframes aparecer-nota { from { opacity: 0; transform: translateX(-14px); } }
+@keyframes sacudir {
+  0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); } 80% { transform: translateX(3px); }
+}
+@keyframes latido { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.5); } }
+@keyframes titilar { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+@keyframes brillo-boton { from { transform: translateX(-130%) skewX(-20deg); } to { transform: translateX(260%) skewX(-20deg); } }
+
+/* Transiciones al interactuar (puntero y teclado) */
+input, textarea, select { transition: border-color .15s ease-out, box-shadow .15s ease-out; }
+input:focus, textarea:focus, select:focus { box-shadow: 0 0 0 4px rgb(255 214 10 / .45); }
+.opcion-caja { transition: background .15s, box-shadow .15s, translate .15s; }
+.opcion:hover .opcion-caja { translate: -1px -1px; }
+.opcion input:checked + .opcion-caja { translate: -2px -2px; }
+.nav a { background-image: linear-gradient(var(--marcador), var(--marcador)); background-repeat: no-repeat;
+  background-position: 0 90%; background-size: 0% 36%; transition: background-size .2s ease-out; }
+.nav a:hover, .nav a[aria-current="page"] { background-size: 100% 36%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Cada pagina entra con un suave deslizamiento y el pie aparece despues */
+  :root:not([data-efectos="off"]) main { animation: entrada-pagina .4s ease-out backwards; }
+  :root:not([data-efectos="off"]) .pie { animation: subir .5s .15s ease-out backwards; }
+  :root:not([data-efectos="off"]) main .panel:not(.rejilla .panel) { animation: subir .45s .05s ease-out backwards; }
+
+  /* Formularios (entrar, registrarse, recuperar, escribir noticia): los campos aparecen en fila */
+  :root:not([data-efectos="off"]) form > * { animation: subir .4s ease-out backwards; }
+  :root:not([data-efectos="off"]) form > *:nth-child(2) { animation-delay: .05s; }
+  :root:not([data-efectos="off"]) form > *:nth-child(3) { animation-delay: .1s; }
+  :root:not([data-efectos="off"]) form > *:nth-child(4) { animation-delay: .15s; }
+  :root:not([data-efectos="off"]) form > *:nth-child(5) { animation-delay: .2s; }
+  :root:not([data-efectos="off"]) form > *:nth-child(6) { animation-delay: .25s; }
+  :root:not([data-efectos="off"]) form > *:nth-child(7) { animation-delay: .3s; }
+  :root:not([data-efectos="off"]) form > *:nth-child(8) { animation-delay: .35s; }
+  :root:not([data-efectos="off"]) form > *:nth-child(n+9) { animation-delay: .4s; }
+
+  /* Avisos: entran por la izquierda; los errores ademas se sacuden; los exitos suben */
+  :root:not([data-efectos="off"]) .nota { animation: aparecer-nota .35s ease-out backwards; }
+  :root:not([data-efectos="off"]) .nota.error { animation: aparecer-nota .35s ease-out backwards, sacudir .45s .35s ease-in-out; }
+  :root:not([data-efectos="off"]) .nota.ok { animation: subir .35s ease-out backwards; }
+  :root:not([data-efectos="off"]) .msg-error { animation: aparecer-nota .3s ease-out backwards, sacudir .4s .3s ease-in-out; }
+
+  /* Logo: el marcador amarillo se dibuja al cargar cada pagina */
+  :root:not([data-efectos="off"]) .marca {
+    background-repeat: no-repeat; background-size: 0% 100%; animation: caer-marcador .6s .1s ease-out forwards;
+  }
+
+  /* Botones principales: un destello cruza al pasar el puntero */
+  :root:not([data-efectos="off"]) .boton.principal { position: relative; overflow: hidden; }
+  :root:not([data-efectos="off"]) .boton.principal::after {
+    content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / .55), transparent);
+    transform: translateX(-130%) skewX(-20deg);
+  }
+  :root:not([data-efectos="off"]) .boton.principal:hover::after { animation: brillo-boton .7s ease-out; }
+
+  /* Chat vivo: "esta escribiendo" titila, la lista de conectados entra en fila y la conexion late */
+  :root:not([data-efectos="off"]) #escribiendo:not(:empty) { animation: titilar 1.4s ease-in-out infinite; }
+  :root:not([data-efectos="off"]) .participantes li { animation: subir .3s ease-out backwards; }
+  :root:not([data-efectos="off"]) .mensaje.sistema { animation: aparecer-nota .35s ease-out backwards; }
+  :root:not([data-efectos="off"]) .estado-conexion.ok::before { animation: latido 2.5s ease-in-out infinite; }
+
+  /* Comentarios y avisos flotantes */
+  :root:not([data-efectos="off"]) .comentarios li { animation: subir .35s ease-out backwards; }
+  :root:not([data-efectos="off"]) .comentarios li:nth-child(2) { animation-delay: .06s; }
+  :root:not([data-efectos="off"]) .comentarios li:nth-child(3) { animation-delay: .12s; }
+  :root:not([data-efectos="off"]) .comentarios li:nth-child(n+4) { animation-delay: .18s; }
+
+  /* Al salir de la pagina el contenido se desvanece mientras carga la siguiente */
+  :root:not([data-efectos="off"]).saliendo main {
+    opacity: .35; transform: translateY(-6px); transition: opacity .18s ease-in, transform .18s ease-in;
+  }
+}
+.nav a:hover, .nav a[aria-current="page"] {
+  background-image: linear-gradient(var(--marcador), var(--marcador)); background-repeat: no-repeat;
+  background-position: 0 90%; background-size: 100% 36%;
+}
