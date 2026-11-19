@@ -119,34 +119,23 @@ Extras fuera del tablero: reacciones y comentarios de lectores, recuperación po
 
 ```mermaid
 flowchart TB
-  NAV([Navegador: HTML de Thymeleaf y JavaScript propio])
-  NAV -->|HTTPS| ENT
-  NAV -->|wss /ws, chat autenticado| WSC
-  NAV -->|wss /avisos-ws, avisos| WSA
+  NAV([Navegador])
   subgraph MONO[Monolito Spring Boot: un solo despliegue]
     SEG[Spring Security: sesión, roles, CSRF y cabeceras]
-    ENT[Capa de entrada: controladores MVC, plantillas y validación]
-    WSC[Servidor WebSocket del chat]
-    WSA[Servidor WebSocket de avisos]
-    subgraph MOD[Módulos de negocio con API pública]
-      CU[cuentas]
-      AU[autenticacion]
-      NO[noticias]
-      IN[interacciones]
-      CH[chat]
-      NT[notificaciones]
-    end
+    ENT[Capa de entrada: controladores MVC, Thymeleaf y validación]
+    WS[Servidores WebSocket: /ws chat y /avisos-ws avisos]
+    MOD[Módulos: cuentas, autenticacion, noticias, interacciones, chat y notificaciones]
     PER[Persistencia: Spring Data JPA]
   end
-  SEG --- ENT
+  DB[(PostgreSQL en Azure, H2 en local)]
+  NAV -->|HTTPS| ENT
+  NAV -->|wss| WS
+  SEG -.protege.-> ENT
+  SEG -.protege.-> WS
   ENT --> MOD
-  WSC --> CH
-  WSA --> NT
-  AU --> CU
-  CH --> AU
-  NT -.evento NoticiaCreada.-> NO
+  WS --> MOD
   MOD --> PER
-  PER --> DB[(PostgreSQL en Azure, H2 en local)]
+  PER --> DB
 ```
 
 **Despliegue y CI/CD:**
