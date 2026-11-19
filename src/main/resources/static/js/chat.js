@@ -15,6 +15,23 @@
   var formulario = document.getElementById('f');
   var temporizador = null;
   var ultimoAviso = 0;
+  var esqueleto = document.getElementById('cargando-conversacion');
+  var enviar = formulario ? formulario.querySelector('button') : null;
+
+  // Estado de la conexion con texto y color (nunca solo color): conectando, conectado, error o desconectado
+  function marcar(mensaje, clase) {
+    if (!estado) return;
+    estado.textContent = mensaje;
+    estado.className = 'estado-conexion ' + clase;
+  }
+
+  function quitarEsqueleto() {
+    if (esqueleto) {
+      esqueleto.remove();
+      esqueleto = null;
+    }
+    if (log) log.removeAttribute('aria-busy');
+  }
 
   function horaLocal(iso) {
     var fecha = new Date(iso);
@@ -78,19 +95,27 @@
     }
   }
 
-  socket.onopen = function () { estado.textContent = 'conectado'; };
-  socket.onerror = function () { estado.textContent = 'error'; };
+  socket.onopen = function () {
+    marcar('Conectado', 'ok');
+    if (enviar) enviar.disabled = false;
+    // Si la sala esta vacia no llega ningun mensaje: se quita el esqueleto igualmente
+    setTimeout(quitarEsqueleto, 1500);
+  };
+  socket.onerror = function () { marcar('Error de conexión', 'error'); };
   socket.onclose = function () {
-    estado.textContent = 'desconectado';
-    conectados.replaceChildren();
-    total.textContent = '0';
-    escribiendo.textContent = '';
+    marcar('Desconectado', 'error');
+    quitarEsqueleto();
+    if (enviar) enviar.disabled = true;
+    if (conectados) conectados.replaceChildren();
+    if (total) total.textContent = '0';
+    if (escribiendo) escribiendo.textContent = '';
   };
 
   socket.onmessage = function (evento) {
     var dato;
     try { dato = JSON.parse(evento.data); } catch (error) { return; }
     if (!dato) return;
+    quitarEsqueleto();
 
     if (dato.tipo === 'mensaje') {
       pintarMensaje(dato.autor || 'Periodista', dato.texto || '', dato.hora || '');

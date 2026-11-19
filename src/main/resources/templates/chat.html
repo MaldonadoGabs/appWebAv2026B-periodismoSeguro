@@ -6,22 +6,28 @@
   <main class="pagina ancha" th:attr="data-yo=${yo}">
     <h1><span>Chat</span> de periodistas</h1>
     <p class="suave">Conversación entre periodistas. El nombre que ves es siempre un seudónimo; nunca se muestra el correo ni el nombre real.</p>
-    <p class="suave">WebSocket: <span id="estado">desconectado</span></p>
+    <p class="suave">Conexión: <span id="estado" class="estado-conexion conectando" role="status">Conectando…</span></p>
 
     <div class="chat-shell">
       <section class="chat-conversacion" aria-label="Conversación">
-        <ol id="log" class="conversacion"></ol>
+        <ol id="log" class="conversacion" aria-busy="true">
+          <li id="cargando-conversacion" class="esqueleto-lista" aria-label="Cargando la conversación">
+            <span class="esqueleto"></span>
+            <span class="esqueleto propio"></span>
+            <span class="esqueleto corto"></span>
+          </li>
+        </ol>
         <p id="escribiendo" aria-live="polite"></p>
         <form id="f" class="chat-form">
           <label class="sr-only" for="t">Mensaje</label>
           <input id="t" maxlength="500" autocomplete="off" placeholder="Escribe un mensaje…">
-          <button class="boton principal" type="submit">Enviar</button>
+          <button class="boton principal" type="submit" disabled>Enviar</button>
         </form>
       </section>
 
       <aside class="participantes" aria-label="Periodistas conectados">
         <h2>Conectados (<span id="total-conectados">0</span>)</h2>
-        <ul id="conectados"><li class="suave">Sin conexión</li></ul>
+        <ul id="conectados"><li class="suave">Conectando…</li></ul>
       </aside>
     </div>
 
