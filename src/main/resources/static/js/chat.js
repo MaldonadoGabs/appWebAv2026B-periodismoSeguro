@@ -1,5 +1,5 @@
 /*
- * Chat de periodistas: conversacion tipo WhatsApp, sin librerias ni recursos externos.
+ * Chat de lectores: conversacion tipo WhatsApp, sin librerias ni recursos externos.
  * El servidor envia solo seudonimos y la hora con precision de minuto.
  */
 (function () {
@@ -118,11 +118,11 @@
     quitarEsqueleto();
 
     if (dato.tipo === 'mensaje') {
-      pintarMensaje(dato.autor || 'Periodista', dato.texto || '', dato.hora || '');
+      pintarMensaje(dato.autor || 'Lector', dato.texto || '', dato.hora || '');
     } else if (dato.tipo === 'conectados') {
       pintarConectados(Array.isArray(dato.usuarios) ? dato.usuarios : []);
     } else if (dato.tipo === 'ingreso') {
-      pintarIngreso(dato.usuario || 'Un periodista');
+      pintarIngreso(dato.usuario || 'Un lector');
     } else if (dato.tipo === 'escribiendo') {
       escribiendo.textContent = dato.activo ? (dato.usuario + ' está escribiendo…') : '';
     }

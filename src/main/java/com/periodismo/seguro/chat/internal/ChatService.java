@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 class ChatService implements ChatApi {
     private static final int MAXIMO_CARACTERES = 500;
-    private static final String SEUDONIMO_POR_DEFECTO = "Periodista";
+    private static final String SEUDONIMO_POR_DEFECTO = "Lector";
 
     private final AutenticacionApi autenticacion;
     private final CuentasApi cuentas;

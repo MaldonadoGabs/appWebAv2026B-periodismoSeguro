@@ -4,8 +4,8 @@
 <body>
   <header th:replace="~{fragments/base :: cabecera}"></header>
   <main class="pagina ancha" th:attr="data-yo=${yo}">
-    <h1><span>Chat</span> de periodistas</h1>
-    <p class="suave">Conversación entre periodistas. El nombre que ves es siempre un seudónimo; nunca se muestra el correo ni el nombre real.</p>
+    <h1><span>Chat</span> de lectores</h1>
+    <p class="suave">Conversación entre lectores. El nombre que ves es siempre un seudónimo; nunca se muestra el correo ni el nombre real.</p>
     <p class="suave">Conexión: <span id="estado" class="estado-conexion conectando" role="status">Conectando…</span></p>
 
     <div class="chat-shell">
@@ -25,7 +25,7 @@
         </form>
       </section>
 
-      <aside class="participantes" aria-label="Periodistas conectados">
+      <aside class="participantes" aria-label="Lectores conectados">
         <h2>Conectados (<span id="total-conectados">0</span>)</h2>
         <ul id="conectados"><li class="suave">Conectando…</li></ul>
       </aside>
