@@ -55,7 +55,7 @@ class EnvioRecuperacionResendTest {
             .andExpect(jsonPath("$.to[0]").value("ana@ejemplo.com"))
             .andExpect(jsonPath("$.subject").value(containsString("contraseña")))
             .andExpect(jsonPath("$.text").value(containsString(ENLACE)))
-            .andExpect(jsonPath("$.html").value(containsString(ENLACE)))
+            .andExpect(jsonPath("$.html").doesNotExist())
             .andRespond(withSuccess("{\"id\":\"1\"}", MediaType.APPLICATION_JSON));
 
         envio.enviar("ana@ejemplo.com", ENLACE);
