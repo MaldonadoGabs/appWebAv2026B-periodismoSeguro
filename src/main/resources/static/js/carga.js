@@ -83,6 +83,8 @@
 
   function mostrar(mensaje, inmediato) {
     crear();
+    // La pagina actual se desvanece un poco mientras carga la siguiente (solo con efectos activos, ver estilo.css)
+    document.documentElement.classList.add("saliendo");
     document.body.setAttribute('aria-busy', 'true');
     barra.hidden = false;
     clearTimeout(retraso);
@@ -119,7 +121,8 @@
     clearTimeout(lento);
     if (velo) { velo.hidden = true; cancelar.hidden = true; }
     if (barra) barra.hidden = true;
-    document.body.removeAttribute('aria-busy');
+    document.body.removeAttribute("aria-busy");
+    document.documentElement.classList.remove("saliendo");
     liberarBotones();
   }
 
