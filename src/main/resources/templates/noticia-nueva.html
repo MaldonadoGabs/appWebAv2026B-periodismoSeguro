@@ -7,24 +7,24 @@
     <h1><span>Nueva</span> noticia</h1>
     <p class="suave">Escribe y modifica tu nota antes de guardarla. Se publicara con tu seudonimo: tu nombre real y tu correo nunca aparecen.</p>
 
-    <form id="form-noticia" th:action="@{/noticias/nueva}" th:object="${form}" method="post" enctype="multipart/form-data" novalidate>
+    <form id="form-noticia" th:action="@{/noticias/nueva}" th:object="${form}" method="post" enctype="multipart/form-data">
       <div class="editor-columnas">
         <div>
           <div class="campo">
             <label for="titulo">Encabezado</label>
-            <input id="titulo" type="text" th:field="*{titulo}" maxlength="180" autocomplete="off">
+            <input id="titulo" type="text" th:field="*{titulo}" required maxlength="180" autocomplete="off">
             <div class="msg-error" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></div>
           </div>
 
           <div class="campo">
             <label for="subtitulo">Subtitulo</label>
-            <input id="subtitulo" type="text" th:field="*{subtitulo}" maxlength="300" autocomplete="off">
+            <input id="subtitulo" type="text" th:field="*{subtitulo}" required maxlength="300" autocomplete="off">
             <div class="msg-error" th:if="${#fields.hasErrors('subtitulo')}" th:errors="*{subtitulo}"></div>
           </div>
 
           <div class="campo">
             <label for="categoria">Categoría</label>
-            <select id="categoria" th:field="*{categoria}">
+            <select id="categoria" th:field="*{categoria}" required>
               <option value="">Elige una categoría</option>
               <option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nombre}">Política</option>
             </select>

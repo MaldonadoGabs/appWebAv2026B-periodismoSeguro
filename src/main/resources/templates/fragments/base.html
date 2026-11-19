@@ -7,6 +7,7 @@
   <script th:src="@{/js/tema.js}"></script>
   <script th:src="@{/js/avisos.js}" defer></script>
   <script th:src="@{/js/carga.js}" defer></script>
+  <script th:src="@{/js/validacion.js}" defer></script>
   <link rel="stylesheet" th:href="@{/css/estilo.css}">
 </head>
 <body>
@@ -32,7 +33,10 @@
           <button type="submit" class="tema" id="cerrar-sesion">Cerrar sesión</button>
         </form>
       </th:block>
-      <button type="button" class="tema" id="tema" aria-label="Cambiar entre tema claro y oscuro">Tema</button>
+      <button type="button" class="interruptor" id="tema" role="switch" aria-checked="false" aria-label="Tema oscuro">
+        <span class="interruptor-pista" aria-hidden="true"><span class="interruptor-bola"></span></span>
+        <span class="interruptor-texto">Oscuro</span>
+      </button>
     </nav>
   </header>
 

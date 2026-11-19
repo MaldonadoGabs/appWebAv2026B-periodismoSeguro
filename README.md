@@ -264,3 +264,33 @@ az containerapp update -n ca-periodismo-psa26 -g rg-periodismo-psa26 --set-env-v
 ```
 
 El pipeline solo cambia la imagen: estas variables y el secreto se conservan en cada despliegue. Si falta `RESEND_API_KEY` con el proveedor `resend`, la aplicacion no arranca (el despliegue falla y la version anterior sigue activa).
+
+## Variables de entorno
+
+Todas las variables están documentadas en [.env.example](.env.example). Copia ese archivo a `.env` y completa los valores; el archivo `.env` real nunca se sube al repositorio. En Azure las claves van como secretos del Container App.
+
+## Seguridad
+
+| Requisito | Cómo se cumple | Dónde |
+|---|---|---|
+| Contraseña con hash y sal | BCrypt (la sal va incluida en cada hash); nunca se guarda ni se registra en texto plano | `cuentas.internal` |
+| Inicio de sesión contra la base de datos | Mensaje genérico si falla; bloqueo temporal tras 5 intentos fallidos | `autenticacion.internal` |
+| Sesión segura | Cookie HttpOnly, SameSite=Lax y Secure en producción (`APP_PRODUCCION=true`, que activa el pipeline); caduca a los 30 minutos; sesión nueva al entrar; al cerrar se invalida y se borra la cookie | `ConfiguracionSeguridad`, `application.properties` |
+| Rutas protegidas y roles | Roles PERIODISTA, LECTOR y ADMINISTRADOR; solo el autor edita o elimina su noticia | `ConfiguracionSeguridad`, `NoticiaController` |
+| Inyección SQL | JPA con parámetros nombrados; no se concatena SQL | repositorios `internal` |
+| XSS | Thymeleaf escapa la salida; el cuerpo de la noticia se sanea con una lista blanca (jsoup) antes de guardarlo; CSP sin scripts en línea; el chat pinta con `textContent` | `SanitizadorHtml`, cabeceras |
+| CSRF | Token en todos los formularios; solo se excluyen los handshakes de WebSocket, que exigen sesión y mismo origen | `ConfiguracionSeguridad` |
+| WebSocket | Handshake autenticado con la sesión y el rol LECTOR; mensajes de máximo 500 caracteres; `wss` en el despliegue (HTTPS del Container App; el cliente usa `wss` cuando la página es `https`) | `ChatHandshakeInterceptor`, `ChatService` |
+| Secretos | En variables de entorno y secretos de Azure; nada en el repositorio | `.env.example` |
+| Cabeceras | HSTS, CSP, X-Frame-Options DENY, nosniff y Referrer-Policy; las páginas de error no muestran trazas | `ConfiguracionSeguridad` |
+| Subida de imágenes | Solo PNG y JPEG con tamaño máximo; se recodifican antes de guardarse | `NoticiaController`, `RecodificadorImagenes` |
+
+La validación se hace en el cliente (campos requeridos, formato de correo, longitud y reglas de contraseña, con mensajes en español) y siempre otra vez en el servidor.
+
+## Diseño responsivo
+
+Se revisó en pantallas de 320 y 375 píxeles: sin scroll horizontal, enlaces y palabras largas que se parten, cabecera que se acomoda en filas y áreas táctiles de al menos 44 píxeles.
+
+## Uso de IA
+
+Se usó Claude (Anthropic), a través de Claude Code, como asistente de programación para generar y revisar código, pruebas, scripts de despliegue, diagramas y documentación. El equipo revisa, prueba y debe poder explicar y modificar todo lo generado durante la defensa.
