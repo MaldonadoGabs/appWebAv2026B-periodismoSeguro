@@ -6,6 +6,7 @@
   <title th:text="${titulo} + ' | Periodismo Seguro'">Periodismo Seguro</title>
   <script th:src="@{/js/tema.js}"></script>
   <script th:src="@{/js/avisos.js}" defer></script>
+  <script th:src="@{/js/carga.js}" defer></script>
   <link rel="stylesheet" th:href="@{/css/estilo.css}">
 </head>
 <body>
@@ -25,7 +26,7 @@
           <a th:href="@{/noticias/nueva}">Escribir noticia</a>
         </th:block>
         <th:block th:if="${esLector}">
-          <a th:href="@{/chat}">Chat</a>
+          <a th:href="@{/chat}" data-carga="Abriendo el chat de lectores…">Chat</a>
         </th:block>
         <form class="cierre" th:action="@{/logout}" method="post">
           <button type="submit" class="tema" id="cerrar-sesion">Cerrar sesión</button>
