@@ -259,7 +259,7 @@ No se guarda ni se registra en logs el correo, el nombre real ni la IP de nadie,
 
 ## Correo de recuperacion de clave (Resend)
 
-El proveedor por defecto es **Resend**, con la API key y la URL publica configuradas directamente en `application.properties` para que el despliegue envie correos sin variables adicionales. En las pruebas se fuerza `consola` mediante `src/test/resources/application.properties`, para no enviar correos reales.
+El proveedor por defecto en desarrollo y pruebas es **`consola`**; el pipeline activa **Resend** en producción con `APP_CORREO_PROVEEDOR=resend`. La API key **no está en el código**: el pipeline toma el secreto `resend_api_key` de Azure DevOps y lo inyecta en la Container App como `RESEND_API_KEY`. La URL publica por defecto apunta a la Container App. En las pruebas se fuerza `consola` con `@TestPropertySource`, para no enviar correos reales.
 
 | Variable | Para que sirve |
 |---|---|
@@ -277,7 +277,7 @@ az containerapp secret set -n ca-periodismo-psa26 -g rg-periodismo-psa26 --secre
 az containerapp update -n ca-periodismo-psa26 -g rg-periodismo-psa26 --set-env-vars APP_CORREO_PROVEEDOR=resend RESEND_API_KEY=secretref:resend-api-key "APP_CORREO_REMITENTE=Periodismo Seguro <noreply@tudominio.com>" APP_URL_PUBLICA=https://TU-URL.azurecontainerapps.io
 ```
 
-Estas variables siguen pudiendo sobreescribir la configuracion directa, pero ya no son obligatorias: el despliegue usa Resend con los valores por defecto. Si se sobreescribe `APP_CORREO_PROVEEDOR=resend` con una key vacia, la aplicacion no arranca (falla el despliegue y queda activa la version anterior).
+El pipeline crea o actualiza el secreto `resend-api-key` de la Container App desde el secreto de DevOps `resend_api_key`, y configura `RESEND_API_KEY=secretref:resend-api-key`. Si falta ese secreto en DevOps, el despliegue falla antes de actualizar la imagen. La key anterior quedó en el historial de Git y debe considerarse revocada.
 
 ## Variables de entorno
 

@@ -39,6 +39,8 @@ stages:
     steps:
     - task: AzureCLI@2
       displayName: Build imagen en ACR y desplegar en Container Apps
+      env:
+        RESEND_API_KEY: $(resend_api_key)
       inputs:
         azureSubscription: $(azureConnection)
         scriptType: bash
@@ -55,9 +57,16 @@ stages:
           docker build -t $(acr).azurecr.io/periodismo:$TAG .
           docker push $(acr).azurecr.io/periodismo:$TAG
           FQDN=$(az containerapp show -n $(app) -g $(rg) --query properties.configuration.ingress.fqdn -o tsv)
-          # Produccion: cookie de sesion Secure (APP_PRODUCCION) y URL publica para los enlaces de recuperacion
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "Falta el secreto resend_api_key en Azure DevOps"
+            exit 1
+          fi
+          az containerapp secret set -n $(app) -g $(rg) --secrets resend-api-key="$RESEND_API_KEY" -o none
+          # Produccion: cookie Secure, URL publica y correo de recuperacion via Resend
           az containerapp update -n $(app) -g $(rg) --image $(acr).azurecr.io/periodismo:$TAG \
-            --set-env-vars APP_PRODUCCION=true APP_URL_PUBLICA=https://$FQDN
+            --set-env-vars APP_PRODUCCION=true APP_URL_PUBLICA=https://$FQDN \
+              APP_CORREO_PROVEEDOR=resend RESEND_API_KEY=secretref:resend-api-key \
+              "APP_CORREO_REMITENTE=Periodismo Seguro <onboarding@resend.dev>"
           echo "Desplegado: https://$FQDN"
           sleep 30
           curl -fsS https://$FQDN/actuator/health
