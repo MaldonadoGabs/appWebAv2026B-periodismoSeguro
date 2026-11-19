@@ -48,7 +48,11 @@ class TemaInterruptorWebTest {
             .andExpect(status().isOk())
             .andExpect(content().string(not(containsString("matchMedia"))))
             .andExpect(content().string(containsString("\"data-tema\", oscuro ? \"oscuro\" : \"claro\"")))
-            .andExpect(content().string(containsString("aria-checked")));
+            .andExpect(content().string(containsString("aria-checked")))
+            // Una eleccion guardada de visitas anteriores no puede forzar el oscuro: se borra y no se lee
+            .andExpect(content().string(not(containsString("localStorage.getItem"))))
+            .andExpect(content().string(containsString("localStorage.removeItem(\"tema\")")))
+            .andExpect(content().string(containsString("sessionStorage.getItem(\"tema\")")));
     }
 
     @Test
