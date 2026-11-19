@@ -54,8 +54,10 @@ stages:
           echo "$ACR_PASS" | docker login $(acr).azurecr.io -u "$ACR_USER" --password-stdin
           docker build -t $(acr).azurecr.io/periodismo:$TAG .
           docker push $(acr).azurecr.io/periodismo:$TAG
-          az containerapp update -n $(app) -g $(rg) --image $(acr).azurecr.io/periodismo:$TAG
           FQDN=$(az containerapp show -n $(app) -g $(rg) --query properties.configuration.ingress.fqdn -o tsv)
+          # Produccion: cookie de sesion Secure (APP_PRODUCCION) y URL publica para los enlaces de recuperacion
+          az containerapp update -n $(app) -g $(rg) --image $(acr).azurecr.io/periodismo:$TAG \
+            --set-env-vars APP_PRODUCCION=true APP_URL_PUBLICA=https://$FQDN
           echo "Desplegado: https://$FQDN"
           sleep 30
           curl -fsS https://$FQDN/actuator/health
