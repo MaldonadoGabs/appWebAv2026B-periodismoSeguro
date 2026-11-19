@@ -1,3 +1,8 @@
 target/
 *.env
 .idea/
+
+# Variables locales: nunca se suben
+.env
+.env.*
+!.env.example
