@@ -23,6 +23,12 @@ public interface ChatApi {
     /** Avisa a los demas participantes de que esa cuenta esta escribiendo, o de que ya no. */
     void avisarEscritura(String cuentaId, boolean activo);
 
+    /**
+     * HU-19: los ultimos mensajes guardados en la base de datos, del mas antiguo al mas reciente.
+     * Solo seudonimo, texto y hora con precision de minuto.
+     */
+    List<MensajeChat> historial(int limite);
+
     /** Seudonimos de quienes estan conectados ahora, sin duplicados y en orden estable. */
     List<String> usuariosConectados();
 }

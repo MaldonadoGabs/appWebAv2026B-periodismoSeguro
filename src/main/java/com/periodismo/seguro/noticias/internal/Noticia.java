@@ -3,6 +3,7 @@ package com.periodismo.seguro.noticias.internal;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
@@ -12,7 +13,11 @@ import java.time.Instant;
  * La hora se redondea a 1 h, como pide la politica de privacidad (HU-26).
  */
 @Entity
-@Table(name = "noticias")
+@Table(name = "noticias", indexes = {
+    @Index(name = "idx_noticias_creada_en", columnList = "creada_en"),
+    @Index(name = "idx_noticias_categoria", columnList = "categoria"),
+    @Index(name = "idx_noticias_autor", columnList = "autor_cuenta_id")
+})
 public class Noticia {
     @Id
     private String id;

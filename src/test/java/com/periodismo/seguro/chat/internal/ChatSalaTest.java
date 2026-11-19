@@ -27,8 +27,9 @@ class ChatSalaTest {
     private final SalaChat sala = new SalaChat();
     private final AutenticacionApi autenticacion = mock(AutenticacionApi.class);
     private final CuentasApi cuentas = mock(CuentasApi.class);
+    private final MensajeChatRepository historial = mock(MensajeChatRepository.class);
     private final ChatService chat = new ChatService(
-        autenticacion, cuentas, sala, Clock.fixed(INSTANTE, ZoneOffset.UTC));
+        autenticacion, cuentas, sala, Clock.fixed(INSTANTE, ZoneOffset.UTC), historial);
 
     @BeforeEach
     void preparar() {

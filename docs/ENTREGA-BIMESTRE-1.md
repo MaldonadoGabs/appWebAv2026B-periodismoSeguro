@@ -104,7 +104,7 @@ Las historias están en Azure Boards (`AppWebAv2026-B`). Estado según el códig
 | | HU-16 Categorías | Hecha |
 | WebSockets | HU-17 Conexión autenticada al chat | Hecha |
 | | HU-18 Enviar y recibir en la sala general | Hecha |
-| | HU-19 Historial de mensajes persistentes | Pendiente (hoy la conversación vive en memoria) |
+| | HU-19 Historial de mensajes persistentes | Hecha (tabla `mensajes_chat`; quien entra recibe los últimos 50) |
 | | HU-20 Usuarios conectados | Hecha |
 | | HU-21 Notificación en tiempo real de noticias nuevas | Hecha |
 | | HU-22 Aviso de mensaje no leído | Pendiente |
@@ -184,6 +184,12 @@ erDiagram
     timestamp caduca_en
     boolean usado
   }
+  mensajes_chat {
+    long id PK
+    string autor_seudonimo
+    string texto
+    timestamp enviado_en
+  }
   intentos_login {
     string clave_correo PK
     int fallos
@@ -233,6 +239,7 @@ erDiagram
 ```
 
 Decisión de privacidad en el modelo: solo `identidades_privadas` guarda el correo y el nombre real. Ninguna otra tabla los copia; el resto usa el seudónimo.
+**Índices** (rendimiento de búsqueda y actualización): noticias por fecha, categoría y autor; comentarios y reacciones por noticia; reacciones por cuenta; imágenes por noticia y tokens por cuenta. El correo y el seudónimo tienen índice único. La búsqueda por texto usa `LIKE` sobre título y cuerpo, que un índice normal no acelera; si el volumen crece, en PostgreSQL se puede añadir un índice de trigramas.
 
 ## 7. Repositorio
 
@@ -262,16 +269,16 @@ Repositorio público: https://github.com/MaldonadoGabs/appWebAv2026B-periodismoS
 
 ## 9. Pruebas realizadas y resultados
 
-`mvn verify` corre **259 pruebas automáticas** en 49 clases, todas en verde, y el pipeline las ejecuta en cada cambio.
+`mvn verify` corre **277 pruebas automáticas** en 57 clases, todas en verde, y el pipeline las ejecuta en cada cambio.
 
 | Área | Pruebas | Qué comprueban |
 |---|---|---|
-| Entrada web | 139 | Validaciones del formulario, CRUD, búsqueda, paginación, seguridad de rutas, estilo, responsivo, estados de carga y efectos |
+| Entrada web | 147 | Validaciones del formulario, CRUD, búsqueda, paginación, seguridad de rutas, estilo, responsivo, estados de carga y efectos |
 | Noticias | 38 | Crear, listar, buscar, editar y eliminar, saneamiento y reglas del autor |
 | Autenticación | 31 | Inicio de sesión, bloqueo por intentos, sesión, recuperación y restablecimiento de clave |
-| Chat | 16 | Conexión autenticada, mensajes, usuarios conectados y escritura |
+| Chat | 22 | Conexión autenticada, mensajes, historial guardado en la base, usuarios conectados y escritura |
 | Cuentas | 15 | Hash BCrypt, seudónimo único e identidad separada |
-| Arquitectura y despliegue | 13 | Reglas entre módulos (ArchUnit), arranque y configuración |
+| Arquitectura, índices y despliegue | 17 | Reglas entre módulos (ArchUnit), índices de la base, arranque y configuración |
 | Interacciones y notificaciones | 7 | Reacciones, comentarios y avisos en tiempo real |
 
 ## 10. Uso de herramientas de IA

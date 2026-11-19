@@ -6,10 +6,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "reacciones_noticias")
+@Table(name = "reacciones_noticias", indexes = {
+    @Index(name = "idx_reacciones_noticia", columnList = "noticia_id"),
+    @Index(name = "idx_reacciones_cuenta", columnList = "cuenta_id")
+})
 class ReaccionNoticia {
     @Id
     private String id;

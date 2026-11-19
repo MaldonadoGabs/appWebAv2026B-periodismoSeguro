@@ -209,6 +209,7 @@ El cliente `static/js/avisos.js` se carga desde la plantilla base, por lo que fu
 
 `/chat` es exclusivo de lectores y muestra una conversación tipo WhatsApp: burbujas propias y ajenas, seudónimo del autor, hora local con precisión de minuto, mensajes de sistema cuando alguien se une y un indicador de «está escribiendo…». El cliente solo conoce su propio seudónimo (para alinear sus burbujas); nunca recibe correo, nombre real ni id de cuenta. El aviso de escritura viaja como JSON por `/ws` y no se devuelve a quien lo envía. Los periodistas reciben 403 en `/chat` y en el handshake de `/ws`.
 
+**Historial (HU-19).** Cada mensaje se guarda en la tabla `mensajes_chat` antes de difundirse, con solo el seudónimo, el texto y la hora con precisión de minuto (nunca la cuenta, el correo ni el nombre real). Quien entra a la sala recibe primero los últimos 50 mensajes en orden cronológico y después el aviso de que se unió.**Índices.** Las tablas de noticias, comentarios, reacciones, imágenes y tokens de recuperación tienen índices en las columnas por las que se busca o se une (`IndicesBaseDatosTest` lo comprueba contra el esquema real).
 ## Lector, reacciones y comentarios
 
 El formulario de `/registro` permite elegir **lector** o **periodista**; no se puede pedir el rol de administrador. El periodista puede publicar y gestionar sus notas, pero **no tiene acceso al chat ni al WebSocket `/ws`**: ese canal es exclusivo del lector, por privacidad. Tras iniciar sesión, el periodista va a `/inicio` y el lector al feed `/`.

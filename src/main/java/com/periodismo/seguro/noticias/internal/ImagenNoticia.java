@@ -3,6 +3,7 @@ package com.periodismo.seguro.noticias.internal;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
 /**
@@ -12,7 +13,7 @@ import jakarta.persistence.Table;
  * Se relaciona por id, sin claves foraneas, como pide la arquitectura modular.
  */
 @Entity
-@Table(name = "imagenes_noticias")
+@Table(name = "imagenes_noticias", indexes = @Index(name = "idx_imagenes_noticia", columnList = "noticia_id"))
 public class ImagenNoticia {
     @Id
     private String id;
