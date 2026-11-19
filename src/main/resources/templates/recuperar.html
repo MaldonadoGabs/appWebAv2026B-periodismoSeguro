@@ -14,10 +14,10 @@
 
     <th:block th:unless="${param.enviado}">
       <p class="suave">Escribe el correo con el que te registraste. Por tu seguridad, la respuesta es la misma tenga o no cuenta ese correo.</p>
-      <form th:action="@{/recuperar}" th:object="${form}" method="post" novalidate>
+      <form th:action="@{/recuperar}" th:object="${form}" method="post">
         <div class="campo">
           <label for="correo">Correo</label>
-          <input id="correo" type="email" th:field="*{correo}" autocomplete="email">
+          <input id="correo" type="email" th:field="*{correo}" autocomplete="email" required maxlength="254">
           <div class="msg-error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
         </div>
         <button type="submit" class="boton principal">Enviar enlace</button>

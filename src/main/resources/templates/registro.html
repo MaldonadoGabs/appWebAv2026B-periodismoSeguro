@@ -7,34 +7,42 @@
     <h1><span>Registro</span> de usuarios</h1>
     <p class="suave">Tu nombre real y tu correo nunca serán públicos. Aparecerás con un seudónimo.</p>
 
-    <form th:action="@{/registro}" th:object="${form}" method="post" novalidate>
-      <div class="campo">
-        <span class="etiqueta">Tipo de cuenta</span>
-        <label><input type="radio" th:field="*{rol}" value="PERIODISTA"> Periodista (puede publicar noticias)</label>
-        <label><input type="radio" th:field="*{rol}" value="LECTOR"> Lector (puede reaccionar, comentar y usar el chat)</label>
+    <form th:action="@{/registro}" th:object="${form}" method="post">
+      <fieldset class="campo selector">
+        <legend>Tipo de cuenta</legend>
+        <div class="selector-opciones">
+          <label class="opcion">
+            <input type="radio" th:field="*{rol}" value="PERIODISTA" required>
+            <span class="opcion-caja"><strong>Periodista</strong><small>Puede publicar noticias</small></span>
+          </label>
+          <label class="opcion">
+            <input type="radio" th:field="*{rol}" value="LECTOR">
+            <span class="opcion-caja"><strong>Lector</strong><small>Reacciona, comenta y usa el chat</small></span>
+          </label>
+        </div>
         <div class="msg-error" th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}"></div>
-      </div>
+      </fieldset>
       <div class="campo">
         <label for="correo">Correo</label>
-        <input id="correo" type="email" th:field="*{correo}" autocomplete="email">
+        <input id="correo" type="email" th:field="*{correo}" autocomplete="email" required maxlength="254">
         <div class="msg-error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></div>
       </div>
 
       <div class="campo">
         <label for="nombreReal">Nombre real</label>
-        <input id="nombreReal" type="text" th:field="*{nombreReal}" autocomplete="name">
+        <input id="nombreReal" type="text" th:field="*{nombreReal}" autocomplete="name" required maxlength="100">
         <div class="msg-error" th:if="${#fields.hasErrors('nombreReal')}" th:errors="*{nombreReal}"></div>
       </div>
 
       <div class="campo">
         <label for="clave">Contraseña</label>
-        <input id="clave" type="password" th:field="*{clave}" autocomplete="new-password">
+        <input id="clave" type="password" th:field="*{clave}" autocomplete="new-password" required minlength="8" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}" title="Mínimo 8 caracteres, con mayúscula, minúscula y número">
         <div class="msg-error" th:if="${#fields.hasErrors('clave')}" th:errors="*{clave}"></div>
       </div>
 
       <div class="campo">
         <label for="confirmacion">Confirmar contraseña</label>
-        <input id="confirmacion" type="password" th:field="*{confirmacion}" autocomplete="new-password">
+        <input id="confirmacion" type="password" th:field="*{confirmacion}" autocomplete="new-password" required maxlength="72">
         <div class="msg-error" th:if="${#fields.hasErrors('confirmacion')}" th:errors="*{confirmacion}"></div>
       </div>
 

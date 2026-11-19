@@ -1,21 +1,29 @@
-/* Tema claro/oscuro. Sin dependencias ni recursos externos. */
+/*
+ * Interruptor de tema. El tema claro es SIEMPRE el predeterminado: no se sigue la preferencia del sistema.
+ * El oscuro solo se activa cuando la persona enciende el interruptor, y esa eleccion se recuerda en este navegador.
+ * Sin dependencias ni recursos externos.
+ */
 (function () {
   var raiz = document.documentElement;
+  var oscuro = false;
   try {
-    var guardado = localStorage.getItem("tema");
-    if (guardado === "claro" || guardado === "oscuro") raiz.setAttribute("data-tema", guardado);
-  } catch (e) { /* sin almacenamiento: se usa el tema del sistema */ }
+    oscuro = localStorage.getItem("tema") === "oscuro";
+  } catch (e) { /* sin almacenamiento: se queda en claro */ }
+  raiz.setAttribute("data-tema", oscuro ? "oscuro" : "claro");
+
+  function pintar(boton) {
+    boton.setAttribute("aria-checked", oscuro ? "true" : "false");
+  }
 
   document.addEventListener("DOMContentLoaded", function () {
-    var boton = document.getElementById("tema");
-    if (!boton) return;
-    boton.addEventListener("click", function () {
-      var actual = raiz.getAttribute("data-tema");
-      var oscuroSistema = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      var esOscuro = actual ? actual === "oscuro" : oscuroSistema;
-      var nuevo = esOscuro ? "claro" : "oscuro";
-      raiz.setAttribute("data-tema", nuevo);
-      try { localStorage.setItem("tema", nuevo); } catch (e) { /* ignorar */ }
+    var interruptor = document.getElementById("tema");
+    if (!interruptor) return;
+    pintar(interruptor);
+    interruptor.addEventListener("click", function () {
+      oscuro = !oscuro;
+      raiz.setAttribute("data-tema", oscuro ? "oscuro" : "claro");
+      pintar(interruptor);
+      try { localStorage.setItem("tema", oscuro ? "oscuro" : "claro"); } catch (e) { /* ignorar */ }
     });
   });
 })();
