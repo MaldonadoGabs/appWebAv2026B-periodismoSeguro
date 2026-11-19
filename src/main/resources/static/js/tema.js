@@ -1,13 +1,16 @@
 /*
- * Interruptor de tema. El tema claro es SIEMPRE el predeterminado: no se sigue la preferencia del sistema.
- * El oscuro solo se activa cuando la persona enciende el interruptor, y esa eleccion se recuerda en este navegador.
+ * Interruptor de tema. Cada visita abre SIEMPRE en claro: no se sigue la preferencia del sistema y se descarta
+ * cualquier eleccion guardada de visitas anteriores. El oscuro solo se enciende con el interruptor y dura mientras
+ * la persona navega en esta pestana (sessionStorage); al volver otro dia o en otra pestana, vuelve el claro.
  * Sin dependencias ni recursos externos.
  */
 (function () {
   var raiz = document.documentElement;
   var oscuro = false;
   try {
-    oscuro = localStorage.getItem("tema") === "oscuro";
+    // Eleccion permanente de versiones anteriores: se borra para que nunca fuerce el oscuro
+    localStorage.removeItem("tema");
+    oscuro = sessionStorage.getItem("tema") === "oscuro";
   } catch (e) { /* sin almacenamiento: se queda en claro */ }
   raiz.setAttribute("data-tema", oscuro ? "oscuro" : "claro");
 
@@ -23,7 +26,7 @@
       oscuro = !oscuro;
       raiz.setAttribute("data-tema", oscuro ? "oscuro" : "claro");
       pintar(interruptor);
-      try { localStorage.setItem("tema", oscuro ? "oscuro" : "claro"); } catch (e) { /* ignorar */ }
+      try { sessionStorage.setItem("tema", oscuro ? "oscuro" : "claro"); } catch (e) { /* ignorar */ }
     });
   });
 })();
