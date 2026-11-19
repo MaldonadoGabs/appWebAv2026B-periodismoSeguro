@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.HttpMethod;
@@ -25,6 +26,7 @@ import org.springframework.web.client.RestClient;
 
 /** Envio real del correo de recuperacion con Resend, probado contra un servidor simulado (no se manda nada real). */
 @SpringBootTest
+@TestPropertySource(properties = "app.correo.proveedor=consola")
 @ExtendWith(OutputCaptureExtension.class)
 class EnvioRecuperacionResendTest {
     private static final String ENLACE = "https://app.ejemplo.org/restablecer?token=abc123";

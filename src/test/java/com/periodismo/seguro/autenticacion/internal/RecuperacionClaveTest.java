@@ -19,11 +19,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
 /** HU-05: token aleatorio de un solo uso, con hash, caducidad de 30 minutos y envio simulado sin datos reales. */
 @SpringBootTest
+@TestPropertySource(properties = "app.correo.proveedor=consola")
 @ExtendWith(OutputCaptureExtension.class)
 class RecuperacionClaveTest {
     private static final Pattern ENLACE = Pattern.compile("/restablecer\\?token=([A-Za-z0-9_-]+)");

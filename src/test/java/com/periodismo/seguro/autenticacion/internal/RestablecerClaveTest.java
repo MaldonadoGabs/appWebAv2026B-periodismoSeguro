@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.security.core.session.SessionRegistry;
@@ -25,6 +26,7 @@ import org.springframework.security.core.userdetails.User;
 
 /** HU-06: el token se valida (existe, no usado, no caducado), se invalida al usarse y la clave nueva va con BCrypt. */
 @SpringBootTest
+@TestPropertySource(properties = "app.correo.proveedor=consola")
 @ExtendWith(OutputCaptureExtension.class)
 class RestablecerClaveTest {
     private static final Pattern ENLACE = Pattern.compile("/restablecer\\?token=([A-Za-z0-9_-]+)");

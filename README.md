@@ -259,11 +259,11 @@ No se guarda ni se registra en logs el correo, el nombre real ni la IP de nadie,
 
 ## Correo de recuperacion de clave (Resend)
 
-Por defecto el enlace de recuperacion solo se imprime en consola (`APP_CORREO_PROVEEDOR=consola`), util para desarrollar. Para enviar correos reales se usa Resend.
+El proveedor por defecto es **Resend**, con la API key y la URL publica configuradas directamente en `application.properties` para que el despliegue envie correos sin variables adicionales. En las pruebas se fuerza `consola` mediante `src/test/resources/application.properties`, para no enviar correos reales.
 
 | Variable | Para que sirve |
 |---|---|
-| `APP_CORREO_PROVEEDOR` | `consola` (por defecto) o `resend` |
+| `APP_CORREO_PROVEEDOR` | `resend` (por defecto) o `consola` |
 | `RESEND_API_KEY` | API key de Resend. Es un secreto: nunca va en el repositorio |
 | `APP_CORREO_REMITENTE` | Remitente, por ejemplo `Periodismo Seguro <noreply@tudominio.com>` |
 | `APP_URL_PUBLICA` | URL publica de la aplicacion, que se usa en el enlace del correo |
@@ -277,7 +277,7 @@ az containerapp secret set -n ca-periodismo-psa26 -g rg-periodismo-psa26 --secre
 az containerapp update -n ca-periodismo-psa26 -g rg-periodismo-psa26 --set-env-vars APP_CORREO_PROVEEDOR=resend RESEND_API_KEY=secretref:resend-api-key "APP_CORREO_REMITENTE=Periodismo Seguro <noreply@tudominio.com>" APP_URL_PUBLICA=https://TU-URL.azurecontainerapps.io
 ```
 
-El pipeline solo cambia la imagen: estas variables y el secreto se conservan en cada despliegue. Si falta `RESEND_API_KEY` con el proveedor `resend`, la aplicacion no arranca (el despliegue falla y la version anterior sigue activa).
+Estas variables siguen pudiendo sobreescribir la configuracion directa, pero ya no son obligatorias: el despliegue usa Resend con los valores por defecto. Si se sobreescribe `APP_CORREO_PROVEEDOR=resend` con una key vacia, la aplicacion no arranca (falla el despliegue y queda activa la version anterior).
 
 ## Variables de entorno
 
