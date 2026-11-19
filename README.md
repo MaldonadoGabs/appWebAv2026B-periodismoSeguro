@@ -254,7 +254,7 @@ Por defecto el enlace de recuperacion solo se imprime en consola (`APP_CORREO_PR
 | `APP_CORREO_REMITENTE` | Remitente, por ejemplo `Periodismo Seguro <noreply@tudominio.com>` |
 | `APP_URL_PUBLICA` | URL publica de la aplicacion, que se usa en el enlace del correo |
 
-Notas de Resend: sin un dominio verificado solo permite enviar al correo del dueño de la cuenta (remitente `onboarding@resend.dev`). Para escribir a cualquier periodista hay que verificar un dominio.
+Notas de Resend: sin un dominio verificado solo permite enviar al correo del dueño de la cuenta (remitente `onboarding@resend.dev`). Para escribir a cualquier periodista hay que verificar un dominio. El correo se envía **solo en texto plano**, sin HTML ni identidad visual.
 
 ### Activarlo en Azure (una sola vez, lo hace quien tiene la suscripcion)
 

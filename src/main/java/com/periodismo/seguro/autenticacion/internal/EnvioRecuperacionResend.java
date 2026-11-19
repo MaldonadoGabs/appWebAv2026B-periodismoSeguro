@@ -32,16 +32,13 @@ class EnvioRecuperacionResend implements EnvioRecuperacion {
 
     @Override
     public void enviar(String destinatario, String enlace) {
-        String seguro = enlace.replace("\"", "%22");
+        // Solo texto: sin identidad visual ni HTML, como pidio el proyecto.
         Map<String, Object> cuerpo = Map.of(
             "from", remitente,
             "to", List.of(destinatario),
             "subject", "Recupera tu contraseña de Periodismo Seguro",
             "text", "Pediste restablecer tu contraseña.\n\n" + enlace
-                + "\n\nEl enlace sirve una sola vez y caduca en 30 minutos. Si no fuiste tú, ignora este mensaje.",
-            "html", "<p>Pediste restablecer tu contraseña de Periodismo Seguro.</p>"
-                + "<p><a href=\"" + seguro + "\">Restablecer mi contraseña</a></p>"
-                + "<p>El enlace sirve una sola vez y caduca en 30 minutos. Si no fuiste tú, ignora este mensaje.</p>");
+                + "\n\nEl enlace sirve una sola vez y caduca en 30 minutos. Si no fuiste tú, ignora este mensaje.");
         try {
             http.post().uri("/emails").contentType(MediaType.APPLICATION_JSON).body(cuerpo).retrieve().toBodilessEntity();
         } catch (RestClientException e) {
