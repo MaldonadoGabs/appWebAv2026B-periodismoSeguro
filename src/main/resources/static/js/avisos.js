@@ -37,6 +37,13 @@
       item.appendChild(cerrar);
 
       contenedor.prepend(item);
+      // La etiqueta de "Ultima hora" da un pulso para llamar la atencion sin sonido ni vibracion
+      var etiqueta = document.querySelector('.uh-etiqueta');
+      if (etiqueta) {
+        etiqueta.classList.remove('pulso');
+        void etiqueta.offsetWidth;
+        etiqueta.classList.add('pulso');
+      }
       setTimeout(function () { item.remove(); }, 12000);
     };
   }
