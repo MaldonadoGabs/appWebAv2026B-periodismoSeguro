@@ -7,7 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Pantalla de la sala de chat. El acceso lo limita Spring Security a PERIODISTA con sesion iniciada;
+ * Pantalla de la sala de chat. El acceso lo limita Spring Security a LECTOR con sesion iniciada;
  * los mensajes llegan en tiempo real por el WebSocket /ws del modulo chat.
  */
 @Controller
@@ -19,7 +19,7 @@ class ChatController {
     @GetMapping("/chat")
     String chat(Principal principal, Model model) {
         // El cliente necesita solo su propio seudonimo para alinear sus burbujas; nunca su cuenta.
-        model.addAttribute("yo", cuentas.seudonimoDe(principal.getName()).orElse("Periodista"));
+        model.addAttribute("yo", cuentas.seudonimoDe(principal.getName()).orElse("Lector"));
         return "chat";
     }
 }
