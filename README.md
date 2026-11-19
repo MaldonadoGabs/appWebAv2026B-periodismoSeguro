@@ -4,6 +4,21 @@ Plataforma de periodismo independiente que protege la identidad del periodista: 
 
 Es un **monolito modular** hecho con Spring Boot, preparado para separarse en microservicios más adelante (ver [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md)).
 
+## El negocio y el problema
+
+Periodismo Seguro es un pequeño medio digital independiente (una PYME de medios) que publica las noticias de periodistas que no pueden firmar con su nombre real. En entornos de censura, un periodista puede ser identificado por su nombre o su correo. Aquí se registra con sus datos, pero **publica solo con un seudónimo**, y sus datos reales viven en una tabla privada que ninguna vista pública usa. Los lectores leen, reaccionan, comentan y conversan en una sala en tiempo real. Todos los datos de la aplicación son ficticios.
+
+La entidad principal es la **Noticia**: título, subtítulo, cuerpo, categoría, autor (con su seudónimo), fechas e imágenes.
+
+## Integrantes y roles
+
+La tabla de roles y los commits por integrante están en [docs/ENTREGA-BIMESTRE-1.md](docs/ENTREGA-BIMESTRE-1.md#3-cronograma-y-roles).
+
+## Diagramas
+
+- Arquitectura del monolito, despliegue y CI/CD, y modelo de datos: [docs/ENTREGA-BIMESTRE-1.md](docs/ENTREGA-BIMESTRE-1.md#5-diagramas-de-arquitectura).
+- Arquitectura modular y camino a microservicios: [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md).
+
 ## Stack
 
 | Capa | Tecnología |
