@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title th:text="${titulo} + ' | Periodismo Seguro'">Periodismo Seguro</title>
   <script th:src="@{/js/tema.js}"></script>
+  <script th:src="@{/js/efectos.js}"></script>
   <script th:src="@{/js/avisos.js}" defer></script>
   <script th:src="@{/js/carga.js}" defer></script>
   <script th:src="@{/js/validacion.js}" defer></script>
@@ -42,6 +43,10 @@
 
   <footer class="pie" th:fragment="pie">
     <p>Periodismo Seguro. Tu nombre real y tu correo nunca son públicos: publicas con un seudónimo.</p>
+    <button type="button" class="interruptor" id="efectos" role="switch" aria-checked="true" aria-label="Animaciones">
+      <span class="interruptor-pista" aria-hidden="true"><span class="interruptor-bola"></span></span>
+      <span class="interruptor-texto">Animaciones</span>
+    </button>
   </footer>
 </body>
 </html>

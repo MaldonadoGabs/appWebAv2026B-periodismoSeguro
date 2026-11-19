@@ -394,3 +394,62 @@ input:user-invalid, select:user-invalid, textarea:user-invalid { border-color: v
 .opcion input:checked + .opcion-caja strong::after { content: " \2713"; }
 .opcion input:focus-visible + .opcion-caja { outline: 3px solid var(--info); outline-offset: 2px; }
 @media (max-width: 24rem) { .selector-opciones { grid-template-columns: 1fr; } }
+
+/* ===== Efectos de movimiento ===========================================================================
+   Solo transform y opacity. Todo se apaga con "reducir movimiento" del sistema o con el interruptor del pie
+   (data-efectos="off"). Sin efectos la pagina se ve igual, solo quieta. */
+
+/* Tarjetas de noticias: al pasar el puntero o enfocar, se levantan con sombra dura (estilo comic) */
+.tarjeta { transition: translate .15s ease-out, box-shadow .15s ease-out; }
+.tarjeta:hover, .tarjeta:focus-within { translate: -3px -3px; box-shadow: 6px 6px 0 var(--linea); }
+
+/* Barra de ultima hora: titulares que corren, con pausa (WCAG 2.2.2) */
+.ultima-hora { display: flex; align-items: stretch; margin: 0 0 1.5rem; overflow: hidden;
+  background: var(--superficie); border: 2px solid var(--linea); }
+.uh-etiqueta { flex: none; display: flex; align-items: center; padding: .45rem .85rem;
+  background: var(--marcador); color: #12161c; border-right: 2px solid #12161c;
+  font: 400 1rem/1 var(--titulos); letter-spacing: .06em; text-transform: uppercase; }
+.uh-ventana { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; overflow-x: auto; }
+.uh-pista { display: flex; flex: none; gap: 3rem; width: max-content; margin: 0; padding: 0 1.5rem; list-style: none; }
+.uh-pista li { white-space: nowrap; font: 600 .95rem var(--cuerpo); }
+.uh-pista a { text-decoration: none; }
+.uh-pista a:hover { text-decoration: underline; }
+.uh-pausa { flex: none; padding: .35rem .8rem; cursor: pointer; background: transparent; color: var(--tinta);
+  border: 0; border-left: 2px solid var(--linea); font: 700 .8rem var(--cuerpo); }
+.uh-pausa:hover { background: var(--marcador); color: #12161c; }
+:root[data-efectos="off"] .uh-copia, :root[data-efectos="off"] .uh-pausa { display: none; }
+
+@keyframes caer-marcador { to { background-size: 100% 100%; } }
+@keyframes uh-corre { to { transform: translateX(-50%); } }
+@keyframes burbuja { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes pulso { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Entrada en fila: tarjetas, paneles, pilares y avisos del feed aparecen al verse */
+  .con-efectos .tarjeta, .con-efectos .rejilla .panel, .con-efectos .pilares li, .con-efectos .feed .nota {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .45s ease-out, transform .45s ease-out, translate .15s ease-out, box-shadow .15s ease-out;
+  }
+  .con-efectos .tarjeta.visible, .con-efectos .rejilla .panel.visible, .con-efectos .pilares li.visible,
+  .con-efectos .feed .nota.visible { opacity: 1; transform: none; }
+
+  /* Titulo de la portada: el marcador amarillo se dibuja al cargar */
+  :root:not([data-efectos="off"]) .hero h1 span {
+    background-repeat: no-repeat; background-size: 0% 100%; animation: caer-marcador .7s .25s ease-out forwards;
+  }
+
+  /* Ultima hora: corre sola, se detiene con el puntero, el foco o el boton Pausar */
+  :root:not([data-efectos="off"]) .uh-pista { animation: uh-corre 45s linear infinite; }
+  :root:not([data-efectos="off"]) .ultima-hora .uh-ventana { overflow-x: hidden; }
+  :root:not([data-efectos="off"]) .uh-pista:hover, :root:not([data-efectos="off"]) .uh-pista:focus-within,
+  :root:not([data-efectos="off"]) .uh-pista.pausada { animation-play-state: paused; }
+  :root:not([data-efectos="off"]) .uh-etiqueta.pulso { animation: pulso .6s ease-in-out 3; }
+
+  /* Chat: cada burbuja entra con un pequeno salto */
+  :root:not([data-efectos="off"]) .mensaje { animation: burbuja .22s ease-out; }
+}
+
+/* Con "reducir movimiento" no hay desplazamiento automatico: la lista queda quieta y se puede recorrer a mano */
+@media (prefers-reduced-motion: reduce) {
+  .uh-copia, .uh-pausa { display: none; }
+}

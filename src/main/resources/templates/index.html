@@ -5,6 +5,17 @@
   <header th:replace="~{fragments/base :: cabecera}"></header>
   <main class="pagina ancha">
     <p class="nota ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+    <section class="ultima-hora" aria-label="Última hora" th:if="${totalNoticias > 0 and !hayBusqueda}">
+      <span class="uh-etiqueta">Última hora</span>
+      <div class="uh-ventana">
+        <ul class="uh-pista">
+          <li th:each="n : ${noticias}"><a th:href="@{/noticias/{id}(id=${n.id})}" th:text="${n.titulo}">Titular</a></li>
+          <li class="uh-copia" aria-hidden="true" th:each="n : ${noticias}"><a th:href="@{/noticias/{id}(id=${n.id})}" tabindex="-1" th:text="${n.titulo}">Titular</a></li>
+        </ul>
+      </div>
+      <button type="button" class="uh-pausa" aria-pressed="false">Pausar</button>
+    </section>
+
     <section class="hero">
       <h1><span>Periodismo</span> Seguro</h1>
       <p class="lectura">Una plataforma donde el periodista firma con un seudónimo, y nadie puede unirlo a su nombre.</p>
@@ -91,24 +102,7 @@
       </ol>
     </section>
 
-    <details class="plegable">
-      <summary>Estado del stack (prueba técnica)</summary>
-      <ul>
-        <li>Spring Boot + Thymeleaf: OK (esta página)</li>
-        <li>JPA: <span th:text="${total}">0</span> mensajes guardados en la base de datos</li>
-        <li>WebSocket: <span id="estado">desconectado</span></li>
-      </ul>
-      <form id="f">
-        <div class="campo">
-          <label for="t">Mensaje de prueba</label>
-          <input id="t" maxlength="500" autocomplete="off">
-        </div>
-        <button class="boton">Enviar</button>
-      </form>
-      <ul id="log"><li th:each="m : ${mensajes}" th:text="${m.texto}"></li></ul>
-    </details>
   </main>
   <footer th:replace="~{fragments/base :: pie}"></footer>
-  <script th:src="@{/js/chat.js}"></script>
 </body>
 </html>
