@@ -17,11 +17,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 /** HU-05: formulario de recuperacion, respuesta identica exista o no la cuenta, validacion y CSRF. */
 @SpringBootTest
+@TestPropertySource(properties = "app.correo.proveedor=consola")
 @AutoConfigureMockMvc
 class RecuperacionWebTest {
     @Autowired MockMvc mvc;
