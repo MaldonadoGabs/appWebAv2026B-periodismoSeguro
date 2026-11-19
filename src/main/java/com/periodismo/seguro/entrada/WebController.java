@@ -3,7 +3,6 @@ package com.periodismo.seguro.entrada;
 import com.periodismo.seguro.noticias.CategoriaNoticia;
 import com.periodismo.seguro.noticias.NoticiasApi;
 import com.periodismo.seguro.noticias.ResumenNoticia;
-import com.periodismo.seguro.validacion.MensajeRepo;
 import java.util.List;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,11 +19,9 @@ class WebController {
     static final int POR_PAGINA = 10;
     static final int MAXIMO_POR_PAGINA = 50;
 
-    private final MensajeRepo repo;
     private final NoticiasApi noticias;
 
-    WebController(MensajeRepo repo, NoticiasApi noticias) {
-        this.repo = repo;
+    WebController(NoticiasApi noticias) {
         this.noticias = noticias;
     }
 
@@ -68,9 +65,6 @@ class WebController {
         m.addAttribute("categoriaSeleccionada", categoria == null ? "" : categoria);
         m.addAttribute("categorias", noticias.categorias());
         m.addAttribute("hayBusqueda", hayBusqueda);
-        // Chat de prueba del stack, conservado al final de la pagina.
-        m.addAttribute("mensajes", repo.findTop20ByOrderByIdDesc());
-        m.addAttribute("total", repo.count());
         return "index";
     }
 

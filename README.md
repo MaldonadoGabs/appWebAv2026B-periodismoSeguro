@@ -162,7 +162,7 @@ La página principal `/` muestra **Últimas noticias**: un feed público, sin cu
 
 Decisiones tomadas en esta historia:
 
-- El feed convive en `/` con la misión, la visión, el objetivo y el bloque técnico «Estado del stack», que queda al final.
+- El feed convive en `/` con la misión, la visión y el objetivo.
 - Orden por `creadaEn` descendente con **desempate determinista por id**, porque la hora está truncada a 1 h (HU-26) y puede haber empates. Dentro de una misma hora el orden es arbitrario a propósito: guardar el instante exacto permitiría reconstruir cuándo publicó cada periodista. Por eso las pruebas no deben asumir que una noticia concreta cae en la página 1 cuando hay más noticias que el tamaño de página.
 - `NoticiasApi.listar` devuelve `ResumenNoticia` (ids y texto), nunca entidades JPA ni el cuerpo completo; el extracto se calcula con JDK, sin meter jsoup dentro del módulo `noticias`.
 - El extracto se pinta con `th:text`, así que el HTML del autor nunca se ejecuta en el feed.
@@ -218,7 +218,6 @@ src/main/java/com/periodismo/seguro/
   interacciones/    reacciones y comentarios
   notificaciones/   avisos de noticias nuevas      (HU-21)
   entrada/          controladores web (gateway)
-  validacion/       chat de prueba del stack
 ```
 
 Cada módulo tiene su API pública en el paquete raíz y su lógica en `internal`. Las reglas se verifican en cada build con `ReglasArquitecturaTest`.
