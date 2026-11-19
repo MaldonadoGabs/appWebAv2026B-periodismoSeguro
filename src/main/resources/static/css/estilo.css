@@ -1,5 +1,5 @@
 /* Periodismo Seguro: estilo visual (tomado de la guia de estilo del proyecto: capa editorial).
-   Blanco con tinta casi negra, marcador amarillo, titulos en Anton, lectura en Source Serif 4, interfaz en Public Sans.
+   Blanco con tinta casi negra (tema oscuro en vinotinto), marcador amarillo, titulos en Anton, lectura en Source Serif 4, interfaz en Public Sans.
    Sin recursos externos: las fuentes (licencia OFL) estan en /fonts. Nunca solo color para dar significado. */
 
 @font-face { font-family: "Anton"; src: url("../fonts/anton.woff2") format("woff2"); font-weight: 400; font-display: swap; }
@@ -29,34 +29,34 @@
 }
 :root[data-tema="oscuro"] {
   color-scheme: dark;
-  --cab: #0c1322;
-  --cab-tinta: #f1f4fa;
-  --papel: #101728;
-  --superficie: #19223a;
-  --tinta: #f1f4fa;
-  --suave: #b8c3d8;
-  --regla: #34425f;
-  --linea: #c9d4ea;
+  --cab: #16070c;
+  --cab-tinta: #fbf1f3;
+  --papel: #240d16;
+  --superficie: #35141f;
+  --tinta: #fbf1f3;
+  --suave: #d9b8c1;
+  --regla: #5b2635;
+  --linea: #e8b9c6;
   --ok: #6fd12a;
   --alerta: #f0b429;
-  --peligro: #ff7b80;
-  --info: #6aa9ff;
+  --peligro: #ff9aa4;
+  --info: #9cc4ff;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="claro"]) {
     color-scheme: dark;
-    --cab: #0c1322;
-    --cab-tinta: #f1f4fa;
-    --papel: #101728;
-    --superficie: #19223a;
-    --tinta: #f1f4fa;
-    --suave: #b8c3d8;
-    --regla: #34425f;
-    --linea: #c9d4ea;
+    --cab: #16070c;
+    --cab-tinta: #fbf1f3;
+    --papel: #240d16;
+    --superficie: #35141f;
+    --tinta: #fbf1f3;
+    --suave: #d9b8c1;
+    --regla: #5b2635;
+    --linea: #e8b9c6;
     --ok: #6fd12a;
     --alerta: #f0b429;
-    --peligro: #ff7b80;
-    --info: #6aa9ff;
+    --peligro: #ff9aa4;
+    --info: #9cc4ff;
   }
 }
 
